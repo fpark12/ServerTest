@@ -57,7 +57,7 @@ pushd %~dp0\Purify\BatchFiles
 call GetVSComnToolsPath 14
 popd
 if "%VsComnToolsPath%" == "" goto FindVS2013
-set CMakeArg="Visual Studio 14 2015"
+set CMakeArg="Visual Studio 14 2015 Win64"
 goto ReadyToBuild
 :FindVS2013
 pushd %~dp0\Purify\BatchFiles
