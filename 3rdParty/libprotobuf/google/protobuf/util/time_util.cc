@@ -30,7 +30,7 @@
 
 #include <google/protobuf/util/time_util.h>
 
-#include <google/protobuf/stubs/time.h>
+#include <google/protobuf/stubs/pbtime.h>
 #include <google/protobuf/stubs/int128.h>
 #include <google/protobuf/stubs/strutil.h>
 #include <google/protobuf/stubs/stringprintf.h>

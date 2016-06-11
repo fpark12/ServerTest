@@ -34,7 +34,7 @@
 #include <stack>
 
 #include <google/protobuf/stubs/once.h>
-#include <google/protobuf/stubs/time.h>
+#include <google/protobuf/stubs/pbtime.h>
 #include <google/protobuf/wire_format_lite.h>
 #include <google/protobuf/util/internal/field_mask_utility.h>
 #include <google/protobuf/util/internal/object_location_tracker.h>
