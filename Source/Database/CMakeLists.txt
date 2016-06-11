@@ -1,7 +1,7 @@
 SET( DEFINE
 )
 SET( INCLUDE
-	${CMAKE_SOURCE_DIR}///./3rdParty/mysql/include
+	3rdParty/mysql/include
 	C:/boost_1_59_0
 )
 SET( LINK
