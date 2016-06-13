@@ -56,6 +56,8 @@ int main()
 		cout << row[i] << endl;
 	}
 
+	mysql_query(connect, "insert into login values (1, 'Sealina', 'Keathalin21')");
+
 	mysql_close(connect);
 
 	return 0;
