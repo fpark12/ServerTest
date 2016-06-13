@@ -66,8 +66,9 @@ Build/
 CMake/
 Binaries/
 
+# Protobuf
 !3rdParty/libprotobuf/protoc.exe
-
+!*.proto
 
 
 
