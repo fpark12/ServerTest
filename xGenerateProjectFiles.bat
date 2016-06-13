@@ -98,12 +98,18 @@ rem ## build twice here because first build generates cache
 1>NUL 2>NUL "%CMakePath%" -G %CMakeArg% %~dp0
 1>NUL 2>NUL "%CMakePath%" -G %CMakeArg% %~dp0
 popd
+pushd %~dp0
+1>NUL 2>NUL "%CMakePath%" -P "%~dp0/Purify/Core/RemoveAllBuild.cmake"
+popd
 goto GenerateSolutionIcon
 
 :Rebuild
 pushd %~dp0\Build
 1>NUL 2>NUL "%CMakePath%" -G %CMakeArg% %~dp0
 1>NUL 2>NUL "%CMakePath%" -G %CMakeArg% %~dp0
+popd
+pushd %~dp0
+1>NUL 2>NUL "%CMakePath%" -P "%~dp0/Purify/Core/RemoveAllBuild.cmake"
 popd
 goto GenerateSolutionIcon
 
