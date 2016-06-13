@@ -66,6 +66,9 @@ Build/
 CMake/
 Binaries/
 
+# Include CMake Files
+!*.cmake
+
 # Protobuf
 !3rdParty/libprotobuf/protoc.exe
 !*.proto
