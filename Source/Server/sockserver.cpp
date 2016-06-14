@@ -2,7 +2,7 @@
 //
 
 #define WIN32_LEAN_AND_MEAN
-#include "stdafx.h"
+//#include "stdafx.h"
 #include <winsock2.h>
 #include <process.h>
 #pragma comment(lib,"ws2_32.lib" )
@@ -77,12 +77,12 @@ unsigned int __stdcall ServClient(void *data)
 {
 	SOCKET* client =(SOCKET*)data;
     SOCKET Client = *client;
-	printf("Client connected\n");
+	//printf("Client connected\n");
 	
 	char chunk[200];
 	while(recv(Client,chunk,200,0))
 	{
-		printf("%s \t %d\n",chunk,GetCurrentThreadId());
+		//printf("%s \t %d\n",chunk,GetCurrentThreadId());
 	}
 return 0;
 }
