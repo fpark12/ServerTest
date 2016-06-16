@@ -18,44 +18,54 @@
 
 #pragma once
 
-//#include "Define.h"
+ //#include "Define.h"
 
 #include <string>
 #include <list>
+#include <vector>
 #include <mutex>
+#include "SimpleIni.h"
+
+#define GConfig Config::instance()
+#define Run
+
+struct ConfigFile
+{
+	std::string Filename;
+	CSimpleIniA ConfigFileImpl;
+};
 
 class Config
 {
-    Config() = default;
-    Config(Config const&) = delete;
-    Config& operator=(Config const&) = delete;
-    ~Config() = default;
+private:
+	Config() = default;
+	~Config() = default;
+	Config(Config const&) = delete;
+	Config& operator=(Config const&) = delete;
+
+	std::vector<ConfigFile> ConfigFiles;
+	ConfigFile* Find(std::string const& Filename) const;
 
 public:
-    /// Method used only for loading main configuration files
-    bool LoadInitial(std::string const& file, std::string& error);
+	static Config* Config::instance();
 
-    static Config* instance();
+	/// Method used only for loading main configuration files
+	bool Load(std::string const& Filename);
+	bool Reload(std::string const& Filename);
 
-    bool Reload(std::string& error);
+	bool GetString(std::string const& section, std::string const& Key, std::string& Value, std::string const& Filename) const;
+	bool GetBool(std::string const& section, std::string const& Key, bool& Value, std::string const& Filename) const;
+	bool GetInt(std::string const& section, std::string const& Key, int& Value, std::string const& Filename) const;
+	bool GetFloat(std::string const& section, std::string const& Key, float& Value, std::string const& Filename) const;
 
-    std::string GetStringDefault(std::string const& name, const std::string& def) const;
-    bool GetBoolDefault(std::string const& name, bool def) const;
-    int GetIntDefault(std::string const& name, int def) const;
-    float GetFloatDefault(std::string const& name, float def) const;
-
-    std::string const& GetFilename();
-    std::list<std::string> GetKeysByString(std::string const& name);
+	std::list<std::string> const GetFilenames();
+	std::list<std::string> const GetKeysByString(std::string const& Key, std::string const& Filename);
+	std::list<std::string> const GetKeys(std::string const& Filename);
 
 private:
-    std::string _filename;
-    boost::property_tree::ptree _config;
-    std::mutex _configLock;
+	//std::lock_guard<std::mutex> Lock();
+	std::mutex Config::Lock;
 
-    template<class T>
-    T GetValueDefault(std::string const& name, T def) const;
+	bool Unload(std::string const& Filename);
 };
 
-#define sConfigMgr //ConfigMgr::instance()
-
-#endif

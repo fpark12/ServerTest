@@ -18,141 +18,184 @@
 
 #include <algorithm>
 #include <mutex>
-#include "SimpleIni.h"
 #include "Config.h"
-//#include "Errors.h"
-//#include "Log.h"
+ //#include "Errors.h"
+ //#include "Log.h"
 
-bool Config::LoadInitial(std::string const& file, std::string& error)
+bool Config::Load(std::string const& Filename)
 {
-	std::lock_guard<std::mutex> lock(_configLock);
+	std::lock_guard<std::mutex> lock(Lock);
 
-	_filename = file;
+	ConfigFile ConfigFile;
+	ConfigFile.ConfigFileImpl.SetUnicode();
 
-	CSimpleIniA ini;
-	ini.SetUnicode();
-	ini.LoadFile(file.c_str());
-	const char * pVal = ini.GetValue("section", "key", "default");
-	ini.SetValue("section", "key", "newvalue");
-
-	try
+	if (Find(Filename))
 	{
-		ptree fullTree;
-		ini_parser::read_ini(file, fullTree);
+		return true;
+	}
 
-        if (fullTree.empty())
-        {
-            error = "empty file (" + file + ")";
-            return false;
-        }
+	SI_Error res = ConfigFile.ConfigFileImpl.LoadFile(Filename.c_str());
 
-        // Since we're using only one section per config file, we skip the section and have direct property access
-        _config = fullTree.begin()->second;
-    }
-    catch (ini_parser::ini_parser_error const& e)
-    {
-        if (e.line() == 0)
-            error = e.message() + " (" + e.filename() + ")";
-        else
-            error = e.message() + " (" + e.filename() + ":" + std::to_string(e.line()) + ")";
-        return false;
-    }
+	if (res == SI_OK)
+	{
+		ConfigFile.Filename = Filename;
+		ConfigFiles.push_back(ConfigFile);
+		return true;
+	} else
+	{
+		return false;
+	}
+}
 
-    return true;
+bool Config::Reload(std::string const& Filename)
+{
+	if (Unload(Filename))
+	{
+		return Load(Filename);
+	}
+}
+
+bool Config::Unload(std::string const& Filename)
+{
+	auto i = std::begin(ConfigFiles);
+
+	while (i != std::end(ConfigFiles))
+	{
+		if (i->Filename == Filename)
+		{
+			i = ConfigFiles.erase(i);
+		} else
+		{
+			++i;
+		}
+	}
+
+	return true;
+}
+
+ConfigFile* Config::Find(std::string const& Filename) const
+{
+	for (auto i : ConfigFiles)
+	{
+		if (i.Filename == Filename)
+		{
+			return &i;
+		}
+	}
+	return nullptr;
+}
+
+std::list<std::string> const Config::GetKeys(std::string const& Filename)
+{
+	std::list<std::string> Keys;
+	{
+		std::lock_guard<std::mutex> lock(Lock);
+
+		ConfigFile* File = Find(Filename);
+		if (!File)
+		{
+			return Keys;
+		}
+
+		CSimpleIniA::TNamesDepend KeysImpl;
+		File->ConfigFileImpl.GetAllKeys("", KeysImpl);
+		for (auto i : KeysImpl)
+		{
+			Keys.push_back(i.pItem);
+		}
+	}
+
+}
+
+bool Config::GetString(std::string const& Section, std::string const& Key, std::string& Value, std::string const& Filename) const
+{
+	ConfigFile* ConfigFile = this->Find(Filename);
+	if (!ConfigFile)
+	{
+		return "";
+	}
+
+	return ConfigFile->ConfigFileImpl.GetValue(Section.c_str(), Key.c_str(), Value, false);
+}
+
+bool Config::GetBool(std::string const& Section, std::string const& Key, bool& Value, const std::string& Filename) const
+{
+	ConfigFile* ConfigFile = this->Find(Filename);
+	if (!ConfigFile)
+	{
+		return false;
+	}
+	return ConfigFile->ConfigFileImpl.GetBoolValue(Section.c_str(), Key.c_str(), Value, false);
+}
+
+bool Config::GetInt(std::string const& Section, std::string const& Key, int& Value, const std::string& Filename) const
+{
+	ConfigFile* ConfigFile = this->Find(Filename);
+	if (!ConfigFile)
+	{
+		return false;
+	}
+	return ConfigFile->ConfigFileImpl.GetLongValue(Section.c_str(), Key.c_str(), (long&)Value, false);
+}
+
+bool Config::GetFloat(std::string const& Section, std::string const& Key, float& Value, const std::string& Filename) const
+{
+	ConfigFile* ConfigFile = this->Find(Filename);
+	if (!ConfigFile)
+	{
+		return false;
+	}
+	double Double;
+	bool bResult = ConfigFile->ConfigFileImpl.GetDoubleValue(Section.c_str(), Key.c_str(), Double, false);
+	if (bResult)
+	{
+		Value = (float)Double;
+	}
+
+	return bResult;
+}
+
+std::list<std::string> const Config::GetFilenames()
+{
+	std::list<std::string> Filenames;
+	{
+		std::lock_guard<std::mutex> lock(Lock);
+		for (auto i : ConfigFiles)
+		{
+			Filenames.push_back(i.Filename);
+		}
+	}
+	return Filenames;
+}
+
+std::list<std::string> const Config::GetKeysByString(std::string const& Key, std::string const& Filename)
+{
+	std::list<std::string> Keys;
+	{
+		std::lock_guard<std::mutex> lock(Lock);
+
+		ConfigFile* File = Find(Filename);
+		if (!File)
+		{
+			return Keys;
+		}
+
+		CSimpleIniA::TNamesDepend KeysImpl;
+		File->ConfigFileImpl.GetAllKeys("", KeysImpl);
+		for (auto i : KeysImpl)
+		{
+			if (std::string(i.pItem).substr(0, Key.length()) == Key)
+			{
+				Keys.push_back(i.pItem);
+			}
+		}
+	}
+
+	return Keys;
 }
 
 Config* Config::instance()
 {
-    static Config instance;
-    return &instance;
-}
-
-bool Config::Reload(std::string& error)
-{
-    return LoadInitial(_filename, error);
-}
-
-template<class T>
-T Config::GetValueDefault(std::string const& name, T def) const
-{
-    try
-    {
-        return _config.get<T>(ptree::path_type(name, '/'));
-    }
-    catch (boost::property_tree::ptree_bad_path)
-    {
-        TC_LOG_WARN("server.loading", "Missing name %s in config file %s, add \"%s = %s\" to this file",
-            name.c_str(), _filename.c_str(), name.c_str(), std::to_string(def).c_str());
-    }
-    catch (boost::property_tree::ptree_bad_data)
-    {
-        TC_LOG_ERROR("server.loading", "Bad value defined for name %s in config file %s, going to use %s instead",
-            name.c_str(), _filename.c_str(), std::to_string(def).c_str());
-    }
-
-    return def;
-}
-
-template<>
-std::string Config::GetValueDefault<std::string>(std::string const& name, std::string def) const
-{
-    try
-    {
-        return _config.get<std::string>(ptree::path_type(name, '/'));
-    }
-    catch (boost::property_tree::ptree_bad_path)
-    {
-        TC_LOG_WARN("server.loading", "Missing name %s in config file %s, add \"%s = %s\" to this file",
-            name.c_str(), _filename.c_str(), name.c_str(), def.c_str());
-    }
-    catch (boost::property_tree::ptree_bad_data)
-    {
-        TC_LOG_ERROR("server.loading", "Bad value defined for name %s in config file %s, going to use %s instead",
-            name.c_str(), _filename.c_str(), def.c_str());
-    }
-
-    return def;
-}
-
-std::string Config::GetStringDefault(std::string const& name, const std::string& def) const
-{
-    std::string val = GetValueDefault(name, def);
-    val.erase(std::remove(val.begin(), val.end(), '"'), val.end());
-    return val;
-}
-
-bool Config::GetBoolDefault(std::string const& name, bool def) const
-{
-    std::string val = GetValueDefault(name, std::string(def ? "1" : "0"));
-    val.erase(std::remove(val.begin(), val.end(), '"'), val.end());
-    return (val == "1" || val == "true" || val == "TRUE" || val == "yes" || val == "YES");
-}
-
-int Config::GetIntDefault(std::string const& name, int def) const
-{
-    return GetValueDefault(name, def);
-}
-
-float Config::GetFloatDefault(std::string const& name, float def) const
-{
-    return GetValueDefault(name, def);
-}
-
-std::string const& Config::GetFilename()
-{
-    std::lock_guard<std::mutex> lock(_configLock);
-    return _filename;
-}
-
-std::list<std::string> Config::GetKeysByString(std::string const& name)
-{
-    std::lock_guard<std::mutex> lock(_configLock);
-
-    std::list<std::string> keys;
-
-    for (const ptree::value_type& child : _config)
-        if (child.first.compare(0, name.length(), name) == 0)
-            keys.push_back(child.first);
-
-    return keys;
+	static Config instance;
+	return &instance;
 }

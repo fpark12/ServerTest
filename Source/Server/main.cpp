@@ -6,6 +6,8 @@
 #include <future>
 #include <regex>
 #include "class.h"
+#include "Config.h"
+#include "Guard.h"
 
 using namespace std;
 
@@ -93,10 +95,41 @@ int factorial(int num)
 	return num;
 }
 
+#define TOKENPASTE(x, y) x ## y
+#define TOKENPASTE2(x, y) TOKENPASTE(x, y)
+#define UNIQUE static void TOKENPASTE2(scope_guard, __LINE__)(void) {}
+UNIQUE;
+UNIQUE;
+UNIQUE;
 
 
 int main()
 {
+	std::mutex m;
+	SCOPED(m)
+	{
+		static int i = 0;
+		i++;
+		if (i > 3)
+		{
+			return;
+		}
+	};
+
+	GConfig;
+
+	SCOPED2
+	{
+		// revert step 1
+		printf("123");
+	};
+	SCOPED2
+	{
+		// revert step 1
+		printf("123");
+	};
+
+
 	Factorial f;
     bool should_cont = true;
     
