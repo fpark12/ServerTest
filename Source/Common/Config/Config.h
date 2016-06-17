@@ -53,8 +53,8 @@ public:
 	bool Load(std::string const& Filename);
 	bool Reload(std::string const& Filename);
 
-	bool GetString(std::string const& section, std::string const& Key, std::string& Value, std::string const& Filename) const;
 	bool GetBool(std::string const& section, std::string const& Key, bool& Value, std::string const& Filename) const;
+	bool GetString(std::string const& section, std::string const& Key, std::string& Value, std::string const& Filename) const;
 	bool GetInt(std::string const& section, std::string const& Key, int& Value, std::string const& Filename) const;
 	bool GetFloat(std::string const& section, std::string const& Key, float& Value, std::string const& Filename) const;
 

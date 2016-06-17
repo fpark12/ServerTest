@@ -21,6 +21,12 @@
 #include "Config.h"
  //#include "Errors.h"
  //#include "Log.h"
+ //# 
+Config* Config::instance()
+{
+	static Config instance;
+	return &instance;
+}
 
 bool Config::Load(std::string const& Filename)
 {
@@ -47,14 +53,6 @@ bool Config::Load(std::string const& Filename)
 	}
 }
 
-bool Config::Reload(std::string const& Filename)
-{
-	if (Unload(Filename))
-	{
-		return Load(Filename);
-	}
-}
-
 bool Config::Unload(std::string const& Filename)
 {
 	auto i = std::begin(ConfigFiles);
@@ -73,6 +71,14 @@ bool Config::Unload(std::string const& Filename)
 	return true;
 }
 
+bool Config::Reload(std::string const& Filename)
+{
+	if (Unload(Filename))
+	{
+		return Load(Filename);
+	}
+}
+
 ConfigFile* Config::Find(std::string const& Filename) const
 {
 	for (auto i : ConfigFiles)
@@ -83,6 +89,19 @@ ConfigFile* Config::Find(std::string const& Filename) const
 		}
 	}
 	return nullptr;
+}
+
+std::list<std::string> const Config::GetFilenames()
+{
+	std::list<std::string> Filenames;
+	{
+		std::lock_guard<std::mutex> lock(Lock);
+		for (auto i : ConfigFiles)
+		{
+			Filenames.push_back(i.Filename);
+		}
+	}
+	return Filenames;
 }
 
 std::list<std::string> const Config::GetKeys(std::string const& Filename)
@@ -105,6 +124,32 @@ std::list<std::string> const Config::GetKeys(std::string const& Filename)
 		}
 	}
 
+}
+
+std::list<std::string> const Config::GetKeysByString(std::string const& Key, std::string const& Filename)
+{
+	std::list<std::string> Keys;
+	{
+		std::lock_guard<std::mutex> lock(Lock);
+
+		ConfigFile* File = Find(Filename);
+		if (!File)
+		{
+			return Keys;
+		}
+
+		CSimpleIniA::TNamesDepend KeysImpl;
+		File->ConfigFileImpl.GetAllKeys("", KeysImpl);
+		for (auto i : KeysImpl)
+		{
+			if (std::string(i.pItem).substr(0, Key.length()) == Key)
+			{
+				Keys.push_back(i.pItem);
+			}
+		}
+	}
+
+	return Keys;
 }
 
 bool Config::GetString(std::string const& Section, std::string const& Key, std::string& Value, std::string const& Filename) const
@@ -153,49 +198,4 @@ bool Config::GetFloat(std::string const& Section, std::string const& Key, float&
 	}
 
 	return bResult;
-}
-
-std::list<std::string> const Config::GetFilenames()
-{
-	std::list<std::string> Filenames;
-	{
-		std::lock_guard<std::mutex> lock(Lock);
-		for (auto i : ConfigFiles)
-		{
-			Filenames.push_back(i.Filename);
-		}
-	}
-	return Filenames;
-}
-
-std::list<std::string> const Config::GetKeysByString(std::string const& Key, std::string const& Filename)
-{
-	std::list<std::string> Keys;
-	{
-		std::lock_guard<std::mutex> lock(Lock);
-
-		ConfigFile* File = Find(Filename);
-		if (!File)
-		{
-			return Keys;
-		}
-
-		CSimpleIniA::TNamesDepend KeysImpl;
-		File->ConfigFileImpl.GetAllKeys("", KeysImpl);
-		for (auto i : KeysImpl)
-		{
-			if (std::string(i.pItem).substr(0, Key.length()) == Key)
-			{
-				Keys.push_back(i.pItem);
-			}
-		}
-	}
-
-	return Keys;
-}
-
-Config* Config::instance()
-{
-	static Config instance;
-	return &instance;
 }
