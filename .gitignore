@@ -9,6 +9,7 @@
 !*.c
 !*.cc
 !*.cpp
+!*.c++
 !*.cxx
 !*.cpp.template
 !*.h
@@ -73,7 +74,10 @@ Binaries/
 !3rdParty/libprotobuf/protoc.exe
 !*.proto
 
-
+#capnproto
+!3rdParty/capnproto/capnp.exe
+!3rdParty/capnproto/capnpc-c++.exe
+!*.capnp
 
 
 
