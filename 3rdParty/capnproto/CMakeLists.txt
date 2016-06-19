@@ -24,8 +24,8 @@ if(TARGET ${PROJECT_NAME})
 		#message("newfile: ${newFile}, ${newStamp}")
 	endforeach()
 
-	message("CapnProto: ${CapnProto}")
-	message("CapnProtoCPP: ${CapnProtoCPP}")
+	#message("CapnProto: ${CapnProto}")
+	#message("CapnProtoCPP: ${CapnProtoCPP}")
 	#write new stamp to file
 	file(WRITE ${${PROJECT_NAME}_BINARY_DIR}/proto.stamp "${newProtoStamp}")
 
