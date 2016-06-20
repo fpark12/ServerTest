@@ -47,15 +47,16 @@ if(TARGET ${PROJECT_NAME})
 			file(RENAME
 				${${PROJECT_NAME}_BINARY_DIR}/${PROTO_FILE_NAME}.capnp.c++
 				${${PROJECT_NAME}_BINARY_DIR}/${PROTO_FILE_NAME}.capnp.cpp)
+			
+			#message("${PROJECT_NAME}: ${${PROJECT_NAME}_BINARY_DIR}/${PROTO_FILE_NAME}.pb.cc")
+			#message("${PROJECT_NAME}: ${${PROJECT_NAME}_BINARY_DIR}/${PROTO_FILE_NAME}.pb.h")
+			target_sources(${PROJECT_NAME} PRIVATE ${${PROJECT_NAME}_BINARY_DIR}/${PROTO_FILE_NAME}.capnp.cpp)
+			target_sources(${PROJECT_NAME} PRIVATE ${${PROJECT_NAME}_BINARY_DIR}/${PROTO_FILE_NAME}.capnp.h)
+			SOURCE_GROUP("ProtoGenerated" FILES ${${PROJECT_NAME}_BINARY_DIR}/${PROTO_FILE_NAME}.capnp.cpp)
+			SOURCE_GROUP("ProtoGenerated" FILES ${${PROJECT_NAME}_BINARY_DIR}/${PROTO_FILE_NAME}.capnp.h)
+			list(APPEND newProtoSourceList "${${PROJECT_NAME}_BINARY_DIR}/${PROTO_FILE_NAME}.capnp.cpp")
+			list(APPEND newProtoSourceList "${${PROJECT_NAME}_BINARY_DIR}/${PROTO_FILE_NAME}.capnp.h")
 		endif()
-		#message("${PROJECT_NAME}: ${${PROJECT_NAME}_BINARY_DIR}/${PROTO_FILE_NAME}.pb.cc")
-		#message("${PROJECT_NAME}: ${${PROJECT_NAME}_BINARY_DIR}/${PROTO_FILE_NAME}.pb.h")
-		target_sources(${PROJECT_NAME} PRIVATE ${${PROJECT_NAME}_BINARY_DIR}/${PROTO_FILE_NAME}.capnp.cpp)
-		target_sources(${PROJECT_NAME} PRIVATE ${${PROJECT_NAME}_BINARY_DIR}/${PROTO_FILE_NAME}.capnp.h)
-		SOURCE_GROUP("ProtoGenerated" FILES ${${PROJECT_NAME}_BINARY_DIR}/${PROTO_FILE_NAME}.capnp.cpp)
-		SOURCE_GROUP("ProtoGenerated" FILES ${${PROJECT_NAME}_BINARY_DIR}/${PROTO_FILE_NAME}.capnp.h)
-		list(APPEND newProtoSourceList "${${PROJECT_NAME}_BINARY_DIR}/${PROTO_FILE_NAME}.capnp.cpp")
-		list(APPEND newProtoSourceList "${${PROJECT_NAME}_BINARY_DIR}/${PROTO_FILE_NAME}.capnp.h")
 	endforeach()
 
 	#delete useless proto source files
