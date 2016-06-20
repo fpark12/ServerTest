@@ -5,6 +5,7 @@
 
 // For MySQL Connection
 #include <mysql.h>
+#include "Field.h"
 
 using namespace std;
 

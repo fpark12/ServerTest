@@ -5,6 +5,7 @@
 #define SCOPED2 LockGuard SCOPED_(lock, __LINE__) = []()
 #define SCOPED(x) LockGuard SCOPED_(lock, __LINE__); SCOPED_(lock, __LINE__) << &x << [&]()
 
+
 class LockGuard
 {
 public:

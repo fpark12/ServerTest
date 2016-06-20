@@ -1,12 +1,13 @@
 SET( DEFINE
 )
 SET( INCLUDE
+	Common
 	mysql
-	libprotobuf
+	capnproto
 )
 SET( LINK
 	3rdParty/mysql/lib/libmysql.lib
-	libprotobuf
+	capnproto
 )
 
 create_project(CONSOLE "${DEFINE}" "${INCLUDE}" "${LINK}")

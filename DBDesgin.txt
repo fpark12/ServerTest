@@ -1,0 +1,118 @@
+message LoginQuery {
+	String sqlstmt;
+	String userName;
+	String password;
+}
+
+message CharQuery {
+	String sqlstmt;
+	String charName;
+	...
+}
+
+namespace DB
+{
+	TaskQueue GLogin
+	TaskQueue GWorld
+	TaskQueue GHotfix
+
+	// Task Login;
+	// Task ChangeName;
+	// Task CreateCharacter;
+	// ...
+
+	// This is a info class
+	struct Login : public Task
+	{
+		static taskQueue ref.;
+
+		string(cstring) SQLStatement;
+		Params;
+	}
+
+	// struct TaskFuturePair
+	struct TaskResultPair
+	{
+		// task
+		Task*;
+		// result
+		Future;
+	}
+
+	struct TaskQueue
+	{
+		Queue<TaskResaultPair>;
+		Std::Mutex queue_mutex;
+	}
+
+	struct Worker
+	{
+		connectionInfo;
+		connectionInstance (Oracle C API: MYSQL*)
+		TaskQueue&;
+
+		init()
+		{
+			setup connectionInfo;
+			setup reference to TaskQueue;
+		}
+
+		openConnection()
+		{
+			set connection instance according to connection info
+		}
+
+		closeConnection()
+		{
+
+		}
+
+		doTask(task)
+		{
+			make a preparedstmt
+			put preparedstmt into connection
+			return resultset
+		}
+
+		work()
+		{
+			openConnection()
+			loop
+			{
+				// do work or sleep
+				look for task, need wr_lock on task queue
+				doTask()
+			}
+		}
+			
+	}
+
+	Future Query(Task)
+	{
+		TaskQueue = TaskQueues[Task.tag]
+		TaskQueue.add(TaskFuturePair);
+		notify;
+		return TaskFuturePair.Future;
+	}
+
+
+	spawnworkers()
+	{
+		load db config;
+		spawn workers;
+	}
+}
+
+ServerMain()
+{
+	DB.init();
+	new DB::TASK::LOGIN::VerifyCredential verifyTask;
+	Future = Query(Task);
+
+
+	Request::World::Character::GetItemCount a;
+	a.username = "";
+	a.password = "";
+	auto res = LoginDatabase.Query(protoMessage* );
+}
+

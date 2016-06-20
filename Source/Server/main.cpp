@@ -116,6 +116,16 @@ int main()
 		}
 	};
 
+	SCOPED(m)
+	{
+		static int i = 0;
+		i++;
+		if (i > 3)
+		{
+			return;
+		}
+	};
+
 	GConfig;
 
 	SCOPED2

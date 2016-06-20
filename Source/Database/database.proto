@@ -1,9 +1,0 @@
-syntax = "proto3";
-
-message DatabaseConnection {
-	string database_ip = 1;
-	string port_number = 2;
-	string db_username = 3;
-	string db_password = 4;
-	string db_schema = 5;
-};
