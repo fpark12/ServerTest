@@ -14,8 +14,6 @@ foreach(newFile ${newList})
 	#message("newfile: ${newFile}, ${newStamp}")
 endforeach()
 
-#write new stamp to file
-file(WRITE ${projBuildDir}/proto.stamp "${newProtoStamp}")
 if(NOT "${oldProtoStamp}" STREQUAL "${newProtoStamp}")
 	#message("NOT EQUAL!!!!!!!!!!!!!!!!!!!!!!")
 	#file(REMOVE_RECURSE "${buildDir}/x64/Debug/ZERO_CHECK/")
@@ -26,7 +24,11 @@ if(NOT "${oldProtoStamp}" STREQUAL "${newProtoStamp}")
 	#message("generator ${generator}")
 	EXECUTE_PROCESS(
 		COMMAND ${CMAKE_COMMAND} -G "${generator}" "${slnDir}/CMakelists.txt" "${buildDir}"
+		RESULT_VARIABLE Result
 		)
+	if(${Result})
+		message(FATAL_ERROR "Capnp compilation failed!")
+	endif()
 	EXECUTE_PROCESS(
 		COMMAND ${CMAKE_COMMAND}
 			-DCMAKE_BINARY_DIR=${CMAKE_BINARY_DIR}
@@ -35,6 +37,9 @@ if(NOT "${oldProtoStamp}" STREQUAL "${newProtoStamp}")
 			-P "${slnDir}/Purify/Core/RemoveAllBuild.cmake"
 		)
 endif()
+
+#write new stamp to file
+file(WRITE ${projBuildDir}/proto.stamp "${newProtoStamp}")
 message("Old stamp: ${oldProtoStamp}")
 message("New stamp: ${newProtoStamp}")
 

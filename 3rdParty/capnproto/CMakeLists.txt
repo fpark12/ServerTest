@@ -16,13 +16,6 @@ if(TARGET ${PROJECT_NAME})
 	file(GLOB_RECURSE CapnProtoCPP ${CMAKE_SOURCE_DIR}/capnpc-c++.exe)
 	file(GLOB_RECURSE ProtoCompiler ${CMAKE_SOURCE_DIR}/protoc.exe)
 	file(GLOB_RECURSE existingProtoSourceList ${${PROJECT_NAME}_BINARY_DIR}/*.capnp.cpp ${${PROJECT_NAME}_BINARY_DIR}/*.capnp.h)
-	#build new proto stamp
-	set(newProtoStamp "")
-	foreach(newFile ${protoFiles})
-		file(TIMESTAMP ${newFile} newStamp)
-		list(APPEND newProtoStamp "${newFile}, ${newStamp}")
-		#message("newfile: ${newFile}, ${newStamp}")
-	endforeach()
 
 	#message("CapnProto: ${CapnProto}")
 	#message("CapnProtoCPP: ${CapnProtoCPP}")
@@ -40,14 +33,18 @@ if(TARGET ${PROJECT_NAME})
 			--src-prefix=${PROTO_FILE_DIR}
 			-o${CapnProtoCPP}:${${PROJECT_NAME}_BINARY_DIR}
 			${PROTO_FILE}
+			RESULT_VARIABLE Result
 		)
-
+		#message("Result: ${Result}")
+		if(${Result})
+			message(FATAL_ERROR "Capnp compilation failed!")
+		endif()
 		file(GLOB_RECURSE CapnpCPPFile ${${PROJECT_NAME}_BINARY_DIR}/${PROTO_FILE_NAME}.capnp.c++)
 		if(CapnpCPPFile)
 			file(RENAME
 				${${PROJECT_NAME}_BINARY_DIR}/${PROTO_FILE_NAME}.capnp.c++
 				${${PROJECT_NAME}_BINARY_DIR}/${PROTO_FILE_NAME}.capnp.cpp)
-			
+
 			#message("${PROJECT_NAME}: ${${PROJECT_NAME}_BINARY_DIR}/${PROTO_FILE_NAME}.pb.cc")
 			#message("${PROJECT_NAME}: ${${PROJECT_NAME}_BINARY_DIR}/${PROTO_FILE_NAME}.pb.h")
 			target_sources(${PROJECT_NAME} PRIVATE ${${PROJECT_NAME}_BINARY_DIR}/${PROTO_FILE_NAME}.capnp.cpp)
@@ -58,6 +55,15 @@ if(TARGET ${PROJECT_NAME})
 			list(APPEND newProtoSourceList "${${PROJECT_NAME}_BINARY_DIR}/${PROTO_FILE_NAME}.capnp.h")
 		endif()
 	endforeach()
+
+	#build new proto stamp
+	set(newProtoStamp "")
+	foreach(newFile ${protoFiles})
+		file(TIMESTAMP ${newFile} newStamp)
+		list(APPEND newProtoStamp "${newFile}, ${newStamp}")
+		#message("newfile: ${newFile}, ${newStamp}")
+	endforeach()
+
 
 	#delete useless proto source files
 	#message("existingProtoSourceList: ${existingProtoSourceList}")
