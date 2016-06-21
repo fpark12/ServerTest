@@ -40,3 +40,6 @@ typedef uint8_t uint8;
 #  define TRINITY_CONSTEXPR
 #endif
 #endif //COMPILER == COMPILER_GNU
+
+// Database defines
+#define QueryMaxParamCount 32
