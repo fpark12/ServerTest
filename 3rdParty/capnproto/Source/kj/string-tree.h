@@ -26,7 +26,7 @@
 #pragma GCC system_header
 #endif
 
-#include "kj/string.kj.h"
+#include "kj/kj.string.h"
 
 namespace kj {
 

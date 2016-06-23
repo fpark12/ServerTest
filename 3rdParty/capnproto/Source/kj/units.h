@@ -30,7 +30,7 @@
 #pragma GCC system_header
 #endif
 
-#include "kj/common.kj.h"
+#include "kj/kj.common.h"
 
 namespace kj {
 

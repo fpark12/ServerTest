@@ -45,7 +45,7 @@
 // pointers.  Since KJ only ever needs to store pointers, not values, we avoid the question of
 // whether these values' destructors need to be run, and we avoid the need for heap allocation.
 
-#include "kj/common.kj.h"
+#include "kj/kj.common.h"
 
 #if !defined(KJ_USE_PTHREAD_THREADLOCAL) && defined(__APPLE__)
 #include "TargetConditionals.h"

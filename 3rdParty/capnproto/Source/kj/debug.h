@@ -111,8 +111,8 @@
 #pragma GCC system_header
 #endif
 
-#include "kj/string.kj.h"
-#include "kj/exception.kj.h"
+#include "kj/kj.string.h"
+#include "kj/exception.h"
 
 #ifdef ERROR
 // This is problematic because windows.h #defines ERROR, which we use in an enum here.

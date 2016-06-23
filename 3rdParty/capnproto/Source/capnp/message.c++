@@ -21,8 +21,8 @@
 
 #define CAPNP_PRIVATE
 #include "message.h"
-#include <kj/debug.kj.h>
-#include "arena.h"
+#include <kj/debug.h>
+#include "capnp/arena.h"
 #include "orphan.h"
 #include <stdlib.h>
 #include <exception>

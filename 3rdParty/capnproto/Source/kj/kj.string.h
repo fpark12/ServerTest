@@ -27,7 +27,7 @@
 #endif
 
 #include <initializer_list>
-#include "kj/array.kj.h"
+#include "array.h"
 #include <string.h>
 
 namespace kj {

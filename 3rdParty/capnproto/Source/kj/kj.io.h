@@ -27,9 +27,9 @@
 #endif
 
 #include <stddef.h>
-#include "kj/common.kj.h"
-#include "kj/array.kj.h"
-#include "kj/exception.kj.h"
+#include "kj/kj.common.h"
+#include "array.h"
+#include "exception.h"
 
 namespace kj {
 

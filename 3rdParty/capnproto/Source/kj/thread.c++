@@ -19,8 +19,8 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-#include "kj/thread.kj.h"
-#include "kj/debug.kj.h"
+#include "kj/thread.h"
+#include "kj/debug.h"
 
 #if _WIN32
 #include <windows.h>

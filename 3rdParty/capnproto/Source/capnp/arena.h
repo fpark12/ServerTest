@@ -31,11 +31,11 @@
 #endif
 
 #include <unordered_map>
-#include <kj/common.kj.h>
-#include <kj/mutex.kj.h>
-#include <kj/exception.kj.h>
-#include <kj/vector.kj.h>
-#include "common.h"
+#include <kj/kj.common.h>
+#include <kj/mutex.h>
+#include <kj/exception.h>
+#include <kj/vector.h>
+#include "capnp/common.h"
 #include "message.h"
 #include "layout.h"
 

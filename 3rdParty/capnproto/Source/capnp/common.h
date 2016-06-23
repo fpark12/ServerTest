@@ -30,7 +30,7 @@
 #pragma GCC system_header
 #endif
 
-#include <kj/units.kj.h>
+#include <kj/units.h>
 #include <inttypes.h>
 
 namespace capnp {

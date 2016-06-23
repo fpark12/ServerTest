@@ -20,10 +20,10 @@
 // THE SOFTWARE.
 
 #define CAPNP_PRIVATE
-#include "arena.h"
+#include "capnp/arena.h"
 #include "message.h"
-#include <kj/debug.kj.h>
-#include <kj/refcount.kj.h>
+#include <kj/debug.h>
+#include <kj/refcount.h>
 #include <vector>
 #include <string.h>
 #include <stdio.h>

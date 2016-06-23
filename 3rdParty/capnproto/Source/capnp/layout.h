@@ -33,9 +33,9 @@
 #pragma GCC system_header
 #endif
 
-#include <kj/common.kj.h>
-#include <kj/memory.kj.h>
-#include "common.h"
+#include <kj/kj.common.h>
+#include <kj/memory.h>
+#include "capnp/common.h"
 #include "blob.h"
 #include "endian.h"
 

@@ -19,11 +19,11 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-#include "kj/exception.kj.h"
-#include "kj/string.kj.h"
-#include "kj/debug.kj.h"
-#include "kj/threadlocal.kj.h"
-#include "kj/miniposix.kj.h"
+#include "kj/exception.h"
+#include "kj/kj.string.h"
+#include "kj/debug.h"
+#include "kj/threadlocal.h"
+#include "kj/miniposix.h"
 #include <stdlib.h>
 #include <exception>
 #include <new>

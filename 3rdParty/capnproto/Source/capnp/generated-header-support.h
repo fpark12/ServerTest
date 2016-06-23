@@ -33,8 +33,8 @@
 #include "orphan.h"
 #include "pointer-helpers.h"
 #include "any.h"
-#include <kj/string.kj.h>
-#include <kj/string-tree.kj.h>
+#include <kj/kj.string.h>
+#include <kj/string-tree.h>
 
 namespace capnp {
 

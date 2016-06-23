@@ -26,7 +26,7 @@
 #pragma GCC system_header
 #endif
 
-#include "kj/common.kj.h"
+#include "kj/kj.common.h"
 #include <string.h>
 #include <initializer_list>
 

@@ -25,8 +25,8 @@
 #define _WIN32_WINNT 0x0600
 #endif
 
-#include "kj/mutex.kj.h"
-#include "kj/debug.kj.h"
+#include "kj/mutex.h"
+#include "kj/debug.h"
 
 #if KJ_USE_FUTEX
 #include <unistd.h>

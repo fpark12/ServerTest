@@ -19,10 +19,10 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-#include <kj/common.kj.h>
-#include <kj/memory.kj.h>
-#include <kj/mutex.kj.h>
-#include "common.h"
+#include <kj/kj.common.h>
+#include <kj/memory.h>
+#include <kj/mutex.h>
+#include "capnp/common.h"
 #include "layout.h"
 #include "any.h"
 

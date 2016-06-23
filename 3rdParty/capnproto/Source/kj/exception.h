@@ -26,9 +26,9 @@
 #pragma GCC system_header
 #endif
 
-#include "kj/memory.kj.h"
-#include "kj/array.kj.h"
-#include "kj/string.kj.h"
+#include "kj/memory.h"
+#include "kj/array.h"
+#include "kj/kj.string.h"
 
 namespace kj {
 

@@ -26,9 +26,9 @@
 #pragma GCC system_header
 #endif
 
-#include "kj/common.kj.h"
-#include "kj/function.kj.h"
-#include "kj/exception.kj.h"
+#include "kj/kj.common.h"
+#include "kj/function.h"
+#include "kj/exception.h"
 
 namespace kj {
 

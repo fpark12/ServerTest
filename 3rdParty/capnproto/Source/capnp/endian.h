@@ -26,7 +26,7 @@
 #pragma GCC system_header
 #endif
 
-#include "common.h"
+#include "capnp/common.h"
 #include <inttypes.h>
 #include <string.h>  // memcpy
 

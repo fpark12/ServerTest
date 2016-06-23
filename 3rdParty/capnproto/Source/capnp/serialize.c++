@@ -21,7 +21,7 @@
 
 #include "serialize.h"
 #include "layout.h"
-#include <kj/debug.kj.h>
+#include <kj/debug.h>
 #include <exception>
 
 namespace capnp {

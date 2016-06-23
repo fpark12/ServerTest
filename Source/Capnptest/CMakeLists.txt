@@ -2,9 +2,8 @@ SET( DEFINE
 	CAPNP_LITE
 )
 SET( INCLUDE
-	Common
-	mysql
 	capnproto
+	mysql
 )
 SET( LINK
 	3rdParty/mysql/lib/libmysql.lib

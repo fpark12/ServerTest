@@ -20,7 +20,7 @@
 // THE SOFTWARE.
 
 #include "serialize-packed.h"
-#include <kj/debug.kj.h>
+#include <kj/debug.h>
 #include "layout.h"
 #include <vector>
 

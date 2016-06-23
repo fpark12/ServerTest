@@ -19,8 +19,8 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-#include "kj/common.kj.h"
-#include "kj/debug.kj.h"
+#include "kj/kj.common.h"
+#include "kj/debug.h"
 #include <stdlib.h>
 #ifdef _MSC_VER
 #include <limits>

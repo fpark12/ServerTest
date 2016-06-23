@@ -19,9 +19,9 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-#include "kj/io.kj.h"
-#include "kj/debug.kj.h"
-#include "kj/miniposix.kj.h"
+#include "kj/kj.io.h"
+#include "kj/debug.h"
+#include "kj/miniposix.h"
 #include <algorithm>
 #include <errno.h>
 #include <limits.h>
