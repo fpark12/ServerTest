@@ -39,9 +39,7 @@ namespace detail
 
   public:
     static const bool value =
-      sizeof(service_has_move::eval(
-        static_cast<service_type*>(0),
-        static_cast<implementation_type*>(0))) == 1;
+      sizeof(eval(static_cast<service_type*>(0), static_cast<implementation_type*>(0))) == 1;
   };
 }
 #endif // defined(ASIO_HAS_MOVE)

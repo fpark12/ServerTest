@@ -61,7 +61,7 @@ protected:
 	{
 		auto iter = BufferIterators[index];
 		ASSERT(iter.ParamType == TYPE_STRING || iter.ParamType == TYPE_BINARY);
-		memcpy(iter.ParamPtr, (const void*)value, std::min(sizeof(value), iter.MaxLength));
+		memcpy(iter.ParamPtr, (const void*)value, ::std::min(sizeof(value), iter.MaxLength));
 		iter.IsBinded = true;
 	}
 
@@ -70,7 +70,6 @@ protected:
 	{
 		auto iter = BufferIterators[index];
 		ASSERT(iter.ParamType == TYPE_NULL || !value);
-		memcpy(iter.ParamPtr, (const void*)value, std::min(sizeof(value), iter.MaxLength));
 		iter.IsBinded = true;
 	}
 

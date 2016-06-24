@@ -63,11 +63,4 @@ private:
 	std::string getQueryString(std::string const& sqlPattern) const;
 
 	DISALLOW_COPY(PreparedStatement);
-private:
-	void setValue(MYSQL_BIND* param, enum_field_types type, const void* value, uint32 len, bool isUnsigned);
-
-private:
-	uint32 m_paramCount;
-	std::vector<bool> m_paramsSet;
-	MYSQL_BIND* m_bind;
 };

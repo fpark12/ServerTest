@@ -3,6 +3,7 @@ SET( DEFINE
 )
 SET( INCLUDE
 	Common
+	mysql
 	asio
 )
 SET( LINK
