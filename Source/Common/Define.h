@@ -43,3 +43,8 @@ typedef uint8_t uint8;
 
 // Database defines
 #define QueryMaxParamCount 32
+
+// Utility Macro
+#define DISALLOW_COPY(classname) \
+  classname(const classname&) = delete; \
+  classname& operator=(const classname&) = delete

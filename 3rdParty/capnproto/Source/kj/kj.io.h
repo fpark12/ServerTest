@@ -28,8 +28,8 @@
 
 #include <stddef.h>
 #include "kj/kj.common.h"
-#include "array.h"
-#include "exception.h"
+#include "kj/kj.array.h"
+#include "kj/kj.exception.h"
 
 namespace kj {
 

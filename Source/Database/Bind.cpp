@@ -7,17 +7,18 @@ Bind::Bind(std::vector<QueryParamSizeInfo>&& paramSizeInfoList) :
 	ASSERT(ParamCount <= MaxParamCount);
 	sumOfSize(paramSizeInfoList);
 	ParamBuffer = new uint8[totalSize];
+	BufferIterators.reserve(ParamCount);
 	int bufferOffset = 0;
 	for (std::size_t i = 0;
 		i < paramSizeInfoList.size() && bufferOffset < totalSize;
 		++i)
 	{
-		BufferIterators[i]->ParamPtr = (void*)(ParamBuffer + bufferOffset);
-		BufferIterators[i]->ParamType = paramSizeInfoList[i].Type;
+		BufferIterators[i].ParamPtr = (void*)(ParamBuffer + bufferOffset);
+		BufferIterators[i].ParamType = paramSizeInfoList[i].Type;
 		if (paramSizeInfoList[i].Type == TYPE_STRING ||
 			paramSizeInfoList[i].Type == TYPE_BINARY)
 		{
-			BufferIterators[i]->Max_Length = paramSizeInfoList[i].MaxDataLength;
+			BufferIterators[i].MaxLength = paramSizeInfoList[i].MaxDataLength;
 			bufferOffset += paramSizeInfoList[i].MaxDataLength;
 		}
 		else
@@ -25,6 +26,55 @@ Bind::Bind(std::vector<QueryParamSizeInfo>&& paramSizeInfoList) :
 			bufferOffset += ParamSize(paramSizeInfoList[i].Type);
 		}
 	}
+}
+
+Bind::~Bind()
+{
+	ClearParameters();
+}
+
+void Bind::ClearParameters()
+{
+	delete[] ParamBuffer;
+	ParamBuffer = nullptr;
+	for (auto iter: BufferIterators)
+	{
+		iter.IsBinded = false;
+	}
+}
+
+QueryParamType Bind::GetParamType(uint8 index)
+{
+	return BufferIterators[index].ParamType;
+}
+
+unsigned long Bind::GetStringParamMaxLength(uint8 index)
+{
+	if (BufferIterators[index].ParamType == TYPE_STRING
+		|| BufferIterators[index].ParamType == TYPE_BINARY)
+	{
+		return BufferIterators[index].MaxLength;
+	}
+	else
+	{
+		return 0;
+	}
+}
+
+std::size_t Bind::sumOfSize(std::vector<QueryParamSizeInfo>& paramSizeInfoList)
+{
+	for (QueryParamSizeInfo& paramSizeInfo : paramSizeInfoList)
+	{
+		if (paramSizeInfo.Type == TYPE_STRING || paramSizeInfo.Type == TYPE_BINARY)
+		{
+			totalSize += paramSizeInfo.MaxDataLength;
+		}
+		else
+		{
+			totalSize += ParamSize(paramSizeInfo.Type);
+		}
+	}
+	return totalSize;
 }
 
 int32 Bind::ParamSize(QueryParamType Type)
@@ -62,20 +112,4 @@ int32 Bind::ParamSize(QueryParamType Type)
 		//TODO error log system
 		throw std::invalid_argument("Received invalid param type");
 	}
-}
-
-std::size_t Bind::sumOfSize(std::vector<QueryParamSizeInfo>& paramSizeInfoList)
-{
-	for (QueryParamSizeInfo& paramSizeInfo : paramSizeInfoList)
-	{
-		if (paramSizeInfo.Type == TYPE_STRING || paramSizeInfo.Type == TYPE_BINARY)
-		{
-			totalSize += paramSizeInfo.MaxDataLength;
-		}
-		else
-		{
-			totalSize += ParamSize(paramSizeInfo.Type);
-		}
-	}
-	return totalSize;
 }

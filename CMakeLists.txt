@@ -18,6 +18,8 @@ SET( GLOBAL_DEFINE
 _CRT_SECURE_NO_WARNINGS
 )
 
+add_definitions( -DCAPNP_LITE=1 )
+
 # Enable Unicode
 #SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /UMBCS /D_UNICODE /DUNICODE")
 															

@@ -28,13 +28,13 @@
 #pragma GCC system_header
 #endif
 
-#include "layout.h"
-#include "list.h"
-#include "orphan.h"
-#include "pointer-helpers.h"
-#include "any.h"
+#include "capnp.layout.h"
+#include "capnp.list.h"
+#include "capnp.orphan.h"
+#include "capnp.pointer-helpers.h"
+#include "capnp.any.h"
 #include <kj/kj.string.h>
-#include <kj/string-tree.h>
+#include <kj/kj.string-tree.h>
 
 namespace capnp {
 

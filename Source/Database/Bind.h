@@ -7,6 +7,7 @@
 #include "Define.h"
 #include "Errors.h"
 
+class PreparedStatement;
 
 enum QueryParamType
 {
@@ -34,28 +35,57 @@ struct QueryParamSizeInfo
 
 class Bind
 {
+private:
+
+	friend class PreparedStatement;
+
 public:
+
 	Bind(std::vector<QueryParamSizeInfo>&& paramSizeInfoList);
-	
+	~Bind();
+
+protected:
+
 	template<typename T>
-	void SetParam(uint8 index, T&& value)
+	void SetParam(const uint8 index, const T&& value)
 	{
 		auto iter = BufferIterators[index];
 		if (iter->ParamType == TYPE_STRING || iter->ParamType == TYPE_BINARY)
 		{
-			memcpy(iter->ParamPtr, &(value), std::min(sizeof(value), iter->Max_Length));
-		} 
+			memcpy(iter->ParamPtr, value, std::min(sizeof(value), iter->MaxLength));
+		}
+		else if (iter->ParamType == TYPE_NULL)
+		{
+		}
 		else
 		{
 			memcpy(iter->ParamPtr, &(value), ParamSize(iter->ParamType));
 		}
+		iter.IsBinded = true;
 	}
 
 	template<typename T>
-	const T* const GetParam(uint8 index)
+	const T* const GetParam(const uint8 index)
 	{
-		return (T*)(BufferIterators[index]->ParamPtr);
+		if (BufferIterators[index].IsBinded)
+		{
+			return (T*)(BufferIterators[index].ParamPtr);
+		} 
+		else
+		{
+			return nullptr;
+		}
 	}
+
+	void ClearParameters();
+
+	QueryParamType GetParamType(uint8 index);
+
+	/* Get Max Length of a string parameter. If the parameter has a type other string or binary,
+	*  the function will return 0.
+	*/
+	unsigned long GetStringParamMaxLength(uint8 index);
+
 private:
 
 	std::size_t sumOfSize(std::vector<QueryParamSizeInfo>& paramSizeInfoList);
@@ -64,17 +94,17 @@ private:
 
 	struct Header
 	{
-		void* ParamPtr;
-		QueryParamType ParamType;
-		unsigned long Max_Length;
+		void* ParamPtr = nullptr;
+		QueryParamType ParamType = TYPE_NULL;
+		unsigned long MaxLength = 0;
+		bool IsBinded = false;
 	};
 
 	static const int MaxParamCount = QueryMaxParamCount;
 	int ParamCount;
 	uint8* ParamBuffer;
-	std::vector<std::unique_ptr<Header>> BufferIterators;
+	std::vector<Header> BufferIterators;
 	std::size_t totalSize;
 
-	Bind(Bind const& right) = delete;
-	Bind& operator=(Bind const& right) = delete;
+	DISALLOW_COPY(Bind);
 };

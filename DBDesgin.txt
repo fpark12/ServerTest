@@ -22,7 +22,7 @@ namespace DB
 	// ...
 
 	// This is a info class
-	struct Login : public Task
+	struct Task : public protoMessage
 	{
 		static taskQueue ref.;
 
@@ -89,7 +89,7 @@ namespace DB
 
 	Future Query(Task)
 	{
-		TaskQueue = TaskQueues[Task.tag]
+		
 		TaskQueue.add(TaskFuturePair);
 		notify;
 		return TaskFuturePair.Future;
@@ -106,13 +106,16 @@ namespace DB
 ServerMain()
 {
 	DB.init();
+
+	
 	new DB::TASK::LOGIN::VerifyCredential verifyTask;
 	Future = Query(Task);
+
+}
+
 
 
 	Request::World::Character::GetItemCount a;
 	a.username = "";
 	a.password = "";
 	auto res = LoginDatabase.Query(protoMessage* );
-}
-
