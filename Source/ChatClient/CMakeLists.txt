@@ -1,13 +1,13 @@
 SET( DEFINE
-	CAPNP_LITE
+	ASIO_STANDALONE
 )
 SET( INCLUDE
-	capnproto
-	mysql
+	Common
+	asio
 )
 SET( LINK
-	3rdParty/mysql/lib/libmysql.lib
-	capnproto
+	Common
+	asio
 )
 
 create_project(CONSOLE "${DEFINE}" "${INCLUDE}" "${LINK}")
