@@ -13,152 +13,100 @@
 #include <iostream>
 #include <thread>
 #include "asio.hpp"
-#include "ChatMessage.hpp"
+#include "ChatMessage.h"
+#include "ChatClient.h"
 
-using asio::ip::tcp;
-
-typedef std::deque<ChatMessage> chat_message_queue;
-
-class chat_client
+chat_client::chat_client(asio::io_service& io_service, asio::ip::tcp::resolver::iterator endpoint_iterator) : io_service_(io_service),
+socket_(io_service)
 {
-public:
-	chat_client(asio::io_service& io_service,
-				tcp::resolver::iterator endpoint_iterator)
-		: io_service_(io_service),
-		socket_(io_service)
-	{
-		do_connect(endpoint_iterator);
-	}
+	do_connect(endpoint_iterator);
+}
 
-	void write(const ChatMessage& msg)
+void chat_client::write(const ChatMessage& msg)
+{
+	io_service_.post(
+		[this, msg]()
 	{
-		io_service_.post(
-			[this, msg]()
+		bool write_in_progress = !write_msgs_.empty();
+		write_msgs_.push_back(msg);
+		if (!write_in_progress)
 		{
-			bool write_in_progress = !write_msgs_.empty();
-			write_msgs_.push_back(msg);
-			if (!write_in_progress)
+			do_write();
+		}
+	});
+}
+
+void chat_client::close()
+{
+	io_service_.post([this]()
+	{
+		socket_.close();
+	});
+}
+
+void chat_client::do_connect(asio::ip::tcp::resolver::iterator endpoint_iterator)
+{
+	asio::async_connect(socket_, endpoint_iterator,
+		[this](std::error_code ec, asio::ip::tcp::resolver::iterator)
+	{
+		if (!ec)
+		{
+			do_read_header();
+		}
+	});
+}
+
+void chat_client::do_read_header()
+{
+	asio::async_read(socket_,
+		asio::buffer(read_msg_.data(), ChatMessage::header_length),
+		[this](std::error_code ec, std::size_t /*length*/)
+	{
+		if (!ec && read_msg_.decode_header())
+		{
+			do_read_body();
+		} else
+		{
+			socket_.close();
+		}
+	});
+}
+
+void chat_client::do_read_body()
+{
+	asio::async_read(socket_,
+		asio::buffer(read_msg_.body(), read_msg_.body_length()),
+		[this](std::error_code ec, std::size_t /*length*/)
+	{
+		if (!ec)
+		{
+			std::cout.write(read_msg_.body(), read_msg_.body_length());
+			std::cout << "\n";
+			do_read_header();
+		} else
+		{
+			socket_.close();
+		}
+	});
+}
+
+void chat_client::do_write()
+{
+	asio::async_write(socket_,
+		asio::buffer(write_msgs_.front().data(),
+		write_msgs_.front().length()),
+		[this](std::error_code ec, std::size_t /*length*/)
+	{
+		if (!ec)
+		{
+			write_msgs_.pop_front();
+			if (!write_msgs_.empty())
 			{
 				do_write();
 			}
-		});
-	}
-
-	void close()
-	{
-		io_service_.post([this]() { socket_.close(); });
-	}
-
-private:
-	void do_connect(tcp::resolver::iterator endpoint_iterator)
-	{
-		asio::async_connect(socket_, endpoint_iterator,
-							[this](std::error_code ec, tcp::resolver::iterator)
+		} else
 		{
-			if (!ec)
-			{
-				do_read_header();
-			}
-		});
-	}
-
-	void do_read_header()
-	{
-		asio::async_read(socket_,
-						 asio::buffer(read_msg_.data(), ChatMessage::header_length),
-						 [this](std::error_code ec, std::size_t /*length*/)
-		{
-			if (!ec && read_msg_.decode_header())
-			{
-				do_read_body();
-			} else
-			{
-				socket_.close();
-			}
-		});
-	}
-
-	void do_read_body()
-	{
-		asio::async_read(socket_,
-						 asio::buffer(read_msg_.body(), read_msg_.body_length()),
-						 [this](std::error_code ec, std::size_t /*length*/)
-		{
-			if (!ec)
-			{
-				std::cout.write(read_msg_.body(), read_msg_.body_length());
-				std::cout << "\n";
-				do_read_header();
-			} else
-			{
-				socket_.close();
-			}
-		});
-	}
-
-	void do_write()
-	{
-		asio::async_write(socket_,
-						  asio::buffer(write_msgs_.front().data(),
-									   write_msgs_.front().length()),
-						  [this](std::error_code ec, std::size_t /*length*/)
-		{
-			if (!ec)
-			{
-				write_msgs_.pop_front();
-				if (!write_msgs_.empty())
-				{
-					do_write();
-				}
-			} else
-			{
-				socket_.close();
-			}
-		});
-	}
-
-private:
-	asio::io_service& io_service_;
-	tcp::socket socket_;
-	ChatMessage read_msg_;
-	chat_message_queue write_msgs_;
-};
-
-int main(int argc, char* argv[])
-{
-	try
-	{
-		if (argc != 3)
-		{
-			std::cerr << "Usage: chat_client <host> <port>\n";
-			return 1;
+			socket_.close();
 		}
-
-		asio::io_service io_service;
-
-		tcp::resolver resolver(io_service);
-		auto endpoint_iterator = resolver.resolve({ argv[1], argv[2] });
-		chat_client c(io_service, endpoint_iterator);
-
-		std::thread t([&io_service]() { io_service.run(); });
-
-		char line[ChatMessage::max_body_length + 1];
-		while (std::cin.getline(line, ChatMessage::max_body_length + 1))
-		{
-			ChatMessage msg;
-			msg.body_length(std::strlen(line));
-			std::memcpy(msg.body(), line, msg.body_length());
-			msg.encode_header();
-			c.write(msg);
-		}
-
-		c.close();
-		t.join();
-	}
-	catch (std::exception& e)
-	{
-		std::cerr << "Exception: " << e.what() << "\n";
-	}
-
-	return 0;
+	});
 }

@@ -11,10 +11,6 @@
 #ifndef CHAT_MESSAGE_HPP
 #define CHAT_MESSAGE_HPP
 
-#include <cstdio>
-#include <cstdlib>
-#include <cstring>
-
 class ChatMessage
 {
 public:
@@ -87,5 +83,8 @@ private:
 	char data_[header_length + max_body_length];
 	std::size_t body_length_;
 };
+
+typedef std::deque<ChatMessage> ChatMessageQueue;
+
 
 #endif // CHAT_MESSAGE_HPP
