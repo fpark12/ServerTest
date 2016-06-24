@@ -1,16 +1,11 @@
 #pragma once
 #include <vector>
-#include <cstdio>
-#include <stdexcept>
-#include <memory>
-#include <algorithm>
-#include <type_traits>
 #include "Define.h"
 #include "Errors.h"
 
 class PreparedStatement;
 
-enum QueryParamType
+enum QueryParamCPPType
 {
 	TYPE_BOOL,
 	TYPE_UI8,
@@ -30,11 +25,11 @@ enum QueryParamType
 
 struct QueryParamSizeInfo
 {
-	QueryParamType Type;
+	QueryParamCPPType Type;
 	std::size_t MaxDataLength;
 };
 
-class Bind
+class ParamBind
 {
 private:
 
@@ -42,35 +37,34 @@ private:
 
 public:
 
-	Bind(std::vector<QueryParamSizeInfo>&& paramSizeInfoList);
-	~Bind();
+	ParamBind(std::vector<QueryParamSizeInfo>&& paramSizeInfoList);
+	~ParamBind();
 
 protected:
 
 	template<typename T>
 	void SetParam(const uint8 index, const T&& value)
 	{
-		auto iter = BufferIterators[index];
-		ASSERT(iter.ParamType != TYPE_STRING && iter.ParamType != TYPE_BINARY && iter.ParamType != TYPE_NULL);
-		memcpy(iter.ParamPtr, (const void*)&(value), ParamSize(iter.ParamType));
-		iter.IsBinded = true;
+		ASSERT(ParamsCppType[index] != TYPE_STRING && ParamsCppType[index] != TYPE_BINARY && ParamsCppType[index] != TYPE_NULL);
+		memcpy(MySqlBinds[index].buffer, (const void*)&(value), ParamSize(ParamsCppType[index]));
+		bValueSet[index] = true;
 	}
 
 	template<>
 	void SetParam<const char*>(const uint8 index, const char* const&& value)
 	{
-		auto iter = BufferIterators[index];
-		ASSERT(iter.ParamType == TYPE_STRING || iter.ParamType == TYPE_BINARY);
-		memcpy(iter.ParamPtr, (const void*)value, ::std::min(sizeof(value), iter.MaxLength));
-		iter.IsBinded = true;
+		ASSERT(ParamsCppType[index] == TYPE_STRING || ParamsCppType[index] == TYPE_BINARY);
+		memcpy(MySqlBinds[index].buffer, value, strlen(value));
+		delete MySqlBinds[index].length;
+		MySqlBinds[index].length = new unsigned long(strlen(value));
+		bValueSet[index] = true;
 	}
 
 	template<>
 	void SetParam<void*>(const uint8 index, void* const&& value)
 	{
-		auto iter = BufferIterators[index];
-		ASSERT(iter.ParamType == TYPE_NULL || !value);
-		iter.IsBinded = true;
+		ASSERT(ParamsCppType[index] == TYPE_NULL || !value);
+		bValueSet[index] = true;
 	}
 
 	template<typename T>
@@ -88,7 +82,7 @@ protected:
 
 	void ClearParameters();
 
-	QueryParamType GetParamType(uint8 index);
+	QueryParamCPPType GetParamType(uint8 index);
 
 	/* Get Max Length of a string parameter. If the parameter has a type other string or binary,
 	*  the function will return 0.
@@ -99,21 +93,17 @@ private:
 
 	std::size_t sumOfSize(std::vector<QueryParamSizeInfo>& paramSizeInfoList);
 
-	int32 ParamSize(QueryParamType Type);
+	int32 ParamSize(QueryParamCPPType Type);
 
-	struct Header
-	{
-		void* ParamPtr = nullptr;
-		QueryParamType ParamType = TYPE_NULL;
-		size_t MaxLength = 0;
-		bool IsBinded = false;
-	};
+	void SetMySqlBindTypeInfo(QueryParamSizeInfo& paramSizeInfo, MYSQL_BIND& bind);
 
 	static const int MaxParamCount = QueryMaxParamCount;
 	int ParamCount;
 	uint8* ParamBuffer;
-	std::vector<Header> BufferIterators;
-	std::size_t totalSize;
+	MYSQL_BIND* MySqlBinds;
+	std::vector<QueryParamCPPType> ParamsCppType;
+	std::vector<bool> bValueSet;
+	std::size_t TotalParamSize;
 
-	DISALLOW_COPY(Bind);
+	DISALLOW_COPY(ParamBind);
 };

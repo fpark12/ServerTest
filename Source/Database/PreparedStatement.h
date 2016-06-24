@@ -5,7 +5,7 @@
 #include <vector>
 #include "Define.h"
 
-class Bind;
+class ParamBind;
 
 enum StatementStorage
 {
@@ -19,7 +19,7 @@ class PreparedStatement
 {
 	// friend class declaration
 public:
-	PreparedStatement(StatementStorage _storage, uint32 _index, Bind* _paramTypeInfo);
+	PreparedStatement(StatementStorage _storage, uint32 _index, ParamBind* _paramTypeInfo);
 	~PreparedStatement();
 
 	// Clear prepared statement parameters, have no effect if this instance is a raw string command
@@ -43,14 +43,14 @@ public:
 
 private:
 
-	void SetParametersypeInfo(Bind* _parameter);
+	void SetParametersypeInfo(ParamBind* _parameter);
 
 protected:
 
 private:
 	StatementStorage Storage;
 	uint32 Index;
-	std::unique_ptr<Bind> ParametersBuffer;
+	std::unique_ptr<ParamBind> ParametersBuffer;
 	MYSQL_STMT* MySqlStatementHandle;
 
 	/* When the instance is prepared statment, this is a pattern string (sql command with ?)
@@ -63,4 +63,14 @@ private:
 	std::string getQueryString(std::string const& sqlPattern) const;
 
 	DISALLOW_COPY(PreparedStatement);
+};
+
+class PreparedStatementAndQueryResultPair
+{
+public:
+	PreparedStatementAndQueryResultPair();
+	~PreparedStatementAndQueryResultPair();
+
+private:
+
 };

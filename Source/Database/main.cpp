@@ -5,7 +5,7 @@
 
 // For MySQL Connection
 #include <mysql.h>
-#include "Bind.h"
+#include "ParamBind.h"
 
 using namespace std;
 
@@ -19,6 +19,6 @@ int main()
 {
 	
 	// Assume a scenario where we want to query "select user from Users where region = ? and age = ?"
-	Bind r_bind(std::vector<QueryParamSizeInfo>{ {TYPE_STRING, 20}, {TYPE_UI8, 0}});
+	ParamBind r_bind(std::vector<QueryParamSizeInfo>{ {TYPE_STRING, 20}, {TYPE_UI8, 0}});
 	return 0;
 }
