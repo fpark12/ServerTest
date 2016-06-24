@@ -15,6 +15,7 @@
 !*.h
 !*.h.template
 !*.pch.h
+!*.ipp
 !*.hpp
 !*.inl
 !*.inc
