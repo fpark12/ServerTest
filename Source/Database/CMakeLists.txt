@@ -9,6 +9,7 @@ SET( INCLUDE
 SET( LINK
 	3rdParty/mysql/lib/libmysql.lib
 	capnproto
+	Common
 )
 
 create_project(CONSOLE "${DEFINE}" "${INCLUDE}" "${LINK}")

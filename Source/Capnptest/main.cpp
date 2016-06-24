@@ -1,25 +1,3 @@
-// Include Header Files
-#include <iostream>
-#include <cstdio>
-#include <cstdlib>
-
-// For MySQL Connection
-//#include <mysql.h>
-
-// Prevents Windows headers from defining macros called min and max, which
-// conflict with identifiers in the C++ standard library.
-#ifndef NOMINMAX
-#define NOMINMAX
-#endif
-
-// Distinguishes between different types of handles so that we get better
-// error checking at compile time.
-#ifndef STRICT
-#define STRICT
-#endif
-
-#include <windows.h>
-
 // capn proto
 #include "MyTime.capnp.h"
 #include <capnp/capnp.message.h>

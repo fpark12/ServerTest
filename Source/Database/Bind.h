@@ -4,6 +4,7 @@
 #include <stdexcept>
 #include <memory>
 #include <algorithm>
+#include <type_traits>
 #include "Define.h"
 #include "Errors.h"
 
@@ -50,17 +51,26 @@ protected:
 	void SetParam(const uint8 index, const T&& value)
 	{
 		auto iter = BufferIterators[index];
-		if (iter->ParamType == TYPE_STRING || iter->ParamType == TYPE_BINARY)
-		{
-			memcpy(iter->ParamPtr, value, std::min(sizeof(value), iter->MaxLength));
-		}
-		else if (iter->ParamType == TYPE_NULL)
-		{
-		}
-		else
-		{
-			memcpy(iter->ParamPtr, &(value), ParamSize(iter->ParamType));
-		}
+		ASSERT(iter.ParamType != TYPE_STRING && iter.ParamType != TYPE_BINARY && iter.ParamType != TYPE_NULL);
+		memcpy(iter.ParamPtr, (const void*)&(value), ParamSize(iter.ParamType));
+		iter.IsBinded = true;
+	}
+
+	template<>
+	void SetParam<const char*>(const uint8 index, const char* const&& value)
+	{
+		auto iter = BufferIterators[index];
+		ASSERT(iter.ParamType == TYPE_STRING || iter.ParamType == TYPE_BINARY);
+		memcpy(iter.ParamPtr, (const void*)value, std::min(sizeof(value), iter.MaxLength));
+		iter.IsBinded = true;
+	}
+
+	template<>
+	void SetParam<void*>(const uint8 index, void* const&& value)
+	{
+		auto iter = BufferIterators[index];
+		ASSERT(iter.ParamType == TYPE_NULL || !value);
+		memcpy(iter.ParamPtr, (const void*)value, std::min(sizeof(value), iter.MaxLength));
 		iter.IsBinded = true;
 	}
 
@@ -70,7 +80,7 @@ protected:
 		if (BufferIterators[index].IsBinded)
 		{
 			return (T*)(BufferIterators[index].ParamPtr);
-		} 
+		}
 		else
 		{
 			return nullptr;
@@ -96,7 +106,7 @@ private:
 	{
 		void* ParamPtr = nullptr;
 		QueryParamType ParamType = TYPE_NULL;
-		unsigned long MaxLength = 0;
+		size_t MaxLength = 0;
 		bool IsBinded = false;
 	};
 
