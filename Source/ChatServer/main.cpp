@@ -16,7 +16,7 @@ int main(int argc, char* argv[])
 		for (int i = 0; i < 1; ++i)
 		{
 			asio::ip::tcp::endpoint Endpoint(asio::ip::tcp::v4(), std::atoi("14493"/*argv[i]*/));
-			Servers.emplace_back(std::move(ChatServer(IoService, Endpoint)));
+			Servers.emplace_back(IoService, Endpoint);
 		}
 
 		IoService.run();
