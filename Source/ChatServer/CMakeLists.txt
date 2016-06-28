@@ -2,11 +2,11 @@ SET( DEFINE
 	ASIO_STANDALONE
 )
 SET( INCLUDE
-	Common
+	Core
 	asio
 )
 SET( LINK
-	Common
+	Core
 	asio
 )
 

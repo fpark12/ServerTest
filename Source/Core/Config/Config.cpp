@@ -22,10 +22,10 @@
  //#include "Errors.h"
  //#include "Log.h"
  //# 
-Config* Config::instance()
+Config& Config::instance()
 {
 	static Config instance;
-	return &instance;
+	return instance;
 }
 
 bool Config::Load(std::string const& Filename)

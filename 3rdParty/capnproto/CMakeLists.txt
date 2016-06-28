@@ -19,8 +19,6 @@ if(TARGET ${PROJECT_NAME})
 
 	#message("CapnProto: ${CapnProto}")
 	#message("CapnProtoCPP: ${CapnProtoCPP}")
-	#write new stamp to file
-	file(WRITE ${${PROJECT_NAME}_BINARY_DIR}/proto.stamp "${newProtoStamp}")
 
 	set(newProtoSourceList "")
 	foreach(PROTO_FILE ${protoFiles})
@@ -63,6 +61,9 @@ if(TARGET ${PROJECT_NAME})
 		list(APPEND newProtoStamp "${newFile}, ${newStamp}")
 		#message("newfile: ${newFile}, ${newStamp}")
 	endforeach()
+	
+	#write new stamp to file
+	file(WRITE ${${PROJECT_NAME}_BINARY_DIR}/proto.stamp "${newProtoStamp}")
 
 
 	#delete useless proto source files

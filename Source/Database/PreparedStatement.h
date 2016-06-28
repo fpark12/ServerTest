@@ -1,9 +1,6 @@
 #pragma once
-#include <string>
-#include <memory>
-#include <utility>
-#include <vector>
-#include "Define.h"
+
+#include "Core.h"
 
 class ParamBind;
 

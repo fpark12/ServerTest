@@ -1,5 +1,5 @@
 #pragma once
-#include <stdint.h>
+#include "StandardLibraries.h"
 
 typedef int64_t int64;
 typedef int32_t int32;

@@ -17,17 +17,12 @@
  */
 
 #pragma once
-
  //#include "Define.h"
-
 #include <string>
 #include <list>
 #include <vector>
 #include <mutex>
 #include "SimpleIni.h"
-
-#define GConfig Config::instance()
-#define Run
 
 struct ConfigFile
 {
@@ -47,7 +42,7 @@ private:
 	ConfigFile* Find(std::string const& Filename) const;
 
 public:
-	static Config* Config::instance();
+	static Config& instance();
 
 	/// Method used only for loading main configuration files
 	bool Load(std::string const& Filename);

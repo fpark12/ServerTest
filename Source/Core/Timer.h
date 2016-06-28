@@ -1,6 +1,6 @@
 #pragma once
 #include <chrono>
-#include "Define.h"
+#include "Platform.h"
 
 inline uint32 getMSTime()
 {

@@ -16,12 +16,7 @@
 * with this program. If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include "Errors.h"
-
-#include <cstdio>
-#include <cstdlib>
-#include <thread>
-#include <cstdarg>
+#include "Core.h"
 
 /**
 @file Errors.cpp

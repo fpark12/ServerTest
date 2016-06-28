@@ -2,12 +2,12 @@ SET( DEFINE
 	ASIO_STANDALONE
 )
 SET( INCLUDE
-	Common
+	Core
 	mysql
 	asio
 )
 SET( LINK
-	Common
+	Core
 	asio
 )
 

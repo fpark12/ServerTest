@@ -1,7 +1,6 @@
 #pragma once
-#include <vector>
-#include "Define.h"
-#include "Errors.h"
+
+#include "Core.h"
 
 class PreparedStatement;
 

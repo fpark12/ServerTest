@@ -1,10 +1,10 @@
 SET( DEFINE
 )
 SET( INCLUDE
-Common
+Core
 )
 SET( LINK
-Common
+Core
 )
 
 create_project(CONSOLE "${DEFINE}" "${INCLUDE}" "${LINK}")
