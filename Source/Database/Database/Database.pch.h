@@ -1,6 +1,6 @@
 #pragma once
 
-#include <mysql.h>
+//#include <mysql.h>
 
 #ifdef min
 #undef min

@@ -1,9 +1,0 @@
-syntax = "proto3";
-
-message ConnectionCreateInfo {
-	string Hostname = 1;
-	string Port = 2;
-	string Username = 3;
-	string Password = 4;
-	string SchemaName = 5;
-};

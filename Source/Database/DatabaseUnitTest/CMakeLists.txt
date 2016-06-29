@@ -2,12 +2,12 @@ SET( DEFINE
 	CAPNP_LITE
 )
 SET( INCLUDE
-	Core
 	mysql
 	capnproto
+	Database
 )
 SET( LINK
-	Core
+	Database
 	3rdParty/mysql/lib/libmysql.lib
 	capnproto
 	

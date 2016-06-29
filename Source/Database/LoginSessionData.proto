@@ -1,8 +1,0 @@
-syntax = "proto3";
-
-message LoginSessionData {
-	uint32 account_id = 1;		// sql id
-	string account_name = 2;	// account name
-	string password = 3;		// 23+1 for plaintext, 32+1 for md5-ed passwords
-	uint32 client_version = 4;	// version contained in clientinfo
-};

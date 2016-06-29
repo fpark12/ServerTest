@@ -15,11 +15,7 @@
 * with this program. If not, see <http://www.gnu.org/licenses/>.
 */
 #pragma once
-#include <condition_variable>
-#include <mutex>
-#include <queue>
-#include <atomic>
-#include <type_traits>
+#include "StandardLibraries.h"
 
 template <typename T>
 class ProducerConsumerQueue
