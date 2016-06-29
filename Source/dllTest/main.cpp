@@ -28,65 +28,89 @@
 
 VOID ErrorExit(LPSTR);
 
-extern "C" BOOL WINAPI StoreData(DWORD dw);
-extern "C" BOOL WINAPI GetData(DWORD *pdw);
+// extern "C" BOOL WINAPI StoreDataFunc(DWORD dw);
+// extern "C" BOOL WINAPI GetDataFunc(DWORD *pdw);
+typedef BOOL(WINAPI *StoreDataFunc)(DWORD dw);
+typedef BOOL(WINAPI *GetDataFunc)(DWORD *pdw);
 
-typedef int(__cdecl *MYPROC)(LPWSTR);
+StoreDataFunc StoreData;
+GetDataFunc GetData;
 
 DWORD WINAPI ThreadFunc(VOID) {
-    int i;
+	int i;
 
-    if (!StoreData(GetCurrentThreadId()))
-        ErrorExit("StoreData error");
+	if (!StoreData(GetCurrentThreadId()))
+		ErrorExit("StoreData error");
 
-    for (i = 0; i < THREADCOUNT; i++) {
-        DWORD dwOut;
-        if (!GetData(&dwOut))
-            ErrorExit("GetData error");
-        if (dwOut != GetCurrentThreadId())
-            printf("thread %d: data is incorrect (%d)\n", GetCurrentThreadId(), dwOut);
-        else printf("thread %d: data is correct\n", GetCurrentThreadId());
-        Sleep(0);
-    }
-    return 0;
+	for (i = 0; i < THREADCOUNT; i++) {
+		DWORD dwOut;
+		if (!GetData(&dwOut))
+			ErrorExit("GetData error");
+		if (dwOut != GetCurrentThreadId())
+			printf("thread %d: data is incorrect (%d)\n", GetCurrentThreadId(), dwOut);
+		else printf("thread %d: data is correct\n", GetCurrentThreadId());
+		Sleep(0);
+	}
+	return 0;
 }
 
 int main(VOID) {
-    DWORD IDThread;
-    HANDLE hThread[THREADCOUNT];
-    int i;
-    HMODULE hm;
+	DWORD IDThread;
+	HANDLE hThread[THREADCOUNT];
+	int i;
+	HINSTANCE hDLL;
 
-    // Load the DLL
+	// Load the DLL
 
-    hm = LoadLibrary(DLL_NAME);
-    if (!hm) {
-        ErrorExit("DLL failed to load");
-    }
+	hDLL = LoadLibrary(DLL_NAME);
+	if (!hDLL) {
+		ErrorExit("DLL failed to load");
+	}
 
-    // Create multiple threads. 
+	if (hDLL != NULL)
+	{
+		StoreData = (StoreDataFunc)GetProcAddress(hDLL,
+			"StoreData");
+		if (!StoreData)
+		{
+			// handle the error
+			FreeLibrary(hDLL);
+			return 1;
+		}
 
-    for (i = 0; i < THREADCOUNT; i++) {
-        hThread[i] = CreateThread(NULL, // default security attributes 
-                                  0,                           // use default stack size 
-                                  (LPTHREAD_START_ROUTINE)ThreadFunc, // thread function 
-                                  NULL,                    // no thread function argument 
-                                  0,                       // use default creation flags 
-                                  &IDThread);              // returns thread identifier 
+		GetData = (GetDataFunc)GetProcAddress(hDLL,
+			"GetData");
+		if (!GetData)
+		{
+			// handle the error
+			FreeLibrary(hDLL);
+			return 1;
+		}
+	}
 
-                                                           // Check the return value for success. 
-        if (hThread[i] == NULL)
-            ErrorExit("CreateThread error\n");
-    }
+	// Create multiple threads. 
 
-    WaitForMultipleObjects(THREADCOUNT, hThread, TRUE, INFINITE);
+	for (i = 0; i < THREADCOUNT; i++) {
+		hThread[i] = CreateThread(NULL, // default security attributes 
+								  0,                           // use default stack size 
+								  (LPTHREAD_START_ROUTINE)ThreadFunc, // thread function 
+								  NULL,                    // no thread function argument 
+								  0,                       // use default creation flags 
+								  &IDThread);              // returns thread identifier 
 
-    FreeLibrary(hm);
+														   // Check the return value for success. 
+		if (hThread[i] == NULL)
+			ErrorExit("CreateThread error\n");
+	}
 
-    return 0;
+	WaitForMultipleObjects(THREADCOUNT, hThread, TRUE, INFINITE);
+
+	FreeLibrary(hDLL);
+
+	return 0;
 }
 
 VOID ErrorExit(LPSTR lpszMessage) {
-    fprintf(stderr, "%s\n", lpszMessage);
-    ExitProcess(0);
+	fprintf(stderr, "%s\n", lpszMessage);
+	ExitProcess(0);
 }
