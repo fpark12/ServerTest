@@ -21,7 +21,8 @@
 #include "Config.h"
  //#include "Errors.h"
  //#include "Log.h"
- //# 
+
+
 Config& Config::instance()
 {
 	static Config instance;
@@ -77,11 +78,13 @@ bool Config::Reload(std::string const& Filename)
 	{
 		return Load(Filename);
 	}
+
+	return false;
 }
 
-ConfigFile* Config::Find(std::string const& Filename) const
+const ConfigFile* Config::Find(std::string const& Filename) const
 {
-	for (auto i : ConfigFiles)
+	for (const auto& i : ConfigFiles)
 	{
 		if (i.Filename == Filename)
 		{
@@ -91,7 +94,7 @@ ConfigFile* Config::Find(std::string const& Filename) const
 	return nullptr;
 }
 
-std::list<std::string> const Config::GetFilenames()
+std::list<std::string> Config::GetFilenames() const
 {
 	std::list<std::string> Filenames;
 	{
@@ -104,13 +107,13 @@ std::list<std::string> const Config::GetFilenames()
 	return Filenames;
 }
 
-std::list<std::string> const Config::GetKeys(std::string const& Filename)
+std::list<std::string> Config::GetKeys(std::string const& Filename) const
 {
 	std::list<std::string> Keys;
 	{
 		std::lock_guard<std::mutex> lock(Lock);
 
-		ConfigFile* File = Find(Filename);
+		const ConfigFile* File = Find(Filename);
 		if (!File)
 		{
 			return Keys;
@@ -124,15 +127,16 @@ std::list<std::string> const Config::GetKeys(std::string const& Filename)
 		}
 	}
 
+	return Keys;
 }
 
-std::list<std::string> const Config::GetKeysByString(std::string const& Key, std::string const& Filename)
+std::list<std::string> Config::GetKeysByString(std::string const& Key, std::string const& Filename) const
 {
 	std::list<std::string> Keys;
 	{
 		std::lock_guard<std::mutex> lock(Lock);
 
-		ConfigFile* File = Find(Filename);
+		const ConfigFile* File = Find(Filename);
 		if (!File)
 		{
 			return Keys;
@@ -154,7 +158,7 @@ std::list<std::string> const Config::GetKeysByString(std::string const& Key, std
 
 bool Config::GetString(std::string const& Section, std::string const& Key, std::string& Value, std::string const& Filename) const
 {
-	ConfigFile* ConfigFile = this->Find(Filename);
+	const ConfigFile* ConfigFile = this->Find(Filename);
 	if (!ConfigFile)
 	{
 		return "";
@@ -165,7 +169,7 @@ bool Config::GetString(std::string const& Section, std::string const& Key, std::
 
 bool Config::GetBool(std::string const& Section, std::string const& Key, bool& Value, const std::string& Filename) const
 {
-	ConfigFile* ConfigFile = this->Find(Filename);
+	const ConfigFile* ConfigFile = this->Find(Filename);
 	if (!ConfigFile)
 	{
 		return false;
@@ -175,7 +179,7 @@ bool Config::GetBool(std::string const& Section, std::string const& Key, bool& V
 
 bool Config::GetInt(std::string const& Section, std::string const& Key, int& Value, const std::string& Filename) const
 {
-	ConfigFile* ConfigFile = this->Find(Filename);
+	const ConfigFile* ConfigFile = this->Find(Filename);
 	if (!ConfigFile)
 	{
 		return false;
@@ -185,7 +189,7 @@ bool Config::GetInt(std::string const& Section, std::string const& Key, int& Val
 
 bool Config::GetFloat(std::string const& Section, std::string const& Key, float& Value, const std::string& Filename) const
 {
-	ConfigFile* ConfigFile = this->Find(Filename);
+	const ConfigFile* ConfigFile = this->Find(Filename);
 	if (!ConfigFile)
 	{
 		return false;

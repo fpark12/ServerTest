@@ -540,6 +540,8 @@
 # endif // !defined(ASIO_WINDOWS_RUNTIME)
 #endif // !defined(ASIO_WINDOWS)
 
+// Hack: Assume target windows machine is at least XP
+#  define _WIN32_WINNT 0x0501
 // Windows: target OS version.
 #if defined(ASIO_WINDOWS) || defined(__CYGWIN__)
 # if !defined(_WIN32_WINNT) && !defined(_WIN32_WINDOWS)

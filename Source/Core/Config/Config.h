@@ -39,7 +39,7 @@ private:
 	Config& operator=(Config const&) = delete;
 
 	std::vector<ConfigFile> ConfigFiles;
-	ConfigFile* Find(std::string const& Filename) const;
+	const ConfigFile* Find(std::string const& Filename) const;
 
 public:
 	static Config& instance();
@@ -53,13 +53,13 @@ public:
 	bool GetInt(std::string const& section, std::string const& Key, int& Value, std::string const& Filename) const;
 	bool GetFloat(std::string const& section, std::string const& Key, float& Value, std::string const& Filename) const;
 
-	std::list<std::string> const GetFilenames();
-	std::list<std::string> const GetKeysByString(std::string const& Key, std::string const& Filename);
-	std::list<std::string> const GetKeys(std::string const& Filename);
+	std::list<std::string> GetFilenames() const;
+	std::list<std::string> GetKeysByString(std::string const& Key, std::string const& Filename) const;
+	std::list<std::string> GetKeys(std::string const& Filename) const;
 
 private:
 	//std::lock_guard<std::mutex> Lock();
-	std::mutex Config::Lock;
+	static std::mutex Config::Lock;
 
 	bool Unload(std::string const& Filename);
 };

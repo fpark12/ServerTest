@@ -1,10 +1,4 @@
-#include <iostream>
-#include <string>
-#include <thread>
-#include <mutex>
-#include <fstream>
-#include <future>
-#include <regex>
+
 #include "class.h"
 #include "Config.h"
 #include "Guard.h"

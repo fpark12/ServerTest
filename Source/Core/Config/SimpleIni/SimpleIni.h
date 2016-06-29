@@ -2862,7 +2862,8 @@ CSimpleIniTempl<SI_CHAR, SI_STRLESS, SI_CONVERTER>::DeleteString(
 //  SI_CONVERT_ICU          Use the IBM ICU conversion library. Requires
 //                          ICU headers on include path and icuuc.lib
 //  SI_CONVERT_WIN32        Use the Win32 API functions for conversion.
-
+//  Always use generic as windows.h introduces polution
+#define SI_CONVERT_GENERIC
 #if !defined(SI_CONVERT_GENERIC) && !defined(SI_CONVERT_WIN32) && !defined(SI_CONVERT_ICU)
 # ifdef _WIN32
 #  define SI_CONVERT_WIN32

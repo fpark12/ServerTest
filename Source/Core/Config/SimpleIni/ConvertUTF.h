@@ -86,6 +86,7 @@
     All should be unsigned values to avoid sign extension during
     bit mask & shift operations.
 ------------------------------------------------------------------------ */
+#pragma once
 
 typedef unsigned int	UTF32;	/* at least 32 bits */
 typedef unsigned short	UTF16;	/* at least 16 bits */
