@@ -16,12 +16,12 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <algorithm>
-#include <mutex>
-#include "Config.h"
+
  //#include "Errors.h"
  //#include "Log.h"
+#include "Config.h"
 
+std::mutex Config::Lock;
 
 Config& Config::instance()
 {
@@ -33,23 +33,22 @@ bool Config::Load(std::string const& Filename)
 {
 	std::lock_guard<std::mutex> lock(Lock);
 
-	ConfigFile ConfigFile;
-	ConfigFile.ConfigFileImpl.SetUnicode();
-
 	if (Find(Filename))
 	{
 		return true;
 	}
 
-	SI_Error res = ConfigFile.ConfigFileImpl.LoadFile(Filename.c_str());
+	ConfigFiles.emplace_back(ConfigFile());
+	ConfigFiles.back().ConfigFileImpl.SetUnicode();
+	SI_Error res = ConfigFiles.back().ConfigFileImpl.LoadFile(Filename.c_str());
 
 	if (res == SI_OK)
 	{
-		ConfigFile.Filename = Filename;
-		ConfigFiles.push_back(ConfigFile);
+		ConfigFiles.back().Filename = Filename;
 		return true;
 	} else
 	{
+		ConfigFiles.pop_back();
 		return false;
 	}
 }

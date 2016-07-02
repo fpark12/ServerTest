@@ -18,11 +18,7 @@
 
 #pragma once
  //#include "Define.h"
-#include <string>
-#include <list>
-#include <vector>
-#include <mutex>
-#include "SimpleIni.h"
+#include "Private/SimpleIni/SimpleIni.h"
 
 struct ConfigFile
 {

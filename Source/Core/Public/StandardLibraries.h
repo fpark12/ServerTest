@@ -13,6 +13,7 @@
 #include <iostream>
 #include <fstream>
 // --- Data Structure ---
+#include <algorithm>
 #include <vector>
 #include <queue>
 #include <deque>

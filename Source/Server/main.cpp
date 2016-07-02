@@ -1,7 +1,5 @@
 
 #include "class.h"
-#include "Config.h"
-#include "Guard.h"
 
 using namespace std;
 
@@ -33,6 +31,26 @@ private:
 
 int main()
 {
+	auto& configRef = Config::instance();
+	bool result = configRef.Load("config.ini");
+	if (result)
+	{
+		string a = "";
+		configRef.GetString("section", "a", a, "config.ini");
+		string b;
+		configRef.GetString("section", "a", b, "config.ini");
+		auto c = configRef.GetKeys("config.ini");
+	}
+	std::mutex mu;
+	SCOPED_LOCK(mu)
+	{
+		printf("idk what happened.\n");
+	};
 
+	{
+		mu.lock();
+		printf("idk what happened.\n");
+		mu.unlock();
+	}
 	return 0;
 }

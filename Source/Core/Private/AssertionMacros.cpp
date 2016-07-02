@@ -26,7 +26,7 @@ Calling abort() on Windows does not invoke unhandled exception filters - a mecha
 to log crashes. exit(1) calls here are for static analysis tools to indicate that calling functions defined in this file
 terminates the application.
 */
-
+#include "Core.pri.h"
 namespace Trinity
 {
 
