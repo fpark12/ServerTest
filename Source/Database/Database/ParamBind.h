@@ -1,3 +1,4 @@
+/*
 #pragma once
 
 #include "Core.h"
@@ -83,9 +84,9 @@ protected:
 
 	QueryParamCPPType GetParamType(uint8 index);
 
-	/* Get Max Length of a string parameter. If the parameter has a type other string or binary,
+	/ * Get Max Length of a string parameter. If the parameter has a type other string or binary,
 	*  the function will return 0.
-	*/
+	* /
 	unsigned long GetStringParamMaxLength(uint8 index);
 
 private:
@@ -105,4 +106,4 @@ private:
 	std::size_t TotalParamSize;
 
 	DISALLOW_COPY(ParamBind);
-};
+};*/

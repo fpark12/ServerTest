@@ -1,3 +1,4 @@
+/*
 #include "ResultSet.h"
 #include <Errors.h>
 #include <mysql.h>
@@ -103,3 +104,4 @@ bool ResultSet::_NextRow()
 	return retval == 0 || retval == MYSQL_DATA_TRUNCATED;
 }
 
+*/

@@ -1,3 +1,4 @@
+/*
 #pragma once
 #include <mysql.h>
 
@@ -96,8 +97,8 @@ public:
 
 	uint8 GetUInt8() const
 	{
-		if (!data.value)
-			return 0;
+		/ *if (!data.value)
+			return 0;* /
 
 #ifdef TRINITY_DEBUG
 		if (!IsType(MYSQL_TYPE_TINY))
@@ -328,4 +329,4 @@ public:
 		return data.value == NULL;
 	}
 
-};
+};*/

@@ -1,3 +1,4 @@
+/*
 #pragma once
 
 class Field;
@@ -51,9 +52,9 @@ private:
 	MYSQL_BIND* MySqlBindHandle;
 	StatementStorage Storage;	
 
-	/* When the instance is prepared statment, this is a pattern string (sql command with ?)
+	/ * When the instance is prepared statment, this is a pattern string (sql command with ?)
 	* And if the instance is a raw string query, this is a complete sql command in raw string
-	*/
+	* /
 	std::string SqlQueryString;
 	bool IsRawStringCommand;
 
@@ -62,3 +63,4 @@ private:
 
 	DISALLOW_COPY(PreparedStatement);
 };
+*/

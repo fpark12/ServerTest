@@ -1,3 +1,4 @@
+/*
 #include "PreparedStatement.h"
 #include "ParamBind.h"
 #include "Errors.h"
@@ -48,4 +49,4 @@ void PreparedStatement::SetValue(MYSQL_BIND* param, enum_field_types type, const
 	param->is_unsigned = isUnsigned;
 
 	memcpy(param->buffer, value, len);
-}
+}*/

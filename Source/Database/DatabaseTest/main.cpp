@@ -1,3 +1,4 @@
+/*
 
 int main()
 {
@@ -8,13 +9,13 @@ int main()
 	DatabaseQuery query;
 // 	preparedBind.bind(0, param1);
 // 	preparedBind.bind(1, param2);
-	/*query.initInput(param1, param2);*/
+	/ *query.initInput(param1, param2);* /
 	//query.initOutput(field1, field2);
 // 	resultBind.bind(0, field1);
 // 	resultBind.bind(1, field2);
 	query.setStmt(stmt);
 	query.setConnection(connection);
-/*	query.run();*/
+/ *	query.run();* /
 	query.getResult();
 	query.getResultAsync();
 
@@ -68,3 +69,25 @@ int main()
 
 	pipeline.setparam()
 	pipeline.getfield()
+
+		union PreparedStatementDataUnion
+		{
+		bool boolean;
+		uint8 ui8;
+		int8 i8;
+		uint16 ui16;
+		int16 i16;
+		uint32 ui32;
+		int32 i32;
+		uint64 ui64;
+		int64 i64;
+		float f;
+		double d;
+		const char* s;
+		};*/
+#include "DatabaseOperation.h"
+int main()
+{
+	DatabaseOperation Op;
+
+}

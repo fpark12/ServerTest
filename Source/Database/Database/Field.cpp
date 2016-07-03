@@ -1,3 +1,4 @@
+/*
 #include "Field.h"
 
 int32 Field::SizeForType(MYSQL_FIELD* field)
@@ -39,11 +40,11 @@ int32 Field::SizeForType(MYSQL_FIELD* field)
 		return 64;
 
 	case MYSQL_TYPE_GEOMETRY:
-		/*
+		/ *
 		Following types are not sent over the wire:
 		MYSQL_TYPE_ENUM:
 		MYSQL_TYPE_SET:
-		*/
+		* /
 	default:
 		return MYSQL_TYPE_NOT_RECOGNIZED_ERROR;
 	}
@@ -94,3 +95,4 @@ void Field::CleanUp()
 {
 	data.value = nullptr;
 }
+*/

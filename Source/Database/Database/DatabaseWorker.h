@@ -2,7 +2,6 @@
 #include <mysql.h>
 #include <thread>
 #include <string>
-#include "Define.h"
 
 class PreparedStatement;
 

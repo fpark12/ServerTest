@@ -1,3 +1,4 @@
+/*
 #pragma once
 #include "Define.h"
 
@@ -14,7 +15,7 @@ public:
 	uint64 GetRowCount() const { return RowCount; }
 	uint32 GetFieldCount() const { return FieldCount; }
 
-	/*
+	/ *
 	Field* Fetch() const
 	{
 		ASSERT(m_rowPosition < m_rowCount);
@@ -27,7 +28,7 @@ public:
 		ASSERT(index < m_fieldCount);
 		return m_rows[uint32(m_rowPosition) * m_fieldCount + index];
 	}
-	*/
+	* /
 
 protected:
 	ParamBind* RowData;
@@ -45,4 +46,4 @@ private:
 	bool _NextRow();
 
 	DISALLOW_COPY(ResultSet);
-};
+};*/

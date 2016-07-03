@@ -1,3 +1,4 @@
+/*
 #include "DatabaseWorker.h"
 
 
@@ -39,3 +40,4 @@ MYSQL* DatabaseWorker::GetConnection()
 	return MysqlConnection;
 }
 
+*/
