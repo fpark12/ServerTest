@@ -11,6 +11,10 @@
 #ifndef ASIO_DETAIL_CONFIG_HPP
 #define ASIO_DETAIL_CONFIG_HPP
 
+// We are using standalone asio, so we force disable boost at all times...
+#ifndef ASIO_STANDALONE
+#define ASIO_STANDALONE
+#endif
 #if defined(ASIO_STANDALONE)
 # define ASIO_DISABLE_BOOST_ARRAY 1
 # define ASIO_DISABLE_BOOST_ASSERT 1

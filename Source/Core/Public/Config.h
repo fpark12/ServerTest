@@ -17,7 +17,6 @@
  */
 
 #pragma once
- //#include "Define.h"
 #include "Private/SimpleIni/SimpleIni.h"
 
 struct ConfigFile
@@ -29,18 +28,17 @@ struct ConfigFile
 class Config
 {
 private:
-	Config() = default;
-	~Config() = default;
-	Config(Config const&) = delete;
-	Config& operator=(Config const&) = delete;
+	//Config() = default;
+	//~Config() = default;
+	//Config(Config const&) = delete;
+	//Config& operator=(Config const&) = delete;
 
-	std::vector<ConfigFile> ConfigFiles;
+	static std::vector<ConfigFile> ConfigFiles;
+	static std::mutex Lock;
 	const ConfigFile* Find(std::string const& Filename) const;
 
 public:
-	static Config& instance();
-
-	/// Method used only for loading main configuration files
+	// Method used only for loading main configuration files
 	bool Load(std::string const& Filename);
 	bool Reload(std::string const& Filename);
 
@@ -55,8 +53,10 @@ public:
 
 private:
 	//std::lock_guard<std::mutex> Lock();
-	static std::mutex Config::Lock;
 
 	bool Unload(std::string const& Filename);
 };
 
+#define GConfig GConfigInstance
+static Config GConfigInstance;
+static_assert(std::is_pod<Config>::value, "Config is not POD!");
