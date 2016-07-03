@@ -31,14 +31,15 @@ private:
 
 int main()
 {
+#define GConfig Config::instance()
 	auto& configRef = Config::instance();
-	bool result = configRef.Load("config.ini");
+	bool result = GConfig.Load("config.ini");
 	if (result)
 	{
 		string a = "";
-		configRef.GetString("section", "a", a, "config.ini");
+		GConfig.GetString("section", "a", a, "config.ini");
 		string b;
-		configRef.GetString("section", "a", b, "config.ini");
+		GConfig.GetString("section", "a", b, "config.ini");
 		auto c = configRef.GetKeys("config.ini");
 	}
 	std::mutex mu;
