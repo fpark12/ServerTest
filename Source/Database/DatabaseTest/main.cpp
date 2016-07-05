@@ -88,6 +88,71 @@ int main()
 #include "DatabaseOperation.h"
 int main()
 {
+	MYSQL* mysql = mysql_init(NULL);
+
+	MYSQL_STMT* stmt = mysql_stmt_init(mysql);
+	if (!stmt)
+	{
+		exit(EXIT_FAILURE);
+	}
+
+	if (!mysql_real_connect(mysql, "localhost", "root", "Keathalin21", "testserver", 0, NULL, 0))
+	{
+		fprintf(stderr, "No connection could be made to the database\n");
+		exit(EXIT_FAILURE);
+	}
+
+	char* sql = "SELECT `name` FROM `user` WHERE `id` = ?";
+
+	if (mysql_stmt_prepare(stmt, sql, strlen(sql)))
+	{
+		exit(EXIT_FAILURE);
+	}
+	// error checking
 	DatabaseOperation Op;
-	int test = 100;
+	Op.SetStatement(stmt);
+	Op.SetParamInt32(0, 1);
+	Op.BindParam();
+
+	MYSQL_BIND result[1];
+	char result_data[128];
+	unsigned long data_length;
+
+	memset(result, 0, sizeof(result));
+	result[0].buffer_type = MYSQL_TYPE_VAR_STRING;
+	result[0].buffer = result_data;
+	result[0].buffer_length = 128;
+	result[0].is_null = 0;
+	result[0].length = &data_length;
+
+	if (mysql_stmt_bind_result(stmt, result) != 0)
+	{
+		fprintf(stderr, " mysql_stmt_bind_result() failed\n");
+		fprintf(stderr, " %s\n", mysql_stmt_error(stmt));
+		exit(EXIT_FAILURE);
+	}
+
+	if (mysql_stmt_execute(stmt))
+	{
+		fprintf(stderr, " mysql_stmt_execute(), failed\n");
+		fprintf(stderr, " %s\n", mysql_stmt_error(stmt));
+		exit(EXIT_FAILURE);
+	}
+
+	if (mysql_stmt_fetch(stmt) == 0)
+	{
+		printf("%s\n", result_data);
+	}
+	else
+	{
+		printf("No results found!\n");
+	}
+
+	if (mysql_stmt_close(stmt))
+	{
+		fprintf(stderr, " failed while closing the statement\n");
+		fprintf(stderr, " %s\n", mysql_stmt_error(stmt));
+		exit(EXIT_FAILURE);
+	}
+
 }

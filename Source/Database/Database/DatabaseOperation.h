@@ -15,7 +15,7 @@ enum SqlOperationFlag
 	Sync,
 	Async,
 	Both,
-	None
+	Neither
 };
 
 class DatabaseOperation
@@ -35,7 +35,12 @@ private:
 	StatementStorage Storage;
 
 	// Field: for output
-
+	MYSQL_RES* ResultMetaData;
+	MYSQL_FIELD* ResultDataFields;
+	MYSQL_BIND* FieldBindHandle;
+	uint64 RowCount;
+	uint32 FieldCount;
+	uint64* FieldDataSerialization;
 
 	// Database Connection
 
@@ -49,9 +54,11 @@ public:
 
 	void ClearParam();
 
-	// void SetConnection(DatabaseConnection* conn);
+	// init params
+	// TODO void SetConnection(DatabaseConnection* conn);
 	void SetStatement(MYSQL_STMT* stmt);
 	void SetOperationFlag(SqlOperationFlag flag);
+	void BindParam();
 	
 	void SetParamBool(uint8 index, bool&& value);
 	void SetParamUInt8(uint8 index, uint8&& value);
@@ -69,6 +76,12 @@ public:
 	void SetParamBinary(uint8 index, const void* value, uint32 dataSize);
 	void SetParamBinary(uint8 index, std::vector<uint8>&& value);
 	void SetParamNull(uint8 index);
+
+	// init field
+	void GetResult()
+	{
+		ResultDataFields = mysql_fetch_fields(ResultMetaData);
+	}
 
 private:
 
