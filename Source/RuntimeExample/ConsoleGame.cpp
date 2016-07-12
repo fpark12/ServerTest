@@ -70,6 +70,7 @@ ConsoleGame::ConsoleGame()
 	: m_pCompilerLogger(0)
 	, m_pRuntimeObjectSystem(0)
 	, m_pUpdateable(0)
+	, m_pUpdateable2(0)
 {
 }
 
@@ -109,7 +110,8 @@ bool ConsoleGame::Init()
 
 
 	// construct first object
-	IObjectConstructor* pCtor = m_pRuntimeObjectSystem->GetObjectFactorySystem()->GetConstructor( "RuntimeObject01" );
+	IObjectConstructor* pCtor = m_pRuntimeObjectSystem->GetObjectFactorySystem()->GetConstructor("RuntimeObject01");
+	IObjectConstructor* pCtor2 = m_pRuntimeObjectSystem->GetObjectFactorySystem()->GetConstructor("RuntimeObject02");
 	if( pCtor )
 	{
 		IObject* pObj = pCtor->Construct();
@@ -121,6 +123,19 @@ bool ConsoleGame::Init()
 			return false;
 		}
 		m_ObjectId = pObj->GetObjectId();
+
+	}
+	if (pCtor2)
+	{
+		IObject* pObj2 = pCtor2->Construct();
+		pObj2->GetInterface(&m_pUpdateable2);
+		if (0 == m_pUpdateable2)
+		{
+			delete pObj2;
+			m_pCompilerLogger->LogError("Error - no updateable interface found\n");
+			return false;
+		}
+		m_ObjectId2 = pObj2->GetObjectId();
 
 	}
 
@@ -138,6 +153,18 @@ void ConsoleGame::OnConstructorsAdded()
 		{
 			delete pObj;
 			m_pCompilerLogger->LogError( "Error - no updateable interface found\n");
+		}
+	}
+
+	// This could have resulted in a change of object pointer, so release old and get new one.
+	if (m_pUpdateable2)
+	{
+		IObject* pObj2 = m_pRuntimeObjectSystem->GetObjectFactorySystem()->GetObject(m_ObjectId2);
+		pObj2->GetInterface(&m_pUpdateable2);
+		if (0 == m_pUpdateable2)
+		{
+			delete pObj2;
+			m_pCompilerLogger->LogError("Error - no updateable interface found\n");
 		}
 	}
 }
@@ -167,7 +194,8 @@ bool ConsoleGame::MainLoop()
 		}
 		const float deltaTime = 1.0f;
 		m_pRuntimeObjectSystem->GetFileChangeNotifier()->Update( deltaTime );
-		m_pUpdateable->Update( deltaTime );
+		m_pUpdateable->Update(deltaTime);
+		m_pUpdateable2->Update(deltaTime);
 		Sleep(1000);
 	}
 

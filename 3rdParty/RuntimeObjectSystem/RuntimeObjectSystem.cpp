@@ -239,12 +239,17 @@ void RuntimeObjectSystem::SetAutoCompile( bool autoCompile )
 // RuntimeObjectSystem::AddToRuntimeFileList - filename should be cleaned of "/../" etc, see FileSystemUtils::Path::GetCleanPath()
 void RuntimeObjectSystem::AddToRuntimeFileList( const char* filename, unsigned short projectId_ )
 {
+	Path cleanPath = FileSystemUtils::Path(filename);
+	cleanPath.ToOSCanonicalCase();
+	cleanPath = cleanPath.GetCleanPath();
+	const char* cleanfilename = cleanPath.c_str();
+
     ProjectSettings& project = GetProject( projectId_ );
-    TFileList::iterator it = std::find( project.m_RuntimeFileList.begin( ), project.m_RuntimeFileList.end( ), filename );
+    TFileList::iterator it = std::find( project.m_RuntimeFileList.begin( ), project.m_RuntimeFileList.end( ), cleanfilename);
     if( it == project.m_RuntimeFileList.end( ) )
 	{
-        project.m_RuntimeFileList.push_back( filename );
-        m_pFileChangeNotifier->Watch( filename, this );
+        project.m_RuntimeFileList.push_back(cleanfilename);
+        m_pFileChangeNotifier->Watch(cleanfilename, this );
 	}
 }
 

@@ -57,7 +57,9 @@ private:
 
 	// Runtime object
 	IUpdateable* 			m_pUpdateable;
+	IUpdateable* 			m_pUpdateable2;
 	ObjectId	   			m_ObjectId;
+	ObjectId	   			m_ObjectId2;
 
 };
 
