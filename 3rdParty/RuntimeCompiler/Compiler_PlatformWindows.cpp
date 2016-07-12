@@ -298,6 +298,14 @@ void Compiler::RunCompile(	const std::vector<FileSystemUtils::Path>&	filesToComp
 	//optimization and c runtime
 #ifdef _DEBUG
 	std::string flags = "/nologo /Zi /FC /MDd /LDd ";
+	std::string folder;
+#ifdef _DEBUG
+	folder = "DEBUG_";
+#else
+	folder = "RELEASE_";
+#endif
+	folder += RCppOptimizationLevelStrings[GetActualOptimizationLevel(compilerOptions_.optimizationLevel)];
+	flags += "/Fd\"Runtime/" + folder + "/vc140.pdb\" ";
 #else
 	std::string flags = "/nologo /Zi /FC /MD /LD ";	//also need debug information in release
 #endif
@@ -345,13 +353,14 @@ void Compiler::RunCompile(	const std::vector<FileSystemUtils::Path>&	filesToComp
             linkOptions += " ";
 		}
 	}
-    // faster linking if available: https://randomascii.wordpress.com/2015/07/27/programming-is-puzzles/
     #if   (_MSC_VER >= 1900)
         if( linkOptions.empty() )
         {
             linkOptions = " /link ";
         }
-        linkOptions += "/DEBUG:FASTLINK ";
+		// faster linking if available: https://randomascii.wordpress.com/2015/07/27/programming-is-puzzles/
+		// corrupts obj as of vs2015 update 2
+        //linkOptions += "/DEBUG:FASTLINK ";
     #endif
 
 	// Check for intermediate directory, create it if required

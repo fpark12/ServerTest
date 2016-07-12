@@ -16,7 +16,7 @@ public:
 	}
 	virtual void Update( float deltaTime )
 	{
-		std::cout << "Runtime Object 01 update called! " << rand << " \n";
+		//std::cout << "Runtime Object 01 update called! " << rand << " \n";
 	}
 };
 
