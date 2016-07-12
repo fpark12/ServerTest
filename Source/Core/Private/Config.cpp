@@ -22,7 +22,12 @@
 #include "Config.h"
 
 std::mutex Config::Lock;
-std::vector<ConfigFile> Config::ConfigFiles;
+
+Config& Config::Instance()
+{
+	static Config instance;
+	return instance;
+}
 
 bool Config::Load(std::string const& Filename)
 {

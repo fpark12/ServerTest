@@ -2,39 +2,57 @@
 #include "asio.hpp"
 #include "Public/config.h"
 
-
 class LoginService
 {
-public:
+private:
 	LoginService() = default;
+	~LoginService() = default;
+	LoginService(LoginService const&) = delete;
+	LoginService& operator=(LoginService const&) = delete;
+
+	std::string IPAddress;
+	int32 Port;
+	asio::ip::tcp::endpoint ExternalAddress;
+
+public:
+	static LoginService& Instance();
+
 
 	bool Start(asio::io_service& ioService)
 	{
-		GConfig.GetString("Initialization", "IPAddress", IPAddress, "LoginService.ini");
-		GConfig.GetInt("Initialization", "Port", Port, "LoginService.ini");
+		bool ok;
+		asio::error_code ec;
+		std::string configuredAddress;
+		asio::ip::tcp::resolver::iterator end;
+
+		ok &= GConfig.GetString("Initialization", "IPAddress", IPAddress, "LoginService.ini");
+		ok &= GConfig.GetString("Initialization", "ExternalIPAddress", configuredAddress, "LoginService.ini");
+		ok &= GConfig.GetInt("Initialization", "Port", Port, "LoginService.ini");
 		if (Port < 0 || Port > 0xFFFF)
 		{
 			//TC_LOG_ERROR("server.rest", "Specified login service port (%d) out of allowed range (1-65535), defaulting to 8081", _port);
 			Port = 8081;
 		}
 
-		/*
-		boost::system::error_code ec;
-		boost::asio::ip::tcp::resolver resolver(ioService);
-		boost::asio::ip::tcp::resolver::iterator end;
+		asio::ip::tcp::resolver resolver(ioService);
 
-		std::string configuredAddress = sConfigMgr->GetStringDefault("LoginREST.ExternalAddress", "127.0.0.1");
-		boost::asio::ip::tcp::resolver::query externalAddressQuery(boost::asio::ip::tcp::v4(), configuredAddress, std::to_string(_port));
-		boost::asio::ip::tcp::resolver::iterator endPoint = resolver.resolve(externalAddressQuery, ec);
+		asio::ip::tcp::resolver::query externalAddressQuery(asio::ip::tcp::v4(), configuredAddress, std::to_string(Port));
+		asio::ip::tcp::resolver::iterator endPoint = resolver.resolve(externalAddressQuery, ec);
+
 		if (endPoint == end || ec)
 		{
-			TC_LOG_ERROR("server.rest", "Could not resolve LoginREST.ExternalAddress %s", configuredAddress.c_str());
+			//TC_LOG_ERROR("server.rest", "Could not resolve LoginREST.ExternalAddress %s", configuredAddress.c_str());
 			return false;
 		}
 
-		_externalAddress = endPoint->endpoint();
+		ExternalAddress = endPoint->endpoint();
 
-		configuredAddress = sConfigMgr->GetStringDefault("LoginREST.LocalAddress", "127.0.0.1");
+		/*
+
+
+
+
+		configuredAddress = GConfig->GetStringDefault("LoginREST.LocalAddress", "127.0.0.1");
 		boost::asio::ip::tcp::resolver::query localAddressQuery(boost::asio::ip::tcp::v4(), configuredAddress, std::to_string(_port));
 		endPoint = resolver.resolve(localAddressQuery, ec);
 		if (endPoint == end || ec)
@@ -81,10 +99,7 @@ public:
 	}
 	
 protected:
-private:
-	static std::string IPAddress;
-	static int32 Port;
+
 };
-#define GLoginService GLoginServiceInstance
-static LoginService GLoginServiceInstance;
-static_assert(std::is_pod<LoginService>::value, "LoginService is not POD!");
+#define GLoginService LoginService::Instance()
+//static_assert(std::is_pod<LoginService>::value, "LoginService is not POD!");

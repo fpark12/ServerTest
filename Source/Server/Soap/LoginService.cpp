@@ -1,4 +1,7 @@
 #include "LoginService.h"
 
-std::string LoginService::IPAddress;
-int32 LoginService::Port;
+LoginService& LoginService::Instance()
+{
+	static LoginService Instance;
+	return Instance;
+}

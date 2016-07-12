@@ -28,16 +28,18 @@ struct ConfigFile
 class Config
 {
 private:
-	//Config() = default;
-	//~Config() = default;
-	//Config(Config const&) = delete;
-	//Config& operator=(Config const&) = delete;
+	Config() = default;
+	~Config() = default;
+	Config(Config const&) = delete;
+	Config& operator=(Config const&) = delete;
 
-	static std::vector<ConfigFile> ConfigFiles;
+	std::vector<ConfigFile> ConfigFiles;
 	static std::mutex Lock;
 	const ConfigFile* Find(std::string const& Filename) const;
 
 public:
+	static Config& Instance();
+
 	// Method used only for loading main configuration files
 	bool Load(std::string const& Filename);
 	bool Reload(std::string const& Filename);
@@ -52,11 +54,9 @@ public:
 	std::list<std::string> GetKeys(std::string const& Filename) const;
 
 private:
-	//std::lock_guard<std::mutex> Lock();
-
 	bool Unload(std::string const& Filename);
 };
 
-#define GConfig GConfigInstance
-static Config GConfigInstance;
-static_assert(std::is_pod<Config>::value, "Config is not POD!");
+#define GConfig Config::Instance()
+
+//static_assert(std::is_pod<Config>::value, "Config is not POD!");
