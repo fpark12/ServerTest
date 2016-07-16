@@ -22,9 +22,7 @@
 
 #include "IFileChangeNotifier.h"
 #include "SimpleFileWatcher/FileWatcher.h"
-#include <vector>
-#include <map>
-#include <set>
+
 
 #include "FileSystemUtils.h"
 

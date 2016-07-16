@@ -30,8 +30,6 @@
 #define _FW_FILEWATCHER_H_
 #pragma once
 
-#include <string>
-#include <stdexcept>
 
 #include "../FileSystemUtils.h"
 

@@ -17,8 +17,7 @@
 
 #pragma once
 
-#include <string>
-#include <vector>
+
 
 #include "FileSystemUtils.h"
 #include "CompileOptions.h"
@@ -56,7 +55,7 @@ public:
         m_bFastCompileMode = bFast;
 
         // call GetIsComplete() to ensure this stops process
-        GetIsComplete();
+        IsComplete();
     }
 
     std::string GetObjectFileExtension() const;
@@ -66,7 +65,7 @@ public:
 					 const FileSystemUtils::Path&				moduleName_  );
 
 
-	bool GetIsComplete() const;
+	bool IsComplete() const;
 private:
 	PlatformCompilerImplData* m_pImplData;
     bool                      m_bFastCompileMode;

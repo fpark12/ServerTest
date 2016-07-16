@@ -26,16 +26,10 @@
 
 #include "Compiler.h"
 
-#define WIN32_LEAN_AND_MEAN
-#include <windows.h>
-#include <string>
-#include <sstream>
-#include <vector>
-#include <set>
+
 #include "FileSystemUtils.h"
 
 #include "assert.h"
-#include <process.h>
 
 #include "ICompilerLogger.h"
 
@@ -250,7 +244,7 @@ std::string Compiler::GetObjectFileExtension() const
 	return ".obj";
 }
 
-bool Compiler::GetIsComplete() const
+bool Compiler::IsComplete() const
 {
     bool bComplete = m_pImplData->m_bCompileIsComplete;
     if( bComplete & !m_bFastCompileMode )

@@ -21,7 +21,6 @@
 #define IFILECHANGENOTIFIER_INCLUDED
 
 #include "../RuntimeCompiler/AUArray.h"
-#include <set>
 
 struct IFileChangeListener;
 

@@ -19,8 +19,7 @@
 #ifndef AUARRAY_DEFINED
 #define AUARRAY_DEFINED
 
-#include <stdlib.h>
-#include <vector>
+
 
 
 // Here we define a semi-virtualised wrapper for a vector-like object so that it can

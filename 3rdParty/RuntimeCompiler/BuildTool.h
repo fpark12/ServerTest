@@ -17,8 +17,7 @@
 
 #pragma once
 
-#include <vector>
-#include <string>
+
 #include "Compiler.h"
 
 #include "FileSystemUtils.h"
@@ -26,12 +25,13 @@
 class BuildTool
 {
 public:
-	BuildTool();
-	~BuildTool();
+	BuildTool() = default;
+	~BuildTool() = default;
+
 	void Initialise( ICompilerLogger * pLogger );
 
-    // Clean - cleans up the intermediate files
-    void Clean( const FileSystemUtils::Path& temporaryPath_ ) const;
+	// Clean - cleans up the intermediate files
+	void Clean( const FileSystemUtils::Path& temporaryPath_ ) const;
 
 	struct FileToBuild
 	{
@@ -49,24 +49,22 @@ public:
 		bool					forceCompile; //if true the file is compiled even if object file is present
 	};
 
-	void BuildModule( const std::vector<FileToBuild>&		buildFileList_, 
-					  const CompilerOptions&				compilerOptions_,
-					  std::vector<FileSystemUtils::Path>	linkLibraryList_,
-                      const FileSystemUtils::Path&			moduleName_ );
+	void BuildModule(const std::vector<FileToBuild>& buildFileList_, const CompilerOptions& compilerOptions_, 
+		std::vector<FileSystemUtils::Path> linkLibraryList_, const FileSystemUtils::Path& moduleName_ );
 
-	bool GetIsComplete()
+	bool IsComplete()
 	{
-		return m_Compiler.GetIsComplete();
+		return m_Compiler.IsComplete();
 	}
 
-    void SetFastCompileMode( bool bFast )
-    {
-        m_Compiler.SetFastCompileMode( bFast );
-    }
-    
+	void SetFastCompileMode( bool bFast )
+	{
+		m_Compiler.SetFastCompileMode( bFast );
+	}
+	
 
 private:
-	Compiler                    m_Compiler;
-	ICompilerLogger*            m_pLogger;
+	Compiler	m_Compiler;
+	ICompilerLogger*	m_pLogger;
 };
 

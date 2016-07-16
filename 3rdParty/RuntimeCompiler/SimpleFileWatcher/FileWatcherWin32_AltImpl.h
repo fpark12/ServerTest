@@ -26,9 +26,7 @@
 
 #if FILEWATCHER_PLATFORM == FILEWATCHER_PLATFORM_WIN32
 
-#include <iostream>
-#include <vector>
-#include <string>
+
 
 #define WIN32_LEAN_AND_MEAN
 #include <Windows.h>

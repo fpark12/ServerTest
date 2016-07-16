@@ -17,21 +17,11 @@
 
 #include "BuildTool.h"
 #include "Compiler.h"
-#include <fstream>
-#include <algorithm>
+
 #include "ICompilerLogger.h"
 
 using namespace std;
 using namespace FileSystemUtils;
-
-BuildTool::BuildTool()
-{
-}
-
-
-BuildTool::~BuildTool()
-{
-}
 
 void BuildTool::Clean( const FileSystemUtils::Path& temporaryPath_ ) const
 {
@@ -110,14 +100,14 @@ void BuildTool::BuildModule( const std::vector<FileToBuild>&		buildFileList_,
 			objectFileName.ReplaceExtension(objectFileExtension.c_str());
 
 			if( objectFileName.Exists() && buildFile.Exists() )
-            {
-                FileSystemUtils::filetime_t objTime = objectFileName.GetLastWriteTime();
-                if( objTime > buildFile.GetLastWriteTime() )
- 			    {
-                    // we only want to use the object file if it's newer than the source file
-				    buildFile = objectFileName;
-			    }
-            }
+			{
+				FileSystemUtils::filetime_t objTime = objectFileName.GetLastWriteTime();
+				if( objTime > buildFile.GetLastWriteTime() )
+				{
+					// we only want to use the object file if it's newer than the source file
+					buildFile = objectFileName;
+				}
+			}
 			compileFileList.push_back(buildFile);
 		}
 	}

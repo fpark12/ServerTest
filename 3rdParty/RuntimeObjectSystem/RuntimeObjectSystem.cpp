@@ -186,7 +186,7 @@ void RuntimeObjectSystem::OnFileChange(const IAUDynArray<const char*>& filelist)
 
 bool RuntimeObjectSystem::GetIsCompiledComplete()
 {
-	return m_bCompiling && m_pBuildTool->GetIsComplete();
+	return m_bCompiling && m_pBuildTool->IsComplete();
 }
 
 void RuntimeObjectSystem::CompileAllInProject( bool bForceRecompile, unsigned short projectId_ )

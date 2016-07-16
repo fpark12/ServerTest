@@ -18,29 +18,23 @@
 
 // we use std::string as there are many string types in the community
 // and this can be easily swapped for your own implementation if desired
-#include <string>
-#include <stdio.h>
-#include <stdint.h>
-#include <stdlib.h>
-#include <sys/stat.h>
-#include <sys/types.h>
-#include <time.h>
+
 
 #ifdef _WIN32
 	#include <direct.h>
-    #include <sys/utime.h>
+	#include <sys/utime.h>
 	#define WIN32_LEAN_AND_MEAN
-    #define NOMINMAX
-    #include <windows.h>
+	#define NOMINMAX
+	#include <windows.h>
 	#undef GetObject
-    #undef GetCurrentTime
+	#undef GetCurrentTime
 
 	#define FILESYSTEMUTILS_SEPERATORS "/\\"
 #else
-    #include <utime.h>
-    #include <string.h>
-    #include <unistd.h>
-    #include <dirent.h>
+	#include <utime.h>
+	#include <string.h>
+	#include <unistd.h>
+	#include <dirent.h>
 	#define FILESYSTEMUTILS_SEPERATORS "/"
 #endif
 
@@ -48,9 +42,9 @@
 namespace FileSystemUtils
 {
 #ifdef _WIN32
-    typedef __time64_t filetime_t;
+	typedef __time64_t filetime_t;
 #else
-    typedef time_t filetime_t;
+	typedef time_t filetime_t;
 #endif
 
 	class Path
@@ -71,7 +65,7 @@ namespace FileSystemUtils
 			: m_string( rhs_ )
 		{
 		}
-        virtual ~Path() {}  // for RCC++
+		virtual ~Path() {}  // for RCC++
 
 		const char* c_str()             const;
 
@@ -82,7 +76,7 @@ namespace FileSystemUtils
 		bool		CreateDir()			const;
 		bool		Remove()			const;
 		filetime_t	GetLastWriteTime()	const;
-        void        SetLastWriteTime( filetime_t time_ ) const;
+		void        SetLastWriteTime( filetime_t time_ ) const;
 		uint64_t	GetFileSize()		const;
 		bool		HasExtension()		const;
 		bool		HasParentPath()		const;
@@ -95,7 +89,7 @@ namespace FileSystemUtils
 
 		// returns a path cleaned of /../ by removing prior dir
 		Path GetCleanPath()				const;
-        void ToOSCanonicalCase();  // lower case on Windows, preserve case on Linux
+		void ToOSCanonicalCase();  // lower case on Windows, preserve case on Linux
 
 		// replaces extension if one exists, or adds it if not
 		void ReplaceExtension( const std::string& ext );
@@ -163,21 +157,21 @@ namespace FileSystemUtils
 
 	inline bool Path::CreateDir() const
 	{
-        if( m_string.length() == 0 )
-        {
-            return false;
-        }
-        if( Exists() )
-        {
-            return false;
-        }
+		if( m_string.length() == 0 )
+		{
+			return false;
+		}
+		if( Exists() )
+		{
+			return false;
+		}
 
-        // we may need to create the parent path recursively
-        Path parentpath = ParentPath();
-        if( !parentpath.Exists() )
-        {
-            parentpath.CreateDir();
-        }
+		// we may need to create the parent path recursively
+		Path parentpath = ParentPath();
+		if( !parentpath.Exists() )
+		{
+			parentpath.CreateDir();
+		}
 
 		int error = -1;
 #ifdef _WIN32
@@ -210,38 +204,38 @@ namespace FileSystemUtils
 		return lastwritetime;
 	}
 
-    inline void Path::SetLastWriteTime( filetime_t time_ ) const
-    {
+	inline void Path::SetLastWriteTime( filetime_t time_ ) const
+	{
 #ifdef _WIN32
-        __utimbuf64 modtime = { time_, time_ };
-        _utime64( c_str(), &modtime );
+		__utimbuf64 modtime = { time_, time_ };
+		_utime64( c_str(), &modtime );
 #else
-        utimbuf modtime = { time_, time_ };
-        utime( c_str(), &modtime );
+		utimbuf modtime = { time_, time_ };
+		utime( c_str(), &modtime );
 #endif
-    }
+	}
 
-    inline filetime_t GetCurrentTime()
-    {
-        filetime_t timer;
+	inline filetime_t GetCurrentTime()
+	{
+		filetime_t timer;
 #ifdef _WIN32
-        _time64(&timer);
+		_time64(&timer);
 #else
-        time(&timer);
+		time(&timer);
 #endif
-        return timer;
-    }
+		return timer;
+	}
 
-    inline tm GetTimeStruct( filetime_t time )
-    {
-        tm ret;
+	inline tm GetTimeStruct( filetime_t time )
+	{
+		tm ret;
 #ifdef _WIN32
-        _gmtime64_s(&ret, &time);
+		_gmtime64_s(&ret, &time);
 #else
-        gmtime_r(&time, &ret);
+		gmtime_r(&time, &ret);
 #endif
-        return ret;
-    }
+		return ret;
+	}
 
 	inline bool		Path::Remove()			const
 	{
@@ -338,10 +332,10 @@ namespace FileSystemUtils
 	{
 		Path parentpath = m_string;
 
-        if( parentpath.m_string.length() == 0 )
-        {
-            return parentpath;
-        }
+		if( parentpath.m_string.length() == 0 )
+		{
+			return parentpath;
+		}
 		//remove any trailing seperators
 		while( parentpath.m_string.find_last_of( FILESYSTEMUTILS_SEPERATORS ) == parentpath.m_string.length()-1 )
 		{
@@ -356,7 +350,7 @@ namespace FileSystemUtils
 			//remove any trailing seperators
 			while( parentpath.m_string.find_last_of( FILESYSTEMUTILS_SEPERATORS ) == parentpath.m_string.length()-1)
 			{
-                parentpath.m_string.erase(parentpath.m_string.length()-1, 1);
+				parentpath.m_string.erase(parentpath.m_string.length()-1, 1);
 			}
 		}
 
@@ -390,26 +384,26 @@ namespace FileSystemUtils
 	}
 
 
-    inline Path operator/( const Path& lhs_, const Path& rhs_ )
-    {
-        if( 0 == lhs_.m_string.length() )
-        {
-            return rhs_;
-        }
-        if( 0 == rhs_.m_string.length() )
-        {
-            return lhs_;
-        }
-        std::string strlhs = lhs_.m_string;
-        while( strlhs.length() && strlhs.find_last_of( FILESYSTEMUTILS_SEPERATORS ) == strlhs.length()-1 )
-        {
-        	strlhs.erase(strlhs.length()-1, 1);
-        }
-        
-        //note: should probably remove preceding seperators to rhs_, but this has not as yet occured
-        Path join = strlhs + Path::seperator + rhs_.m_string;
-        return join;
-    }
+	inline Path operator/( const Path& lhs_, const Path& rhs_ )
+	{
+		if( 0 == lhs_.m_string.length() )
+		{
+			return rhs_;
+		}
+		if( 0 == rhs_.m_string.length() )
+		{
+			return lhs_;
+		}
+		std::string strlhs = lhs_.m_string;
+		while( strlhs.length() && strlhs.find_last_of( FILESYSTEMUTILS_SEPERATORS ) == strlhs.length()-1 )
+		{
+			strlhs.erase(strlhs.length()-1, 1);
+		}
+		
+		//note: should probably remove preceding seperators to rhs_, but this has not as yet occured
+		Path join = strlhs + Path::seperator + rhs_.m_string;
+		return join;
+	}
 
 	inline bool operator==(  const Path& lhs_, const Path& rhs_ )
 	{
@@ -458,118 +452,118 @@ namespace FileSystemUtils
 		return path;
 	}
 
-    inline void Path::ToOSCanonicalCase()
-    {
+	inline void Path::ToOSCanonicalCase()
+	{
 #ifdef _WIN32
-        ToLowerInPlace( m_string );
+		ToLowerInPlace( m_string );
 #endif
-    }
+	}
 
 
-    class PathIterator
-    {
-    private:
-        Path m_dir;
-        Path m_path;
-        bool m_bIsValid;
+	class PathIterator
+	{
+	private:
+		Path m_dir;
+		Path m_path;
+		bool m_bIsValid;
 #ifdef _WIN32
-        void ImpCtor()
-        {
-            Path test = m_dir / "*";
-            m_path = m_dir;
-            m_hFind = INVALID_HANDLE_VALUE;
-            m_hFind = FindFirstFileA(test.c_str(), &m_ffd);
-            m_bIsValid = INVALID_HANDLE_VALUE != m_hFind;
-        }
-        bool ImpNext()
-        {
-            if( m_bIsValid )
-            {
-                m_bIsValid = 0 != FindNextFileA( m_hFind, &m_ffd );
-                if( m_bIsValid )
-                {
-                    m_path = m_dir / m_ffd.cFileName;
-                    if( m_path.Filename() == ".." )
-                    {
-                        return ImpNext();
-                    }
-                }
-            }
-            return m_bIsValid;
-        }
-        void ImpDtor()
-        {
-            FindClose( m_hFind );
-        }
+		void ImpCtor()
+		{
+			Path test = m_dir / "*";
+			m_path = m_dir;
+			m_hFind = INVALID_HANDLE_VALUE;
+			m_hFind = FindFirstFileA(test.c_str(), &m_ffd);
+			m_bIsValid = INVALID_HANDLE_VALUE != m_hFind;
+		}
+		bool ImpNext()
+		{
+			if( m_bIsValid )
+			{
+				m_bIsValid = 0 != FindNextFileA( m_hFind, &m_ffd );
+				if( m_bIsValid )
+				{
+					m_path = m_dir / m_ffd.cFileName;
+					if( m_path.Filename() == ".." )
+					{
+						return ImpNext();
+					}
+				}
+			}
+			return m_bIsValid;
+		}
+		void ImpDtor()
+		{
+			FindClose( m_hFind );
+		}
 
-        HANDLE           m_hFind;
-        WIN32_FIND_DATAA m_ffd;
+		HANDLE           m_hFind;
+		WIN32_FIND_DATAA m_ffd;
 #else
-        void ImpCtor()
-        {
-            Path test = m_dir / "*";
-            m_path = m_dir;
-            m_numFilesInList = scandir( m_path.c_str(), &m_paDirFileList, 0, alphasort);
-            m_bIsValid = m_numFilesInList > 0;
-            m_currFile = 0;
-            if( !m_bIsValid )
-            {
-                m_paDirFileList = 0;
-            }
-        }
-        bool ImpNext()
-        {
-            if( m_bIsValid )
-            {
-                ++m_currFile;
-                m_bIsValid = m_currFile < m_numFilesInList;
-                if( m_bIsValid )
-                {
-                    m_path = m_dir / m_paDirFileList[ m_currFile ]->d_name;
-                    if( strcmp( m_paDirFileList[ m_currFile ]->d_name, "." )  == 0 ||
-                        strcmp( m_paDirFileList[ m_currFile ]->d_name, ".." ) == 0 )
-                    {
-                        return ImpNext();
-                    }
-                }
-            }
-            return m_bIsValid;
-        }
-        void ImpDtor()
-        {
-            free(m_paDirFileList);
-        }
-        struct dirent **m_paDirFileList;
-        int           m_numFilesInList;
-        int           m_currFile;
+		void ImpCtor()
+		{
+			Path test = m_dir / "*";
+			m_path = m_dir;
+			m_numFilesInList = scandir( m_path.c_str(), &m_paDirFileList, 0, alphasort);
+			m_bIsValid = m_numFilesInList > 0;
+			m_currFile = 0;
+			if( !m_bIsValid )
+			{
+				m_paDirFileList = 0;
+			}
+		}
+		bool ImpNext()
+		{
+			if( m_bIsValid )
+			{
+				++m_currFile;
+				m_bIsValid = m_currFile < m_numFilesInList;
+				if( m_bIsValid )
+				{
+					m_path = m_dir / m_paDirFileList[ m_currFile ]->d_name;
+					if( strcmp( m_paDirFileList[ m_currFile ]->d_name, "." )  == 0 ||
+						strcmp( m_paDirFileList[ m_currFile ]->d_name, ".." ) == 0 )
+					{
+						return ImpNext();
+					}
+				}
+			}
+			return m_bIsValid;
+		}
+		void ImpDtor()
+		{
+			free(m_paDirFileList);
+		}
+		struct dirent **m_paDirFileList;
+		int           m_numFilesInList;
+		int           m_currFile;
 
 #endif
-    public:
-        PathIterator( const Path& path_ )
-        : m_dir( path_ )
-        {
-            ImpCtor();
-        }
-        ~PathIterator()
-        {
-            ImpDtor();
-        }
-        
-        bool operator++()
-        {
-            return ImpNext();
-        }
-        
-        bool IsValid() const
-        {
-            return m_bIsValid;
-        }
-        const Path& GetPath() const
-        {
-            return m_path;
-        }
-        
-    };
+	public:
+		PathIterator( const Path& path_ )
+		: m_dir( path_ )
+		{
+			ImpCtor();
+		}
+		~PathIterator()
+		{
+			ImpDtor();
+		}
+		
+		bool operator++()
+		{
+			return ImpNext();
+		}
+		
+		bool IsValid() const
+		{
+			return m_bIsValid;
+		}
+		const Path& GetPath() const
+		{
+			return m_path;
+		}
+		
+	};
 
 
 }

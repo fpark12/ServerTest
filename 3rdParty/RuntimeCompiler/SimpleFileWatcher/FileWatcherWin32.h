@@ -42,9 +42,6 @@
 #include "FileWatcherWin32_AltImpl.h"
 #endif
 
-
-#include <map>
-
 namespace FW
 {
 	/// Implementation for Win32 based on ReadDirectoryChangesW.

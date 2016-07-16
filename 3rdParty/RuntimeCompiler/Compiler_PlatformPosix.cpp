@@ -76,7 +76,7 @@ std::string Compiler::GetObjectFileExtension() const
 	return ".o";
 }
 
-bool Compiler::GetIsComplete() const
+bool Compiler::IsComplete() const
 {
     if( !m_pImplData->m_bCompileIsComplete && m_pImplData->m_ChildForCompilationPID )
     {
