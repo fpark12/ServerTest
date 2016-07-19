@@ -21,7 +21,7 @@
 #define FILECHANGENOTIFIER_INCLUDED
 
 #include "IFileChangeNotifier.h"
-#include "SimpleFileWatcher/FileWatcher.h"
+#include "FileWatcher/FileWatcher.h"
 
 
 #include "FileSystemUtils.h"

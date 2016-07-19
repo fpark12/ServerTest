@@ -1,7 +1,7 @@
 #pragma once
 #include <set>
 #include <queue>
-#include "ChatMessage.h"
+#include "Core/Public/ChatMessage.h"
 #include "ChatParticipant.h"
 
 //----------------------------------------------------------------------

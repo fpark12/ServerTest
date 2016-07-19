@@ -13,7 +13,7 @@
 #include <iostream>
 #include <thread>
 #include "asio.hpp"
-#include "ChatMessage.h"
+#include "Core/Public/ChatMessage.h"
 #include "ChatClient.h"
 
 chat_client::chat_client(asio::io_service& io_service, asio::ip::tcp::resolver::iterator endpoint_iterator) : io_service_(io_service),

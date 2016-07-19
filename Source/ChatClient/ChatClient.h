@@ -1,6 +1,6 @@
 #pragma once
 #include "asio.hpp"
-#include "ChatMessage.h"
+#include "Core/Public/ChatMessage.h"
 
 
 class chat_client
