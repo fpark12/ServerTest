@@ -36,6 +36,7 @@
 
 # Text files
 !*.txt
+!*_txt
 !*.md
 
 # Script files
