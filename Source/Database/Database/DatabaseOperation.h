@@ -37,10 +37,12 @@ private:
 	// Field: for output
 	MYSQL_RES* ResultMetaData;
 	MYSQL_FIELD* ResultDataFields;
+	uint32 FieldSetMask;	// A max of 32 field is allowed for each result
 	MYSQL_BIND* FieldBindHandle;
 	uint64 RowCount;
 	uint32 FieldCount;
-	uint64* FieldDataSerialization;
+	uint64* RowDataSerialization;
+	uint64* ResultSetDataSerialization;
 
 	// Database Connection
 
@@ -59,6 +61,7 @@ public:
 	void SetStatement(MYSQL_STMT* stmt);
 	void SetOperationFlag(SqlOperationFlag flag);
 	void BindParam();
+	void ExecuteStatement();
 	
 	void SetParamBool(uint8 index, bool&& value);
 	void SetParamUInt8(uint8 index, uint8&& value);
@@ -77,16 +80,14 @@ public:
 	void SetParamBinary(uint8 index, std::vector<uint8>&& value);
 	void SetParamNull(uint8 index);
 
-	// init field
-	void GetResult()
-	{
-		ResultDataFields = mysql_fetch_fields(ResultMetaData);
-	}
-
 private:
 
 	// Utility Function for set params
 	void SetMySqlBind(MYSQL_BIND* mySqlBind, enum_field_types bufferType, void* bufferLocation,
 		bool isUnsigned, uint32 bufferLength = 0, uint32 dataSize = 0, bool isNull = 0);
+
+	static uint32 SizeForType(MYSQL_FIELD* field);
+
+	bool FetchNextRow();
 
 };
