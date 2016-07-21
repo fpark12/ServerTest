@@ -1,4 +1,5 @@
 #include "DatabaseOperation.h"
+#include <vector>
 
 DatabaseOperation::DatabaseOperation() :
 	MySqlStatementHandle(nullptr),
@@ -7,13 +8,22 @@ DatabaseOperation::DatabaseOperation() :
 	ParamSetMask(0x00000000),
 	ParamBindHandle(nullptr),
 	ParamDataSerialization(nullptr),
-	Storage(StatementStorage::None)
+	Storage(StatementStorage::None),
+	HasResult(false),
+	ResultMetaData(nullptr),
+	ResultDataFields(nullptr),
+	FieldBindHandle(nullptr),
+	RowCount(0),
+	FieldCount(0),
+	RowDataSerialization(nullptr),
+	ResultSetDataSerialization(nullptr)
 {
 }
 
 DatabaseOperation::~DatabaseOperation()
 {
 	ClearParam();
+	ClearResult();
 }
 
 void DatabaseOperation::ClearParam()
@@ -30,7 +40,7 @@ void DatabaseOperation::ClearParam()
 			if (ParamBindHandle[i].buffer_type == MYSQL_TYPE_VAR_STRING ||
 				ParamBindHandle[i].buffer_type == MYSQL_TYPE_BLOB)
 			{
-				delete ParamBindHandle[i].buffer;
+				delete[] ParamBindHandle[i].buffer;
 			}
 			delete ParamBindHandle[i].is_null;
 			delete ParamBindHandle[i].length;
@@ -40,18 +50,48 @@ void DatabaseOperation::ClearParam()
 	delete[] ParamBindHandle;
 }
 
+void DatabaseOperation::ClearResult()
+{
+	if (HasResult)
+	{
+		std::vector<uint32> extraMemoryItemIndex;
+
+		for (uint32 i = 0; i < FieldCount; ++i)
+		{
+			if (FieldBindHandle[i].buffer_type == MYSQL_TYPE_BLOB ||
+				FieldBindHandle[i].buffer_type == MYSQL_TYPE_VAR_STRING)
+			{
+				extraMemoryItemIndex.push_back(i);
+				delete[] FieldBindHandle[i].buffer;
+			}
+			delete FieldBindHandle[i].is_null;
+			delete FieldBindHandle[i].length;
+		}
+
+		for (uint64 row = 0; row < RowCount; ++row)
+		{
+			uint64* newRow = ResultSetDataSerialization + FieldCount*row;
+			for (auto& index : extraMemoryItemIndex)
+			{
+				delete[] reinterpret_cast<void*>(*(newRow + index));
+			}
+		}
+
+		delete[] ResultSetDataSerialization;
+		delete[] RowDataSerialization;
+	}
+}
+
 void DatabaseOperation::SetStatement(MYSQL_STMT* stmt)
 {
 	MySqlStatementHandle = stmt;
 	ParamCount = mysql_stmt_param_count(stmt);
-	ParamSetMask = 0x00000000;
 	ParamBindHandle = new MYSQL_BIND[ParamCount];
 	memset(ParamBindHandle, 0, sizeof(MYSQL_BIND)*ParamCount);
 	ParamDataSerialization = new uint64[ParamCount];
 	memset(ParamDataSerialization, 0, sizeof(uint64)*ParamCount);
 
 	FieldCount = mysql_stmt_field_count(stmt);
-	FieldSetMask = 0x00000000;
 	if (FieldCount)
 	{
 		FieldBindHandle = new MYSQL_BIND[FieldCount];
@@ -85,63 +125,68 @@ void DatabaseOperation::ExecuteStatement()
 		exit(EXIT_FAILURE);
 	}
 
-	// get metadata
-	ResultMetaData = mysql_stmt_result_metadata(MySqlStatementHandle);
-	ResultDataFields = mysql_fetch_fields(ResultMetaData);
-	RowCount = (uint64)mysql_stmt_num_rows(MySqlStatementHandle);
-
-	// bind result for fetching
-	if (MySqlStatementHandle->bind_result_done)
+	if (FieldCount)
 	{
-		delete[] MySqlStatementHandle->bind->length;
-		delete[] MySqlStatementHandle->bind->is_null;
-	}
+		HasResult = true;
 
-	for (uint32 i = 0; i < FieldCount; ++i)
-	{
+		// get metadata
+		ResultMetaData = mysql_stmt_result_metadata(MySqlStatementHandle);
+		ResultDataFields = mysql_fetch_fields(ResultMetaData);
+		RowCount = (uint64)mysql_stmt_num_rows(MySqlStatementHandle);
 
-		uint32 size = SizeForType(&ResultDataFields[i]);
-
-		if (ResultDataFields[i].type == MYSQL_TYPE_VAR_STRING ||
-			ResultDataFields[i].type == MYSQL_TYPE_BLOB)
+		// bind result for fetching
+		if (MySqlStatementHandle->bind_result_done)
 		{
-			char* fieldBuffer = new char[size];
-			RowDataSerialization[i] = reinterpret_cast<uint64&>(fieldBuffer);
-			SetMySqlBind(&FieldBindHandle[i], ResultDataFields[i].type,
-				fieldBuffer, false, size, size);
+			delete[] MySqlStatementHandle->bind->length;
+			delete[] MySqlStatementHandle->bind->is_null;
 		}
-		else
-		{
-			SetMySqlBind(&FieldBindHandle[i], ResultDataFields[i].type,
-				&RowDataSerialization[i], ResultDataFields[i].flags & UNSIGNED_FLAG);
-		}
-	}
 
-	mysql_stmt_bind_result(MySqlStatementHandle, FieldBindHandle);
-	ResultSetDataSerialization = new uint64[RowCount*FieldCount];
-
-	uint32 rowIndex = 0;
-	while (FetchNextRow())
-	{
-		for (uint32 fieldIndex = 0; fieldIndex < FieldCount; ++fieldIndex)
+		for (uint32 i = 0; i < FieldCount; ++i)
 		{
-			if (FieldBindHandle[fieldIndex].buffer_type == MYSQL_TYPE_BLOB ||
-				FieldBindHandle[fieldIndex].buffer_type == MYSQL_TYPE_VAR_STRING)
+
+			uint32 size = SizeForType(&ResultDataFields[i]);
+
+			if (ResultDataFields[i].type == MYSQL_TYPE_VAR_STRING ||
+				ResultDataFields[i].type == MYSQL_TYPE_BLOB)
 			{
-				uint32 fieldBufferSize = FieldBindHandle[fieldIndex].buffer_length;
-				char* fieldBuffer = new char[fieldBufferSize];
-				memcpy(fieldBuffer, (void*)RowDataSerialization[fieldIndex], fieldBufferSize);
-				ResultSetDataSerialization[rowIndex*FieldCount + fieldIndex] = reinterpret_cast<uint64&>(fieldBuffer);
+				char* fieldBuffer = new char[size];
+				RowDataSerialization[i] = reinterpret_cast<uint64&>(fieldBuffer);
+				SetMySqlBind(&FieldBindHandle[i], ResultDataFields[i].type,
+					fieldBuffer, false, size, size);
 			}
 			else
 			{
-				memcpy(&ResultSetDataSerialization[rowIndex*FieldCount + fieldIndex],
-					&RowDataSerialization[fieldIndex], sizeof(uint64));
+				SetMySqlBind(&FieldBindHandle[i], ResultDataFields[i].type,
+					&RowDataSerialization[i], ResultDataFields[i].flags & UNSIGNED_FLAG);
 			}
 		}
-		++rowIndex;
+
+		mysql_stmt_bind_result(MySqlStatementHandle, FieldBindHandle);
+		ResultSetDataSerialization = new uint64[RowCount*FieldCount];
+
+		uint32 rowIndex = 0;
+		while (FetchNextRow())
+		{
+			for (uint32 fieldIndex = 0; fieldIndex < FieldCount; ++fieldIndex)
+			{
+				if (FieldBindHandle[fieldIndex].buffer_type == MYSQL_TYPE_BLOB ||
+					FieldBindHandle[fieldIndex].buffer_type == MYSQL_TYPE_VAR_STRING)
+				{
+					uint32 fieldBufferSize = FieldBindHandle[fieldIndex].buffer_length;
+					char* fieldBuffer = new char[fieldBufferSize];
+					memcpy(fieldBuffer, (void*)RowDataSerialization[fieldIndex], fieldBufferSize);
+					ResultSetDataSerialization[rowIndex*FieldCount + fieldIndex] = reinterpret_cast<uint64&>(fieldBuffer);
+				}
+				else
+				{
+					memcpy(&ResultSetDataSerialization[rowIndex*FieldCount + fieldIndex],
+						&RowDataSerialization[fieldIndex], sizeof(uint64));
+				}
+			}
+			++rowIndex;
+		}
+		mysql_stmt_free_result(MySqlStatementHandle);
 	}
-	mysql_stmt_free_result(MySqlStatementHandle);
 }
 
 void DatabaseOperation::SetParamBool(uint8 index, bool&& value)

@@ -35,9 +35,9 @@ private:
 	StatementStorage Storage;
 
 	// Field: for output
+	bool HasResult;
 	MYSQL_RES* ResultMetaData;
 	MYSQL_FIELD* ResultDataFields;
-	uint32 FieldSetMask;	// A max of 32 field is allowed for each result
 	MYSQL_BIND* FieldBindHandle;
 	uint64 RowCount;
 	uint32 FieldCount;
@@ -55,6 +55,7 @@ public:
 	~DatabaseOperation();
 
 	void ClearParam();
+	void ClearResult();
 
 	// init params
 	// TODO void SetConnection(DatabaseConnection* conn);

@@ -113,6 +113,7 @@ int main()
 	Op.SetStatement(stmt);
 	Op.SetParamInt32(0, 1);
 	Op.BindParam();
+	// Op.ExecuteStatement();
 
 	MYSQL_BIND result[2];
 	char result_data1[128];
@@ -120,10 +121,13 @@ int main()
 	unsigned long data_length1;
 	unsigned long data_length2;
 
-	memset(result, 0, sizeof(result) * 2);
+	memset(result, 0, sizeof(MYSQL_BIND) * 2);
+	memset(result_data1, 0, 128);
+	memset(result_data2, 0, 128);
+
 	result[0].buffer_type = MYSQL_TYPE_LONG;
 	result[0].buffer = result_data1;
-	result[0].buffer_length = 32;
+	result[0].buffer_length = 128;
 	result[0].is_null = 0;
 	result[0].length = &data_length1;
 	result[0].is_unsigned = false;
@@ -172,7 +176,6 @@ int main()
 		exit(EXIT_FAILURE);
 	}
 
-	/*
 	if (mysql_stmt_fetch(stmt) == 0)
 	{
 		printf("%s %s\n", result_data1, result_data2);
@@ -181,7 +184,6 @@ int main()
 	{
 		printf("No results found!\n");
 	}
-	*/
 
 	if (mysql_stmt_close(stmt))
 	{
