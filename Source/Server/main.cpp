@@ -34,16 +34,25 @@ private:
 int main()
 {
 	asio::io_service IoService;
+	//Config& GConfigRef2 = Config::Instance();
 
+	Config::Instance();
 	bool result = GConfig.Load("config.ini");
+	//bool result2 = GConfigRef2.Load("config.ini");
+	//ConfigFile* file = GConfig.GetFile("config.ini");
+	//CSimpleIniA* simpleIniFile = &file->ConfigFileImpl;
+	//simpleIniFile->LoadFile("LoginService.ini");
+	// ÓÐ¶¾
 	result = GConfig.Load("LoginService.ini");
 	GLoginService.Start(IoService);
 	if (result)
 	{
+		auto names = GConfig.GetFilenames();
 		string a = "";
-		GConfig.GetString("section", "a", a, "config.ini");
+		GConfig.GetString("section", "teststring", a, "config.ini");
+		//GConfigRef2.GetString("section", "teststring", a, "config.ini");
 		string b;
-		GConfig.GetString("section", "a", b, "config.ini");
+		GConfig.GetString("section", "teststring", b, "config.ini");
 		auto c = GConfig.GetKeys("config.ini");
 	}
 

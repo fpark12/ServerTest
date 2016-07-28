@@ -480,6 +480,9 @@ public:
 		bool a_bMultiLine = false
 	);
 
+	CSimpleIniTempl(CSimpleIniTempl&& Old);
+	CSimpleIniTempl& CSimpleIniTempl::operator=(CSimpleIniTempl&& Old);
+
 	/** Destructor */
 	~CSimpleIniTempl();
 
@@ -1324,6 +1327,33 @@ CSimpleIniTempl<SI_CHAR, SI_STRLESS, SI_CONVERTER>::CSimpleIniTempl(
 	, m_bSpaces(true)
 	, m_nOrder(0)
 {
+}
+
+template<class SI_CHAR, class SI_STRLESS, class SI_CONVERTER>
+CSimpleIniTempl<SI_CHAR, SI_STRLESS, SI_CONVERTER>::CSimpleIniTempl(CSimpleIniTempl<SI_CHAR, SI_STRLESS, SI_CONVERTER>&& Other)
+	: m_pData(std::move(Other.m_pData))
+	, m_uDataLen(std::move(Other.m_uDataLen))
+	, m_pFileComment(std::move(Other.m_pFileComment))
+	, m_bStoreIsUtf8(std::move(Other.m_bStoreIsUtf8))
+	, m_bAllowMultiKey(std::move(Other.m_bAllowMultiKey))
+	, m_bAllowMultiLine(std::move(Other.m_bAllowMultiLine))
+	, m_bSpaces(std::move(Other.m_bSpaces))
+	, m_nOrder(std::move(Other.m_nOrder))
+{
+}
+
+template<class SI_CHAR, class SI_STRLESS, class SI_CONVERTER>
+CSimpleIniTempl<SI_CHAR, SI_STRLESS, SI_CONVERTER>& CSimpleIniTempl<SI_CHAR, SI_STRLESS, SI_CONVERTER>::operator=(CSimpleIniTempl<SI_CHAR, SI_STRLESS, SI_CONVERTER>&& Other)
+{
+	m_pData = std::move(Other.m_pData);
+	m_uDataLen = std::move(Other.m_uDataLen);
+	m_pFileComment = std::move(Other.m_pFileComment);
+	m_bStoreIsUtf8 = std::move(Other.m_bStoreIsUtf8);
+	m_bAllowMultiKey = std::move(Other.m_bAllowMultiKey);
+	m_bAllowMultiLine = std::move(Other.m_bAllowMultiLine);
+	m_bSpaces = std::move(Other.m_bSpaces);
+	m_nOrder = std::move(Other.m_nOrder);
+	return *this;
 }
 
 template<class SI_CHAR, class SI_STRLESS, class SI_CONVERTER>
