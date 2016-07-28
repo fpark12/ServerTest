@@ -20,7 +20,7 @@ int main()
 			exit(EXIT_FAILURE);
 		}
 
-		char* sql = "SELECT `id`, `name`, `password` FROM `user` WHERE `sex` = ? AND `age` = ?";
+		char* sql = "SELECT `sex`, `age`, `name` FROM `user` WHERE `score` = ?";
 
 		if (mysql_stmt_prepare(stmt, sql, strlen(sql)))
 		{
@@ -29,16 +29,15 @@ int main()
 		// error checking
 		DatabaseOperation Op;
 		Op.SetStatement(stmt);
-		Op.SetParamInt32(0, 1);
-		Op.SetParamInt32(1, 18);
+		Op.SetParamFloat(0, 3.4);
 		Op.ExecuteStatement();
 
 		while (Op.GetNextRowOfResultSet())
 		{
 			int32 a = Op.GetInt32(0);
-			std::string b = Op.GetString(1);
+			int32 b = Op.GetInt32(1);
 			std::string c = Op.GetString(2);
-			std::cout << "Id: " << a << ", Name: " << b << ", Password: " << c << std::endl;
+			std::cout << "Sex: " << a << ", Age: " << b << ", Name: " << c << std::endl;
 		}
 
 		if (mysql_stmt_close(stmt))

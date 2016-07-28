@@ -278,7 +278,7 @@ void DatabaseOperation::SetParamString(uint8 index, char const* value)
 {
 	ParamSetMask ^= 0x00000001 << index;
 
-	uint32 len = uint32(strlen(value));
+	uint32 len = uint32(strlen(value)) + 1;
 	char* stringLocation = new char[len];
 	memcpy(stringLocation, value, len);
 
