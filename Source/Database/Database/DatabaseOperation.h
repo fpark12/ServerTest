@@ -41,6 +41,7 @@ private:
 	MYSQL_BIND* FieldBindHandle;
 	uint64 RowCount;
 	uint32 FieldCount;
+	uint64 CurrentRowCursor;
 	uint64* RowDataSerialization;
 	uint64* ResultSetDataSerialization;
 
@@ -61,7 +62,6 @@ public:
 	// TODO void SetConnection(DatabaseConnection* conn);
 	void SetStatement(MYSQL_STMT* stmt);
 	void SetOperationFlag(SqlOperationFlag flag);
-	void BindParam();
 	void ExecuteStatement();
 	
 	void SetParamBool(uint8 index, bool&& value);
@@ -80,6 +80,23 @@ public:
 	void SetParamBinary(uint8 index, const void* value, uint32 dataSize);
 	void SetParamBinary(uint8 index, std::vector<uint8>&& value);
 	void SetParamNull(uint8 index);
+
+	bool GetNextRowOfResultSet();
+	
+	bool GetBool(uint8 index);
+	uint8 GetUInt8(uint8 index);
+	int8 GetInt8(uint8 index);
+	uint16 GetUInt16(uint8 index);
+	int16 GetInt16(uint8 index);
+	uint32 GetUInt32(uint8 index);
+	int32 GetInt32(uint8 index);
+	uint64 GetUInt64(uint8 index);
+	int64 GetInt64(uint8 index);
+	float GetFloat(uint8 index);
+	double GetDouble(uint8 index);
+	char const* GetCString(uint8 index);
+	std::string GetString(uint8 index);
+	std::vector<uint8> GetBinary(uint8 index, std::size_t size);
 
 private:
 

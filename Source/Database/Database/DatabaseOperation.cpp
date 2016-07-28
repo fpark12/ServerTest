@@ -15,6 +15,7 @@ DatabaseOperation::DatabaseOperation() :
 	FieldBindHandle(nullptr),
 	RowCount(0),
 	FieldCount(0),
+	CurrentRowCursor(0),
 	RowDataSerialization(nullptr),
 	ResultSetDataSerialization(nullptr)
 {
@@ -68,6 +69,8 @@ void DatabaseOperation::ClearResult()
 			delete FieldBindHandle[i].length;
 		}
 
+		delete[] FieldBindHandle;
+
 		for (uint64 row = 0; row < RowCount; ++row)
 		{
 			uint64* newRow = ResultSetDataSerialization + FieldCount*row;
@@ -92,13 +95,6 @@ void DatabaseOperation::SetStatement(MYSQL_STMT* stmt)
 	memset(ParamDataSerialization, 0, sizeof(uint64)*ParamCount);
 
 	FieldCount = mysql_stmt_field_count(stmt);
-	if (FieldCount)
-	{
-		FieldBindHandle = new MYSQL_BIND[FieldCount];
-		memset(FieldBindHandle, 0, sizeof(MYSQL_BIND)*FieldCount);
-		RowDataSerialization = new uint64[FieldCount];
-		memset(RowDataSerialization, 0, sizeof(uint64)*FieldCount);
-	}
 
 	/// "If set to 1, causes mysql_stmt_store_result() to update the metadata MYSQL_FIELD->max_length value."
 	my_bool bool_tmp = 1;
@@ -110,13 +106,13 @@ void DatabaseOperation::SetOperationFlag(SqlOperationFlag flag)
 	OperationFlag = flag;
 }
 
-void DatabaseOperation::BindParam()
-{
-	mysql_stmt_bind_param(MySqlStatementHandle, ParamBindHandle);
-}
-
 void DatabaseOperation::ExecuteStatement()
 {
+	if (ParamCount)
+	{
+		mysql_stmt_bind_param(MySqlStatementHandle, ParamBindHandle);
+	}
+
 	if (mysql_stmt_execute(MySqlStatementHandle))
 	{
 		//TODO error log
@@ -128,6 +124,20 @@ void DatabaseOperation::ExecuteStatement()
 	if (FieldCount)
 	{
 		HasResult = true;
+
+		// Init data serialization
+		FieldBindHandle = new MYSQL_BIND[FieldCount];
+		memset(FieldBindHandle, 0, sizeof(MYSQL_BIND)*FieldCount);
+		RowDataSerialization = new uint64[FieldCount];
+		memset(RowDataSerialization, 0, sizeof(uint64)*FieldCount);
+
+		if (mysql_stmt_store_result(MySqlStatementHandle))
+		{
+			//TODO error log
+			fprintf(stderr, " mysql_stmt_execute(), failed\n");
+			fprintf(stderr, " %s\n", mysql_stmt_error(MySqlStatementHandle));
+			exit(EXIT_FAILURE);
+		}
 
 		// get metadata
 		ResultMetaData = mysql_stmt_result_metadata(MySqlStatementHandle);
@@ -316,6 +326,96 @@ void DatabaseOperation::SetParamNull(uint8 index)
 	ParamSetMask ^= 0x00000001 << index;
 
 	SetMySqlBind(&ParamBindHandle[index], MYSQL_TYPE_NULL, NULL, false, 0, 0, true);
+}
+
+bool DatabaseOperation::GetNextRowOfResultSet()
+{
+	if (HasResult && CurrentRowCursor < RowCount)
+	{
+		CurrentRowCursor++;
+		return true;
+	}
+	else
+	{
+		return false;
+	}
+}
+
+bool DatabaseOperation::GetBool(uint8 index)
+{
+	return bool(ResultSetDataSerialization[(CurrentRowCursor - 1)*FieldCount + index]);
+}
+
+uint8 DatabaseOperation::GetUInt8(uint8 index)
+{
+	return uint8(ResultSetDataSerialization[(CurrentRowCursor - 1)*FieldCount + index]);
+}
+
+int8 DatabaseOperation::GetInt8(uint8 index)
+{
+	return int8(ResultSetDataSerialization[(CurrentRowCursor - 1)*FieldCount + index]);
+}
+
+uint16 DatabaseOperation::GetUInt16(uint8 index)
+{
+	return uint16(ResultSetDataSerialization[(CurrentRowCursor - 1)*FieldCount + index]);
+}
+
+int16 DatabaseOperation::GetInt16(uint8 index)
+{
+	return int16(ResultSetDataSerialization[(CurrentRowCursor - 1)*FieldCount + index]);
+}
+
+uint32 DatabaseOperation::GetUInt32(uint8 index)
+{
+	return uint32(ResultSetDataSerialization[(CurrentRowCursor - 1)*FieldCount + index]);
+}
+
+int32 DatabaseOperation::GetInt32(uint8 index)
+{
+	return int32(ResultSetDataSerialization[(CurrentRowCursor - 1)*FieldCount + index]);
+}
+
+uint64 DatabaseOperation::GetUInt64(uint8 index)
+{
+	return uint64(ResultSetDataSerialization[(CurrentRowCursor - 1)*FieldCount + index]);
+}
+
+int64 DatabaseOperation::GetInt64(uint8 index)
+{
+	return int64(ResultSetDataSerialization[(CurrentRowCursor - 1)*FieldCount + index]);
+}
+
+float DatabaseOperation::GetFloat(uint8 index)
+{
+	return reinterpret_cast<float&>(ResultSetDataSerialization[(CurrentRowCursor - 1)*FieldCount + index]);
+}
+
+double DatabaseOperation::GetDouble(uint8 index)
+{
+	return reinterpret_cast<double&>(ResultSetDataSerialization[(CurrentRowCursor - 1)*FieldCount + index]);
+}
+
+char const* DatabaseOperation::GetCString(uint8 index)
+{
+	return reinterpret_cast<char const*>(ResultSetDataSerialization[(CurrentRowCursor - 1)*FieldCount + index]);
+}
+
+std::string DatabaseOperation::GetString(uint8 index)
+{
+	return std::string(reinterpret_cast<char const*>(ResultSetDataSerialization[(CurrentRowCursor - 1)*FieldCount + index]));
+}
+
+std::vector<uint8> DatabaseOperation::GetBinary(uint8 index, std::size_t size)
+{
+	std::vector<uint8> bytes(size, 0);
+	void* binaryBuffer = reinterpret_cast<void*>(ResultSetDataSerialization[(CurrentRowCursor - 1)*FieldCount + index]);
+	int i = 0;
+	for (auto& byte : bytes)
+	{
+		byte = ((uint8*)(binaryBuffer))[i++];
+	}
+	return bytes;
 }
 
 void DatabaseOperation::SetMySqlBind(MYSQL_BIND* mySqlBind, enum_field_types bufferType, void* bufferLocation, bool isUnsigned, uint32 bufferLength /*= 0*/, uint32 dataSize /*= 0*/, bool isNull /*= 0*/)
