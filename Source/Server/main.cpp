@@ -38,11 +38,6 @@ int main()
 
 	Config::Instance();
 	bool result = GConfig.Load("config.ini");
-	//bool result2 = GConfigRef2.Load("config.ini");
-	//ConfigFile* file = GConfig.GetFile("config.ini");
-	//CSimpleIniA* simpleIniFile = &file->ConfigFileImpl;
-	//simpleIniFile->LoadFile("LoginService.ini");
-	// ÓÐ¶¾
 	result = GConfig.Load("LoginService.ini");
 	GLoginService.Start(IoService);
 	if (result)

@@ -12,5 +12,5 @@ public:
 	static Singleton& Instance();
 
 };
-#define GLoginService Singleton::Instance()
+//#define GLoginService Singleton::Instance()
 //static_assert(std::is_pod<LoginService>::value, "LoginService is not POD!");
