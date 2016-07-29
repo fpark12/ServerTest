@@ -6,3 +6,9 @@ LoginService& LoginService::Instance()
 	static LoginService Instance;
 	return Instance;
 }
+
+
+Namespace namespaces[] =
+{
+	{ NULL, NULL, NULL, NULL }
+};

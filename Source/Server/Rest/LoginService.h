@@ -3,6 +3,14 @@
 #include "Public/config.h"
 #include <chrono>
 
+#include "httpget.h"
+#include "httppost.h"
+#include "soapH.h"
+
+class LoginService;
+extern LoginService& LoginServiceRef;
+#define GLoginService LoginServiceRef
+
 class LoginService
 {
 private:
@@ -13,11 +21,12 @@ private:
 
 	std::thread Thread;
 	std::string IPAddress;
+	std::string BindIP;
 	int32 Port;
 	asio::ip::tcp::endpoint ExternalAddress;
 	asio::ip::tcp::endpoint LocalAddress;
 	asio::steady_timer* LoginTicketCleanupTimer;
-
+	bool Stopped;
 public:
 	static LoginService& Instance();
 
@@ -30,7 +39,8 @@ public:
 		asio::ip::tcp::resolver::iterator end;
 		asio::ip::tcp::resolver resolver(ioService);
 
-		// "LoginService.Init.IPAddress"
+		// "LoginService.Init.IPAddress	"
+		BindIP = "0.0.0.0";
 		Res |= GConfig.GetString("Initialization", "IPAddress", IPAddress, "LoginService.ini");
 		Res |= GConfig.GetString("Initialization", "ExternalIPAddress", TempExternalAddress, "LoginService.ini");
 		Res |= GConfig.GetString("Initialization", "LocalIPAddress", TempLocalAddress, "LoginService.ini");
@@ -107,61 +117,78 @@ public:
 	}
 	void Run()
 	{
-		/*
-			 soap soapServer(SOAP_C_UTFSTRING, SOAP_C_UTFSTRING);
+		soap soapServer(SOAP_C_UTFSTRING, SOAP_C_UTFSTRING);
 
-	// check every 3 seconds if world ended
-	soapServer.accept_timeout = 3;
-	soapServer.recv_timeout = 5;
-	soapServer.send_timeout = 5;
-	if (!soap_valid_socket(soap_bind(&soapServer, _bindIP.c_str(), _port, 100)))
-	{
-		TC_LOG_ERROR("server.rest", "Couldn't bind to %s:%d", _bindIP.c_str(), _port);
-		return;
-	}
-
-	TC_LOG_INFO("server.rest", "Login service bound to http://%s:%d", _bindIP.c_str(), _port);
-
-	http_post_handlers handlers[] =
-	{
-		{ "application/json;charset=utf-8", handle_post_plugin },
-		{ "application/json", handle_post_plugin },
-		{ nullptr, nullptr }
-	};
-
-	soap_register_plugin_arg(&soapServer, &http_get, (void*)&handle_get_plugin);
-	soap_register_plugin_arg(&soapServer, &http_post, handlers);
-	soap_register_plugin_arg(&soapServer, &ContentTypePlugin::Init, (void*)"application/json;charset=utf-8");
-
-	// Use our already ready ssl context
-	soapServer.ctx = Battlenet::SslContext::instance().native_handle();
-	soapServer.ssl_flags = SOAP_SSL_RSA;
-
-	while (!_stopped)
-	{
-		if (!soap_valid_socket(soap_accept(&soapServer)))
-			continue;   // ran into an accept timeout
-
-		std::shared_ptr<soap> soapClient = std::make_shared<soap>(soapServer);
-		boost::asio::ip::address_v4 address(soapClient->ip);
-		if (soap_ssl_accept(soapClient.get()) != SOAP_OK)
+		// check every 3 seconds if world ended
+		soapServer.accept_timeout = 3;
+		soapServer.recv_timeout = 5;
+		soapServer.send_timeout = 5;
+		if (!soap_valid_socket(soap_bind(&soapServer, BindIP.c_str(), Port, 100)))
 		{
-			TC_LOG_DEBUG("server.rest", "Failed SSL handshake from IP=%s", address.to_string().c_str());
-			continue;
+			//TC_LOG_ERROR("server.rest", "Couldn't bind to %s:%d", _bindIP.c_str(), _port);
+			return;
 		}
 
-		TC_LOG_DEBUG("server.rest", "Accepted connection from IP=%s", address.to_string().c_str());
+		//TC_LOG_INFO("server.rest", "Login service bound to http://%s:%d", _bindIP.c_str(), _port);
 
-		std::thread([soapClient]
+		auto handle_get_plugin = [](soap* soapClient)
 		{
-			soap_serve(soapClient.get());
-		}).detach();
-	}
+			return GLoginService.HandleGet(soapClient);
+		};
 
-	// and release the context handle here - soap does not own it so it should not free it on exit
-	soapServer.ctx = nullptr;
+		auto handle_post_plugin = [](soap* soapClient)
+		{
+			return GLoginService.HandlePost(soapClient);
+		};
 
-	TC_LOG_INFO("server.rest", "Login service exiting...");
+		http_post_handlers handlers[] =
+		{
+			{ "application/json;charset=utf-8", handle_post_plugin },
+			{ "application/json", handle_post_plugin },
+			{ nullptr, nullptr }
+		};
+
+		soap_register_plugin_arg(&soapServer, &http_get, (void*)&handle_get_plugin);
+		soap_register_plugin_arg(&soapServer, &http_post, handlers);
+		//soap_register_plugin_arg(&soapServer, &ContentTypePlugin::Init, (void*)"application/json;charset=utf-8");
+
+		// Use our already ready ssl context
+		//soapServer.ctx = Battlenet::SslContext::instance().native_handle();
+		//soapServer.ssl_flags = SOAP_SSL_RSA;
+
+		while (!Stopped)
+		{
+			if (!soap_valid_socket(soap_accept(&soapServer)))
+				continue;   // ran into an accept timeout
+
+			std::shared_ptr<soap> soapClient = std::make_shared<soap>(soapServer);
+			asio::ip::address_v4 address(soapClient->ip);
+			if (soap_ssl_accept(soapClient.get()) != SOAP_OK)
+			{
+				//TC_LOG_DEBUG("server.rest", "Failed SSL handshake from IP=%s", address.to_string().c_str());
+				continue;
+			}
+
+			//TC_LOG_DEBUG("server.rest", "Accepted connection from IP=%s", address.to_string().c_str());
+
+			std::thread([soapClient]
+			{
+				soap_serve(soapClient.get());
+			}).detach();
+		}
+
+		// and release the context handle here - soap does not own it so it should not free it on exit
+		soapServer.ctx = nullptr;
+
+		//TC_LOG_INFO("server.rest", "Login service exiting...");
+
+		/*
+
+
+
+
+
+
 		 */
 	}
 
@@ -169,6 +196,19 @@ public:
 	{
 
 	}
+
+	//friend int32 handle_get_plugin(soap* soapClient);
+	int32 HandleGet(soap* soapClient)
+	{
+		return 0;
+	}
+
+	//friend int32 handle_post_plugin(soap* soapClient);
+	int32 HandlePost(soap* soapClient)
+	{
+		return 0;
+	}
+
 
 	void CleanupLoginTickets(const asio::error_code& error)
 	{
@@ -182,6 +222,5 @@ public:
 protected:
 
 };
-extern LoginService& LoginServiceRef;
-#define GLoginService LoginServiceRef
+
 //static_assert(std::is_pod<LoginService>::value, "LoginService is not POD!");
