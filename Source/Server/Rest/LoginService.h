@@ -30,6 +30,7 @@ public:
 		asio::ip::tcp::resolver::iterator end;
 		asio::ip::tcp::resolver resolver(ioService);
 
+		// "LoginService.Init.IPAddress"
 		Res |= GConfig.GetString("Initialization", "IPAddress", IPAddress, "LoginService.ini");
 		Res |= GConfig.GetString("Initialization", "ExternalIPAddress", TempExternalAddress, "LoginService.ini");
 		Res |= GConfig.GetString("Initialization", "LocalIPAddress", TempLocalAddress, "LoginService.ini");
