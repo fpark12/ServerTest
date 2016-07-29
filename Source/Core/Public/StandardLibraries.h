@@ -8,6 +8,9 @@
 #include <stdarg.h>
 #include <stdint.h>
 
+#include <cctype>
+
+
 // C++ Standard Libraries
 // --- I/O ---
 #include <iostream>

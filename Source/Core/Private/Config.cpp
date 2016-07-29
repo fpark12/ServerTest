@@ -22,6 +22,7 @@
 #include "Config.h"
 
 std::mutex Config::Lock;
+
 Config& GConfigRef = Config::Instance();
 Config& Config::Instance()
 {
@@ -29,9 +30,7 @@ Config& Config::Instance()
 	return instance;
 }
 
-#include <cctype>
 #include "ini.h"
-#include "INIReader.h"
 
 ConfigFile::ConfigFile()
 {

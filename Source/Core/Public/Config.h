@@ -72,13 +72,6 @@ private:
 	static int ValueHandler(void* user, const char* section, const char* name, const char* value);
 };
 
-struct ConfigFile2
-{
-	std::string Filename;
-	//CSimpleIniA ConfigFileImpl;
-	ConfigFile ConfigFileReader;
-};
-
 class Config
 {
 private:

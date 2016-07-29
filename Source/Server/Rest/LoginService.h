@@ -17,7 +17,6 @@ private:
 public:
 	static LoginService& Instance();
 
-
 	bool Start(asio::io_service& ioService)
 	{
 		bool ok;
@@ -101,5 +100,5 @@ public:
 protected:
 
 };
-#define GLoginService LoginService::Instance()
+#define GLoginService LoginServiceRef
 //static_assert(std::is_pod<LoginService>::value, "LoginService is not POD!");
