@@ -1,9 +1,10 @@
 SET( DEFINE
 	ASIO_STANDALONE
-	ASIO_SEPARATE_COMPILATION
 )
 SET( INCLUDE
+openssl
 )
 SET( LINK
+openssl
 )
 create_project(STATIC "${DEFINE}" "${INCLUDE}" "${LINK}")

@@ -1,15 +1,9 @@
 SET( DEFINE
-	CAPNP_LITE
 )
 SET( INCLUDE
-	Core
-	mysql
-	capnproto
 )
 SET( LINK
-	Core
-	mysql
-	capnproto
+3rdParty/openssl/lib/libeay32MDd.lib
+3rdParty/openssl/lib/ssleay32MDd.lib
 )
-
 create_project(STATIC "${DEFINE}" "${INCLUDE}" "${LINK}")

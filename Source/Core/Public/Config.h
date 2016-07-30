@@ -31,6 +31,7 @@ public:
 	int LoadFile(std::string Filename);
 
 	// Get a string value from INI file, returning default_value if not found.
+	bool GetString(std::string Key, std::string& Output) const;
 	bool GetString(std::string section, std::string name, std::string& OutString) const;
 
 	// Get an integer (long) value from INI file, returning default_value if
@@ -106,6 +107,7 @@ public:
 	}
 
 	//
+	bool GetString(const std::string& Key, std::string& Value) const;
 	bool GetString(std::string const& section, std::string const& Key, std::string& Value, std::string const& Filename) const;
 	bool GetBool(std::string const& section, std::string const& Key, bool& Value, std::string const& Filename) const;
 	bool GetLong(std::string const& section, std::string const& Key, long& Value, std::string const& Filename) const;

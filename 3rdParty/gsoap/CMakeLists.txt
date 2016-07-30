@@ -1,7 +1,10 @@
 SET( DEFINE
+WITH_OPENSSL
 )
 SET( INCLUDE
+openssl
 )
 SET( LINK
+openssl
 )
 create_project(STATIC "${DEFINE}" "${INCLUDE}" "${LINK}")

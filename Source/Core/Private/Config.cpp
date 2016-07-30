@@ -48,9 +48,25 @@ ConfigFile::~ConfigFile()
 
 int ConfigFile::LoadFile(std::string Filename)
 {
-	this->Filename = Filename;
+	
+	this->Filename = Filename.substr(0, Filename.find_first_of("."));
 	Error = ini_parse(Filename.c_str(), ValueHandler, this);
 	return Error;
+}
+
+bool ConfigFile::GetString(std::string Key, std::string& Output) const
+{
+	if (Values.count(Key))
+	{
+		auto it = Values.find(Key);
+		if (it != Values.end())
+		{
+			Output = (*it).second;
+		}
+		return 0;
+	}
+
+	return 1;
 }
 
 bool ConfigFile::GetString(std::string Section, std::string Name, std::string& Output) const
@@ -134,7 +150,7 @@ std::set<std::string> ConfigFile::GetFields(std::string Section) const
 
 std::string ConfigFile::MakeKey(std::string section, std::string name)
 {
-	std::string key = section + "=" + name;
+	std::string key = section + "." + name;
 	std::transform(key.begin(), key.end(), key.begin(), ::tolower);
 	return key;
 }
@@ -287,6 +303,22 @@ std::list<std::string> Config::GetKeysByString(std::string const& Key, std::stri
 
 	return Keys;
 }
+
+bool Config::GetString(const std::string& Key, std::string& Value) const
+{
+	size_t FilenameEnd = Key.find_first_of(".", 0);
+	std::string Filename = Key.substr(0, FilenameEnd);
+	std::string Subkey = Key.substr(FilenameEnd);
+
+	const ConfigFile* ConfigFile = this->Find(Filename);
+	if (!ConfigFile)
+	{
+		return "";
+	}
+
+	return ConfigFile->GetString(Subkey, Value);
+}
+
 
 bool Config::GetString(std::string const& Section, std::string const& Key, std::string& Value, std::string const& Filename) const
 {

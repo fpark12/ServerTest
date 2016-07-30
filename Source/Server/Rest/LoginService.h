@@ -1,5 +1,7 @@
 #pragma once
 #include "asio.hpp"
+#include <asio/ssl/context.hpp>
+
 #include "Public/config.h"
 #include <chrono>
 
@@ -10,6 +12,41 @@
 class LoginService;
 extern LoginService& LoginServiceRef;
 #define GLoginService LoginServiceRef
+
+class SslContext
+{
+public:
+	static bool Initialize()
+	{
+		asio::error_code err;
+
+		bool Res = 0;
+
+		std::string CertificateChainFile;
+		std::string PrivateKeyFile;
+		Res |= GConfig.GetString("Initialization", "CertificatesFile", CertificateChainFile, "LoginService.ini");
+		Res |= GConfig.GetString("Initialization", "PrivateKeyFile", PrivateKeyFile, "LoginService.ini");
+
+
+		instance().set_options(asio::ssl::context::no_sslv3, err);
+		assert(err.value() == 0);
+		instance().use_certificate_chain_file(CertificateChainFile, err);
+		assert(err.value() == 0);
+		instance().use_private_key_file(PrivateKeyFile, asio::ssl::context::pem, err);
+		assert(err.value() == 0);
+
+		return true;
+	}
+
+	static asio::ssl::context& instance()
+	{
+		static asio::ssl::context context(asio::ssl::context::sslv23);
+		return context;
+	}
+
+};
+
+int ns1__executeCommand(soap*, char*, char**);
 
 class LoginService
 {
@@ -115,6 +152,7 @@ public:
 
 		return true;
 	}
+
 	void Run()
 	{
 		soap soapServer(SOAP_C_UTFSTRING, SOAP_C_UTFSTRING);
@@ -171,10 +209,12 @@ public:
 
 			//TC_LOG_DEBUG("server.rest", "Accepted connection from IP=%s", address.to_string().c_str());
 
-			std::thread([soapClient]
+			auto SoapMain = [soapClient]
 			{
 				soap_serve(soapClient.get());
-			}).detach();
+			};
+
+			std::thread(SoapMain).detach();
 		}
 
 		// and release the context handle here - soap does not own it so it should not free it on exit
