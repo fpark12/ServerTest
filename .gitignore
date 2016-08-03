@@ -24,7 +24,12 @@
 !*.def
 !*.exp
 !*.manifest
+
 !*.in
+!*_c
+!*_cpp
+!*_h
+!*_hpp
 
 # Other Source Files
 !*.rc
