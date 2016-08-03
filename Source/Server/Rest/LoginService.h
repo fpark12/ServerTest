@@ -9,17 +9,20 @@
 #include "httppost.h"
 #include "soapH.h"
 
+class SslContext;
 class LoginService;
+
+extern SslContext& SslContextRef;
 extern LoginService& LoginServiceRef;
+#define GSslContext SslContextRef
 #define GLoginService LoginServiceRef
 
 class SslContext
 {
-public:
-	static bool Initialize()
+private:
+	SslContext()
 	{
 		asio::error_code err;
-
 		bool Res = 0;
 
 		std::string CertificateChainFile;
@@ -28,21 +31,24 @@ public:
 		Res |= GConfig.GetString("Initialization", "PrivateKeyFile", PrivateKeyFile, "LoginService.ini");
 
 
-		instance().set_options(asio::ssl::context::no_sslv3, err);
+		NativeHandle.set_options(asio::ssl::context::no_sslv3, err);
 		assert(err.value() == 0);
-		instance().use_certificate_chain_file(CertificateChainFile, err);
+		NativeHandle.use_certificate_chain_file(CertificateChainFile, err);
 		assert(err.value() == 0);
-		instance().use_private_key_file(PrivateKeyFile, asio::ssl::context::pem, err);
+		NativeHandle.use_private_key_file(PrivateKeyFile, asio::ssl::context::pem, err);
 		assert(err.value() == 0);
-
-		return true;
 	}
 
-	static asio::ssl::context& instance()
+	~SslContext() = default;
+
+public:
+	static SslContext& Instance()
 	{
-		static asio::ssl::context context(asio::ssl::context::sslv23);
-		return context;
+		static SslContext Instance;
+		return Instance;
 	}
+
+	asio::ssl::context NativeHandle = asio::ssl::context(asio::ssl::context::sslv23);
 
 };
 
@@ -78,6 +84,7 @@ public:
 
 		// "LoginService.Init.IPAddress	"
 		BindIP = "0.0.0.0";
+		Res |= GConfig.GetString("LoginService.Initialization.IPAddress", IPAddress);
 		Res |= GConfig.GetString("Initialization", "IPAddress", IPAddress, "LoginService.ini");
 		Res |= GConfig.GetString("Initialization", "ExternalIPAddress", TempExternalAddress, "LoginService.ini");
 		Res |= GConfig.GetString("Initialization", "LocalIPAddress", TempLocalAddress, "LoginService.ini");

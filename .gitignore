@@ -24,6 +24,7 @@
 !*.def
 !*.exp
 !*.manifest
+!*.in
 
 # Other Source Files
 !*.rc

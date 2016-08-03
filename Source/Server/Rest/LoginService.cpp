@@ -1,5 +1,6 @@
 #include "LoginService.h"
 
+SslContext& SslContextRef = SslContext::Instance();
 LoginService& LoginServiceRef = LoginService::Instance();
 
 int ns1__executeCommand(soap*, char*, char**)
