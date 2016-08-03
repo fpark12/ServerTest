@@ -155,7 +155,7 @@ struct tm *OPENSSL_gmtime(const time_t *timer, struct tm *result)
 		   below is January 1st 1970 expressed as a VMS time.  The
 		   following code was used to get this number:
 
-		   #include <stdio.h>
+		   
 		   #include <stdlib.h>
 		   #include <lib$routines.h>
 		   #include <starlet.h>
@@ -324,7 +324,7 @@ static void julian_to_date(long jd, int *y, int *m, int *d)
 
 #ifdef OPENSSL_TIME_TEST
 
-#include <stdio.h>
+
 
 /* Time checking test code. Check times are identical for a wide range of
  * offsets. This should be run on a machine with 64 bit time_t or it will

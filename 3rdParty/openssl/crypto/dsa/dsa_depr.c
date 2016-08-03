@@ -73,7 +73,7 @@ static void *dummy=&dummy;
 
 #ifndef OPENSSL_NO_SHA
 
-#include <stdio.h>
+
 #include <time.h>
 #include "cryptlib.h"
 #include <openssl/evp.h>

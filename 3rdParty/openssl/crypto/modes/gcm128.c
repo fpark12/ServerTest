@@ -1454,7 +1454,7 @@ void CRYPTO_gcm128_release(GCM128_CONTEXT *ctx)
 }
 
 #if defined(SELFTEST)
-#include <stdio.h>
+
 #include <openssl/aes.h>
 
 /* Test Case 1 */

@@ -60,7 +60,7 @@
  * Stolen from tjh's ssl/ssl_trc.c stuff.
  */
 
-#include <stdio.h>
+
 #include "cryptlib.h"
 #include "bio_lcl.h"
 

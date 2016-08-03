@@ -94,7 +94,7 @@
  *
  * 1.0 eay - First version
  */
-#include <stdio.h>
+
 #include <string.h>
 #include <stdlib.h>
 #include <openssl/crypto.h>

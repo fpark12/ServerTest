@@ -61,7 +61,7 @@
  * written by Steve Henson.
  */
 
-#include <stdio.h>
+
 #include <time.h>
 #include "cryptlib.h"
 #include "o_time.h"

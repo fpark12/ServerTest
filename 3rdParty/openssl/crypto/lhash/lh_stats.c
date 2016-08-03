@@ -56,7 +56,7 @@
  * [including the GNU Public Licence.]
  */
 
-#include <stdio.h>
+
 #include <string.h>
 #include <stdlib.h>
 /* If you wish to build this outside of SSLeay, remove the following lines

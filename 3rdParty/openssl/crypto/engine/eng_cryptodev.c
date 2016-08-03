@@ -61,7 +61,7 @@ ENGINE_load_cryptodev(void)
 #include <crypto/rsa/rsa.h>
 #include <sys/ioctl.h>
 #include <errno.h>
-#include <stdio.h>
+
 #include <unistd.h>
 #include <fcntl.h>
 #include <stdarg.h>

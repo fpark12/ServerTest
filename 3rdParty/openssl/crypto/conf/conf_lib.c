@@ -56,7 +56,7 @@
  *
  */
 
-#include <stdio.h>
+
 #include <openssl/crypto.h>
 #include <openssl/err.h>
 #include <openssl/conf.h>

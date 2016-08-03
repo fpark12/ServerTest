@@ -59,7 +59,7 @@
 #if !defined(OPENSSL_SYSNAME_NETWARE) && !defined(OPENSSL_SYSNAME_VXWORKS)
 #include <memory.h>
 #endif
-#include <stdio.h>
+
 
 /* Streaming encode support for PKCS#7 */
 

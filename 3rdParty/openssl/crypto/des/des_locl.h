@@ -67,7 +67,7 @@
 #endif
 #endif
 
-#include <stdio.h>
+
 #include <stdlib.h>
 
 #ifndef OPENSSL_SYS_MSDOS

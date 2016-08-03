@@ -61,7 +61,7 @@
 
 #ifndef OPENSSL_NO_SRP
 
-#include <stdio.h>
+
 #include <string.h>
 
 #ifdef  __cplusplus

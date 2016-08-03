@@ -60,7 +60,7 @@
 #ifndef HEADER_PQUEUE_H
 #define HEADER_PQUEUE_H
 
-#include <stdio.h>
+
 #include <stdlib.h>
 #include <string.h>
 

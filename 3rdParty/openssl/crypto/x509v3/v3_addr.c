@@ -59,7 +59,7 @@
  * Implementation of RFC 3779 section 2.2.
  */
 
-#include <stdio.h>
+
 #include <stdlib.h>
 
 #include "cryptlib.h"

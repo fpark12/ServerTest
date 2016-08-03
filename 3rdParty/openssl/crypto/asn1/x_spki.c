@@ -60,7 +60,7 @@
   * wrote it.  It is under my Copyright with his permission
   */
 
-#include <stdio.h>
+
 #include "cryptlib.h"
 #include <openssl/x509.h>
 #include <openssl/asn1t.h>

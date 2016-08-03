@@ -58,7 +58,7 @@
 
 /* Original version from Steven Schoch <schoch@sheba.arc.nasa.gov> */
 
-#include <stdio.h>
+
 #include "cryptlib.h"
 #include <openssl/bn.h>
 #include <openssl/sha.h>

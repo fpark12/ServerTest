@@ -56,7 +56,7 @@
  * [including the GNU Public Licence.]
  */
 
-#include <stdio.h>
+
 #include "cryptlib.h"
 #include "asn1_locl.h"
 #include <openssl/asn1t.h>

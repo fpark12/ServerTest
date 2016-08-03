@@ -61,7 +61,7 @@
  *
  */
 
-#include <stdio.h>
+
 #include <cryptlib.h>
 #include <openssl/objects.h>
 #include <openssl/x509.h>

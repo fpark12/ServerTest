@@ -67,7 +67,7 @@
 
 #ifndef OPENSSL_NO_KRB5
 
-#include <stdio.h>
+
 #include <ctype.h>
 #include <krb5.h>
 

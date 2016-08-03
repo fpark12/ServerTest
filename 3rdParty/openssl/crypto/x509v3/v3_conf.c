@@ -59,7 +59,7 @@
 
 
 
-#include <stdio.h>
+
 #include <ctype.h>
 #include "cryptlib.h"
 #include <openssl/conf.h>

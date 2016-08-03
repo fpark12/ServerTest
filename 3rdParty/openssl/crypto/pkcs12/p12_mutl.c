@@ -57,7 +57,7 @@
  */
 
 #ifndef OPENSSL_NO_HMAC
-#include <stdio.h>
+
 #include "cryptlib.h"
 #include <openssl/hmac.h>
 #include <openssl/rand.h>

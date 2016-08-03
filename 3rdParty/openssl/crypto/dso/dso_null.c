@@ -59,7 +59,7 @@
 /* This "NULL" method is provided as the fallback for systems that have
  * no appropriate support for "shared-libraries". */
 
-#include <stdio.h>
+
 #include "cryptlib.h"
 #include <openssl/dso.h>
 

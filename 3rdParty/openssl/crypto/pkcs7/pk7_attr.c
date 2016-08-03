@@ -56,7 +56,7 @@
  *
  */
 
-#include <stdio.h>
+
 #include <stdlib.h>
 #include <openssl/bio.h>
 #include <openssl/asn1.h>

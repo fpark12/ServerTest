@@ -65,7 +65,7 @@
  *
  * 1.0 eay - First version 29/07/92
  */
-#include <stdio.h>
+
 #include "cryptlib.h"
 #include <openssl/stack.h>
 #include <openssl/objects.h>

@@ -55,7 +55,7 @@
  * Hudson (tjh@cryptsoft.com).
  *
  */
-#include <stdio.h>
+
 #include <stdlib.h>
 #include "cryptlib.h"
 #if !defined(OPENSSL_NO_HMAC) && !defined(OPENSSL_NO_SHA)

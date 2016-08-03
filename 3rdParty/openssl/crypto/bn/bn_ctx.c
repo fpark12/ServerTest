@@ -60,7 +60,7 @@
 #endif
 #endif
 
-#include <stdio.h>
+
 #include <assert.h>
 
 #include "cryptlib.h"

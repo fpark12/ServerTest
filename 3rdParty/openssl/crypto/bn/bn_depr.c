@@ -56,7 +56,7 @@
 /* Support for deprecated functions goes here - static linkage will only slurp
  * this code if applications are using them directly. */
 
-#include <stdio.h>
+
 #include <time.h>
 #include "cryptlib.h"
 #include "bn_lcl.h"

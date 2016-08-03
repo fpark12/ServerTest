@@ -56,7 +56,7 @@
  * [including the GNU Public Licence.]
  */
 
-#include <stdio.h>
+
 #include <time.h>
 #include "cryptlib.h"
 #include "o_time.h"

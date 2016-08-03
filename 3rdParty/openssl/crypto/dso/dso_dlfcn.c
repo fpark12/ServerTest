@@ -66,7 +66,7 @@
 # endif
 #endif
 
-#include <stdio.h>
+
 #include "cryptlib.h"
 #include <openssl/dso.h>
 

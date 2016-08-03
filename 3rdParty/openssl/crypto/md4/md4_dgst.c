@@ -56,7 +56,7 @@
  * [including the GNU Public Licence.]
  */
 
-#include <stdio.h>
+
 #include <openssl/opensslv.h>
 #include <openssl/crypto.h>
 #include "md4_locl.h"

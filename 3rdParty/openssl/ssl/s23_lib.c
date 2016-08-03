@@ -1,4 +1,4 @@
-/* crypto/mdc2/mdc2test.c */
+/* ssl/s23_lib.c */
 /* Copyright (C) 1995-1998 Eric Young (eay@cryptsoft.com)
  * All rights reserved.
  *
@@ -57,93 +57,131 @@
  */
 
 #include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
+#include <openssl/objects.h>
+#include "ssl_locl.h"
 
-#include "../e_os.h"
-
-#if defined(OPENSSL_NO_DES) && !defined(OPENSSL_NO_MDC2)
-#define OPENSSL_NO_MDC2
-#endif
-
-#ifdef OPENSSL_NO_MDC2
-int main(int argc, char *argv[])
-{
-    printf("No MDC2 support\n");
-    return(0);
-}
-#else
-#include <openssl/evp.h>
-#include <openssl/mdc2.h>
-
-#ifdef CHARSET_EBCDIC
-#include <openssl/ebcdic.h>
-#endif
-
-static unsigned char pad1[16]={
-	0x42,0xE5,0x0C,0xD2,0x24,0xBA,0xCE,0xBA,
-	0x76,0x0B,0xDD,0x2B,0xD4,0x09,0x28,0x1A
-	};
-
-static unsigned char pad2[16]={
-	0x2E,0x46,0x79,0xB5,0xAD,0xD9,0xCA,0x75,
-	0x35,0xD8,0x7A,0xFE,0xAB,0x33,0xBE,0xE2
-	};
-
-int main(int argc, char *argv[])
+long ssl23_default_timeout(void)
 	{
-	int ret=0;
-	unsigned char md[MDC2_DIGEST_LENGTH];
-	int i;
-	EVP_MD_CTX c;
-	static char *text="Now is the time for all ";
-
-#ifdef CHARSET_EBCDIC
-	ebcdic2ascii(text,text,strlen(text));
-#endif
-
-	EVP_MD_CTX_init(&c);
-	EVP_DigestInit_ex(&c,EVP_mdc2(), NULL);
-	EVP_DigestUpdate(&c,(unsigned char *)text,strlen(text));
-	EVP_DigestFinal_ex(&c,&(md[0]),NULL);
-
-	if (memcmp(md,pad1,MDC2_DIGEST_LENGTH) != 0)
-		{
-		for (i=0; i<MDC2_DIGEST_LENGTH; i++)
-			printf("%02X",md[i]);
-		printf(" <- generated\n");
-		for (i=0; i<MDC2_DIGEST_LENGTH; i++)
-			printf("%02X",pad1[i]);
-		printf(" <- correct\n");
-		ret=1;
-		}
-	else
-		printf("pad1 - ok\n");
-
-	EVP_DigestInit_ex(&c,EVP_mdc2(), NULL);
-	/* FIXME: use a ctl function? */
-	((MDC2_CTX *)c.md_data)->pad_type=2;
-	EVP_DigestUpdate(&c,(unsigned char *)text,strlen(text));
-	EVP_DigestFinal_ex(&c,&(md[0]),NULL);
-
-	if (memcmp(md,pad2,MDC2_DIGEST_LENGTH) != 0)
-		{
-		for (i=0; i<MDC2_DIGEST_LENGTH; i++)
-			printf("%02X",md[i]);
-		printf(" <- generated\n");
-		for (i=0; i<MDC2_DIGEST_LENGTH; i++)
-			printf("%02X",pad2[i]);
-		printf(" <- correct\n");
-		ret=1;
-		}
-	else
-		printf("pad2 - ok\n");
-
-	EVP_MD_CTX_cleanup(&c);
-#ifdef OPENSSL_SYS_NETWARE
-    if (ret) printf("ERROR: %d\n", ret);
-#endif
-	EXIT(ret);
-	return(ret);
+	return(300);
 	}
+
+int ssl23_num_ciphers(void)
+	{
+	return(ssl3_num_ciphers()
+#ifndef OPENSSL_NO_SSL2
+	       + ssl2_num_ciphers()
 #endif
+	    );
+	}
+
+const SSL_CIPHER *ssl23_get_cipher(unsigned int u)
+	{
+	unsigned int uu=ssl3_num_ciphers();
+
+	if (u < uu)
+		return(ssl3_get_cipher(u));
+	else
+#ifndef OPENSSL_NO_SSL2
+		return(ssl2_get_cipher(u-uu));
+#else
+		return(NULL);
+#endif
+	}
+
+/* This function needs to check if the ciphers required are actually
+ * available */
+const SSL_CIPHER *ssl23_get_cipher_by_char(const unsigned char *p)
+	{
+	const SSL_CIPHER *cp;
+
+	cp=ssl3_get_cipher_by_char(p);
+#ifndef OPENSSL_NO_SSL2
+	if (cp == NULL)
+		cp=ssl2_get_cipher_by_char(p);
+#endif
+	return(cp);
+	}
+
+int ssl23_put_cipher_by_char(const SSL_CIPHER *c, unsigned char *p)
+	{
+	long l;
+
+	/* We can write SSLv2 and SSLv3 ciphers */
+	if (p != NULL)
+		{
+		l=c->id;
+		p[0]=((unsigned char)(l>>16L))&0xFF;
+		p[1]=((unsigned char)(l>> 8L))&0xFF;
+		p[2]=((unsigned char)(l     ))&0xFF;
+		}
+	return(3);
+	}
+
+int ssl23_read(SSL *s, void *buf, int len)
+	{
+	int n;
+
+	clear_sys_error();
+	if (SSL_in_init(s) && (!s->in_handshake))
+		{
+		n=s->handshake_func(s);
+		if (n < 0) return(n);
+		if (n == 0)
+			{
+			SSLerr(SSL_F_SSL23_READ,SSL_R_SSL_HANDSHAKE_FAILURE);
+			return(-1);
+			}
+		return(SSL_read(s,buf,len));
+		}
+	else
+		{
+		ssl_undefined_function(s);
+		return(-1);
+		}
+	}
+
+int ssl23_peek(SSL *s, void *buf, int len)
+	{
+	int n;
+
+	clear_sys_error();
+	if (SSL_in_init(s) && (!s->in_handshake))
+		{
+		n=s->handshake_func(s);
+		if (n < 0) return(n);
+		if (n == 0)
+			{
+			SSLerr(SSL_F_SSL23_PEEK,SSL_R_SSL_HANDSHAKE_FAILURE);
+			return(-1);
+			}
+		return(SSL_peek(s,buf,len));
+		}
+	else
+		{
+		ssl_undefined_function(s);
+		return(-1);
+		}
+	}
+
+int ssl23_write(SSL *s, const void *buf, int len)
+	{
+	int n;
+
+	clear_sys_error();
+	if (SSL_in_init(s) && (!s->in_handshake))
+		{
+		n=s->handshake_func(s);
+		if (n < 0) return(n);
+		if (n == 0)
+			{
+			SSLerr(SSL_F_SSL23_WRITE,SSL_R_SSL_HANDSHAKE_FAILURE);
+			return(-1);
+			}
+		return(SSL_write(s,buf,len));
+		}
+	else
+		{
+		ssl_undefined_function(s);
+		return(-1);
+		}
+	}

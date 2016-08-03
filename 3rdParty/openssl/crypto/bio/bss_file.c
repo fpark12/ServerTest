@@ -83,7 +83,7 @@
 #endif
 #endif
 
-#include <stdio.h>
+
 #include <errno.h>
 #include "cryptlib.h"
 #include "bio_lcl.h"

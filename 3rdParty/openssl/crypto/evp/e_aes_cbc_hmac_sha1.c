@@ -49,7 +49,7 @@
 
 #include <openssl/opensslconf.h>
 
-#include <stdio.h>
+
 #include <string.h>
 
 #if !defined(OPENSSL_NO_AES) && !defined(OPENSSL_NO_SHA1)

@@ -56,7 +56,7 @@
  * [including the GNU Public Licence.]
  */
 
-#include <stdio.h>
+
 #include <ctype.h>
 #include <limits.h>
 #include "cryptlib.h"

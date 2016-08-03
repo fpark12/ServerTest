@@ -56,7 +56,7 @@
  * [including the GNU Public Licence.]
  */
 
-#include <stdio.h>
+
 
 /* This version of crypt has been developed from my MIT compatible
  * DES library.

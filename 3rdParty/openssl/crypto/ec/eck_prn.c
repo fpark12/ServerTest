@@ -61,7 +61,7 @@
  * contributed to the OpenSSL project.
  */
 
-#include <stdio.h>
+
 #include "cryptlib.h"
 #include <openssl/evp.h>
 #include <openssl/ec.h>

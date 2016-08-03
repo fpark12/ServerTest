@@ -56,7 +56,7 @@
 /* NB: This file contains deprecated functions (compatibility wrappers to the
  * "new" versions). */
 
-#include <stdio.h>
+
 #include <time.h>
 #include "cryptlib.h"
 #include <openssl/bn.h>

@@ -5,6 +5,7 @@ SET( INCLUDE
 SET( LINK
 )
 
+add_definitions(/wd4244 /wd4267 /wd4331)
 
 file( READ opensslconf.h.in CONF )
 string( REPLACE "#undef OPENSSL_EXPORT_VAR_AS_FUNCTION" "#cmakedefine OPENSSL_EXPORT_VAR_AS_FUNCTION" CONF "${CONF}" )

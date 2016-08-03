@@ -56,7 +56,7 @@
  *
  */
 
-#include <stdio.h>
+
 #include <openssl/bn.h>
 
 /* X9.31 routines for prime derivation */
