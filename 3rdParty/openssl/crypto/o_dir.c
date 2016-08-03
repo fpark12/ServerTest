@@ -71,13 +71,13 @@
 
 #define LPDIR_H
 #if defined OPENSSL_SYS_UNIX || defined DJGPP
-#include "LPdir_unix.c"
+#include "LPdir_unix.h"
 #elif defined OPENSSL_SYS_VMS
-#include "LPdir_vms.c"
+#include "LPdir_vms.h"
 #elif defined OPENSSL_SYS_WIN32
-#include "LPdir_win32.c"
+#include "LPdir_win32.h"
 #elif defined OPENSSL_SYS_WINCE
-#include "LPdir_wince.c"
+#include "LPdir_wince.h"
 #else
-#include "LPdir_nyi.c"
+#include "LPdir_nyi.h"
 #endif
