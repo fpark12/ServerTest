@@ -22,7 +22,7 @@ set( CONF "
 #define OPENSSL_NO_SCTP
 #define OPENSSL_NO_EC_NISTP_64_GCC_128
 ${CONF}" )
-file( WRITE ${CMAKE_CURRENT_BINARY_DIR}/opensslconf.h.in "${CONF}" )
+file( WRITE ${CMAKE_CURRENT_BINARY_DIR}/openssl/opensslconf.h.in "${CONF}" )
 
 ## AND MINGW AND NOT CYGWIN? or? at least msvc needs OPENSSL_EXPORT_VAR_AS_FUNCTION
 add_definitions( -DOPENSSL_NO_ASM )
@@ -37,7 +37,7 @@ if( WIN32 )
 endif()
 
 configure_file ( buildinf.h.in ${CMAKE_CURRENT_BINARY_DIR}/buildinf.h )
-configure_file( ${CMAKE_CURRENT_BINARY_DIR}/opensslconf.h.in ${CMAKE_CURRENT_BINARY_DIR}/opensslconf.h )
+configure_file( ${CMAKE_CURRENT_BINARY_DIR}/openssl/opensslconf.h.in ${CMAKE_CURRENT_BINARY_DIR}/openssl/opensslconf.h )
 
 #~2DO: set BUILDINF_DATE to `date LC_ALL=C LC_TIME=C`
 #configure_file ( buildinf.h.cmake buildinf.h )
