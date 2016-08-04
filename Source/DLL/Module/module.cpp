@@ -1,4 +1,5 @@
-#include "testdll.h"
+#include "module.h"
+#include "static.h"
 
 BOOL WINAPI DllMain(HINSTANCE hinstDLL, /* DLL module handle */ DWORD fdwReason, /* reason called */ LPVOID lpvReserved) // reserved
 {

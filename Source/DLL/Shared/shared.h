@@ -2,7 +2,7 @@
 #pragma once
 #include <windows.h>
 
-#ifdef testdll_EXPORTS
+#ifdef _SHARED
 #define MY_EXPORTS __declspec(dllexport)
 #else
 #define MY_EXPORTS __declspec(dllimport)

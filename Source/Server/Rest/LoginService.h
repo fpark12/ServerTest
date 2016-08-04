@@ -9,18 +9,22 @@
 #include "httppost.h"
 #include "soapH.h"
 
-class SslContext;
+class Ssl;
 class LoginService;
 
-extern SslContext& SslContextRef;
+extern Ssl& SslRef;
 extern LoginService& LoginServiceRef;
-#define GSslContext SslContextRef
+#define GSsl SslRef
 #define GLoginService LoginServiceRef
 
-class SslContext
+class Ssl
 {
 private:
-	SslContext()
+	Ssl() = default;
+	~Ssl() = default;
+
+public:
+	void Initialize()
 	{
 		asio::error_code err;
 		bool Res = 0;
@@ -31,24 +35,21 @@ private:
 		Res |= GConfig.GetString("Initialization", "PrivateKeyFile", PrivateKeyFile, "LoginService.ini");
 
 
-		NativeHandle.set_options(asio::ssl::context::no_sslv3, err);
+		Context.set_options(asio::ssl::context::no_sslv3, err);
 		assert(err.value() == 0);
-		NativeHandle.use_certificate_chain_file(CertificateChainFile, err);
+		Context.use_certificate_chain_file(CertificateChainFile, err);
 		assert(err.value() == 0);
-		NativeHandle.use_private_key_file(PrivateKeyFile, asio::ssl::context::pem, err);
+		Context.use_private_key_file(PrivateKeyFile, asio::ssl::context::pem, err);
 		assert(err.value() == 0);
 	}
 
-	~SslContext() = default;
-
-public:
-	static SslContext& Instance()
+	static Ssl& Instance()
 	{
-		static SslContext Instance;
+		static Ssl Instance;
 		return Instance;
 	}
 
-	asio::ssl::context NativeHandle = asio::ssl::context(asio::ssl::context::sslv23);
+	asio::ssl::context Context = asio::ssl::context(asio::ssl::context::sslv23);
 
 };
 
@@ -198,8 +199,9 @@ public:
 		//soap_register_plugin_arg(&soapServer, &ContentTypePlugin::Init, (void*)"application/json;charset=utf-8");
 
 		// Use our already ready ssl context
-		//soapServer.ctx = Battlenet::SslContext::instance().native_handle();
-		//soapServer.ssl_flags = SOAP_SSL_RSA;
+		GSsl.Initialize();
+		soapServer.ctx = GSsl.Context.native_handle();
+		soapServer.ssl_flags = SOAP_SSL_RSA;
 
 		while (!Stopped)
 		{
@@ -236,7 +238,7 @@ public:
 
 
 
-		 */
+		*/
 	}
 
 	void Stop()
@@ -265,9 +267,10 @@ public:
 
 	}
 
-	
+
 protected:
 
 };
 
 //static_assert(std::is_pod<LoginService>::value, "LoginService is not POD!");
+

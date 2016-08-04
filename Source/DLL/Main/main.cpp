@@ -3,9 +3,9 @@
 
 #define THREADCOUNT 1 
 #ifdef _DEBUG
-#define DLL_NAME TEXT("testdll-debug")
+#define DLL_NAME(x) #x "-debug"
 #else
-#define DLL_NAME TEXT("testdll")
+#define DLL_NAME(x) #x
 #endif
 
 
@@ -61,8 +61,8 @@ int main(VOID) {
 	HINSTANCE hDLL;
 
 	// Load the DLL
-
-	hDLL = LoadLibrary(DLL_NAME);
+	const char* a = DLL_NAME(Shared);
+	hDLL = LoadLibrary(a);
 	if (!hDLL) {
 		ErrorExit("DLL failed to load");
 	}
