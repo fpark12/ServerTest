@@ -66,7 +66,7 @@ BOOL WINAPI DllMainStatic(HINSTANCE hinstDLL, /* DLL module handle */ DWORD fdwR
 	UNREFERENCED_PARAMETER(lpvReserved);
 }
 
-Static_EXPORTS BOOL WINAPI GetDataStatic(DWORD *pdw)
+Static_API BOOL WINAPI GetDataStatic(DWORD *pdw)
 {
 	LPVOID lpvData;
 	DWORD * pData;  // The stored memory pointer 
@@ -79,12 +79,12 @@ Static_EXPORTS BOOL WINAPI GetDataStatic(DWORD *pdw)
 	(*pdw) = (*pData);
 	return TRUE;
 }
-Static_EXPORTS BOOL WINAPI StoreDataStatic(DWORD dw, DWORD dw2)
+Static_API BOOL WINAPI StoreDataStatic(DWORD dw, DWORD dw2)
 {
 	return TRUE;
 }
 
-Static_EXPORTS BOOL WINAPI StoreDataStatic(DWORD dw)
+Static_API BOOL WINAPI StoreDataStatic(DWORD dw)
 {
 	LPVOID lpvData;
 	DWORD * pData;  // The stored memory pointer 
