@@ -7,4 +7,4 @@ SET( LINK
 Static
 )
 
-create_project(DYNAMIC "${DEFINE}" "${INCLUDE}" "${LINK}")
+create_project(Shared "${DEFINE}" "${INCLUDE}" "${LINK}")

@@ -2,13 +2,22 @@
 #pragma once
 #include <windows.h>
 
-#ifdef _SHARED
-#define MY_EXPORTS __declspec(dllexport)
+#if Shared_IS_STATIC
+    #if COMPILING_STATIC
+        #define Shared_EXPORTS
+    #else
+        #define Shared_EXPORTS extern
+    #endif
+#elif Shared_IS_SHARED || Shared_IS_MODULE
+    #if COMPILING_SHARED || COMPILING_MODULE
+        #undef Shared_EXPORTS
+        #define Shared_EXPORTS __declspec(dllexport)
+    #else
+        #undef Shared_EXPORTS
+        #define Shared_EXPORTS __declspec(dllimport)
+    #endif
 #else
-#define MY_EXPORTS __declspec(dllimport)
 #endif
-
-static DWORD dwTlsIndex; // address of shared memory
 
 						 // DllMain() is the entry-point function for this DLL. 
 
@@ -25,8 +34,8 @@ BOOL WINAPI DllMain(HINSTANCE hinstDLL, // DLL module handle
 extern "C" {          // we need to export the C interface
 #endif
 
-	MY_EXPORTS BOOL WINAPI StoreData(DWORD dw);
-	MY_EXPORTS BOOL WINAPI GetData(DWORD *pdw);
+    Shared_EXPORTS BOOL WINAPI StoreData(DWORD dw);
+    Shared_EXPORTS BOOL WINAPI GetData(DWORD *pdw);
 
 #ifdef __cplusplus
 }
