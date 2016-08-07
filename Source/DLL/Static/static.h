@@ -5,17 +5,17 @@
 #if CURRENT_PROJECT_ID == Static_PROJECT_ID
 	#if Static_IS_STATIC
 		#define Static_API
-	#elif Static_IS_SHARED // || Static_IS_MODULE
+	#elif Static_IS_SHARED
 		#define Static_API __declspec(dllexport)
-	#elif Static_IS_MODULE // || Static_IS_MODULE
+	#elif Static_IS_MODULE
 		#define Static_API __declspec(dllexport)
 	#endif
 #elif CURRENT_PROJECT_ID != Static_PROJECT_ID
 	#if Static_IS_STATIC
 		#define Static_API extern
-	#elif Static_IS_SHARED // || Static_IS_MODULE
+	#elif Static_IS_SHARED
 		#define Static_API __declspec(dllimport)
-	#elif Static_IS_MODULE // || Static_IS_MODULE
+	#elif Static_IS_MODULE
 		#error "__declspec(dllimport)" cannot be used to import symbols from modules.
 	#endif
 #endif
