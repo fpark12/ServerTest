@@ -29,8 +29,12 @@
 		// first error on parse error, or -1 on file open error.
 		int LoadFile(std::string Filename);
 
-		// Get a string value from INI file, returning default_value if not found.
 		bool GetString(std::string Key, std::string& Output) const;
+		bool GetLong(std::string Key, long& Output) const;
+		bool GetDouble(std::string Key, double& Output) const;
+		bool GetBoolean(std::string Key, bool& Output) const;
+
+		// Get a string value from INI file, returning default_value if not found.
 		bool GetString(std::string section, std::string name, std::string& OutString) const;
 
 		// Get an integer (long) value from INI file, returning default_value if
@@ -107,6 +111,12 @@
 
 		//
 		bool GetString(const std::string& Key, std::string& Value) const;
+		bool GetBool(const std::string& Key, bool& Value) const;
+		bool GetLong(const std::string& Key, long& Value) const;
+		bool GetInt(const std::string& Key, int& Value) const;
+		bool GetDouble(const std::string& Key, double& Value) const;
+		bool GetFloat(const std::string& Key, float& Value) const;
+
 		bool GetString(std::string const& section, std::string const& Key, std::string& Value, std::string const& Filename) const;
 		bool GetBool(std::string const& section, std::string const& Key, bool& Value, std::string const& Filename) const;
 		bool GetLong(std::string const& section, std::string const& Key, long& Value, std::string const& Filename) const;

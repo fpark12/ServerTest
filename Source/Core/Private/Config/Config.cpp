@@ -70,6 +70,55 @@
 		return 1;
 	}
 
+	bool ConfigFile::GetLong(std::string Key, long& Output) const
+	{
+		std::string Value = "";
+		GetString(Key, Value);
+		char* end;
+		// This parses "1234" (decimal) and also "0x4D2" (hex)
+		long Result = strtol(Value.c_str(), &end, 0);
+		if (end > Value.c_str())
+		{
+			Output = Result;
+			return 0;
+		}
+
+		return 1;
+	}
+	bool ConfigFile::GetDouble(std::string Key, double& Output) const
+	{
+		std::string Value = "";
+		GetString(Key, Value);
+		char* end;
+		double Result = strtod(Value.c_str(), &end);
+		if (end > Value.c_str())
+		{
+			Output = Result;
+			return 0;
+		}
+
+		return 1;
+	}
+
+	bool ConfigFile::GetBoolean(std::string Key, bool& Output) const
+	{
+		std::string Value = "";
+		GetString(Key, Value);
+		std::transform(Value.begin(), Value.end(), Value.begin(), ::tolower);
+		if (Value == "true" || Value == "yes" || Value == "on" || Value == "1")
+		{
+			Output = true;
+			return 0;
+		}
+		else if (Value == "false" || Value == "no" || Value == "off" || Value == "0")
+		{
+			Output = false;
+			return 0;
+		}
+
+		return 1;
+	}
+
 	bool ConfigFile::GetString(std::string Section, std::string Name, std::string& Output) const
 	{
 		const std::string key = MakeKey(Section, Name);
@@ -85,7 +134,7 @@
 
 		return 1;
 	}
-
+	
 	bool ConfigFile::GetLong(std::string section, std::string name, long& Output) const
 	{
 		std::string Value = "";
@@ -309,7 +358,8 @@
 	{
 		size_t FilenameEnd = Key.find_first_of(".", 0);
 		std::string Filename = Key.substr(0, FilenameEnd);
-		std::string Subkey = Key.substr(FilenameEnd);
+		std::string Subkey = Key.substr(FilenameEnd + 1);
+		std::transform(Subkey.begin(), Subkey.end(), Subkey.begin(), ::tolower);
 
 		const ConfigFile* ConfigFile = this->Find(Filename);
 		if (!ConfigFile)
@@ -320,7 +370,96 @@
 		return ConfigFile->GetString(Subkey, Value);
 	}
 
+	bool Config::GetBool(const std::string& Key, bool& Value) const
+	{
+		size_t FilenameEnd = Key.find_first_of(".", 0);
+		std::string Filename = Key.substr(0, FilenameEnd);
+		std::string Subkey = Key.substr(FilenameEnd + 1);
+		std::transform(Subkey.begin(), Subkey.end(), Subkey.begin(), ::tolower);
 
+		const ConfigFile* ConfigFile = this->Find(Filename);
+		if (!ConfigFile)
+		{
+			return false;
+		}
+		return ConfigFile->GetBoolean(Subkey, Value);
+	}
+
+	bool Config::GetLong(const std::string& Key, long& Value) const
+	{
+		size_t FilenameEnd = Key.find_first_of(".", 0);
+		std::string Filename = Key.substr(0, FilenameEnd);
+		std::string Subkey = Key.substr(FilenameEnd + 1);
+		std::transform(Subkey.begin(), Subkey.end(), Subkey.begin(), ::tolower);
+
+		const ConfigFile* ConfigFile = this->Find(Filename);
+		if (!ConfigFile)
+		{
+			return false;
+		}
+		return ConfigFile->GetLong(Subkey, Value);
+	}
+
+	bool Config::GetInt(const std::string& Key, int& Value) const
+	{
+		size_t FilenameEnd = Key.find_first_of(".", 0);
+		std::string Filename = Key.substr(0, FilenameEnd);
+		std::string Subkey = Key.substr(FilenameEnd + 1);
+		std::transform(Subkey.begin(), Subkey.end(), Subkey.begin(), ::tolower);
+
+		const ConfigFile* ConfigFile = this->Find(Filename);
+		if (!ConfigFile)
+		{
+			return false;
+		}
+		long Long;
+		bool bResult = ConfigFile->GetLong(Subkey, Long);
+		if (bResult == 0)
+		{
+			Value = (int)Long;
+		}
+
+		return bResult;
+	}
+
+	bool Config::GetDouble(const std::string& Key, double& Value) const
+	{
+		size_t FilenameEnd = Key.find_first_of(".", 0);
+		std::string Filename = Key.substr(0, FilenameEnd);
+		std::string Subkey = Key.substr(FilenameEnd + 1);
+		std::transform(Subkey.begin(), Subkey.end(), Subkey.begin(), ::tolower);
+
+		const ConfigFile* ConfigFile = this->Find(Filename);
+		if (!ConfigFile)
+		{
+			return false;
+		}
+		return ConfigFile->GetDouble(Subkey, Value);
+	}
+
+	bool Config::GetFloat(const std::string& Key, float& Value) const
+	{
+		size_t FilenameEnd = Key.find_first_of(".", 0);
+		std::string Filename = Key.substr(0, FilenameEnd);
+		std::string Subkey = Key.substr(FilenameEnd + 1);
+		std::transform(Subkey.begin(), Subkey.end(), Subkey.begin(), ::tolower);
+
+		const ConfigFile* ConfigFile = this->Find(Filename);
+		if (!ConfigFile)
+		{
+			return false;
+		}
+		double Double;
+		bool bResult = ConfigFile->GetDouble(Subkey, Double);
+		if (bResult == 0)
+		{
+			Value = (float)Double;
+		}
+
+		return bResult;
+	}
+
+	// deprecated
 	bool Config::GetString(std::string const& Section, std::string const& Key, std::string& Value, std::string const& Filename) const
 	{
 		const ConfigFile* ConfigFile = this->Find(Filename);

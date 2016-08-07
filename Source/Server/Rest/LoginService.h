@@ -2,7 +2,7 @@
 #include "asio.hpp"
 #include <asio/ssl/context.hpp>
 
-#include "Public/config.h"
+#include "Public/Config/config.h"
 #include <chrono>
 
 #include "httpget.h"
@@ -31,8 +31,8 @@ public:
 
 		std::string CertificateChainFile;
 		std::string PrivateKeyFile;
-		Res |= GConfig.GetString("Initialization", "CertificatesFile", CertificateChainFile, "LoginService.ini");
-		Res |= GConfig.GetString("Initialization", "PrivateKeyFile", PrivateKeyFile, "LoginService.ini");
+		Res |= GConfig.GetString("LoginService.Initialization.CertificatesFile", CertificateChainFile);
+		Res |= GConfig.GetString("LoginService.Initialization.PrivateKeyFile", PrivateKeyFile);
 
 
 		Context.set_options(asio::ssl::context::no_sslv3, err);
@@ -86,10 +86,9 @@ public:
 		// "LoginService.Init.IPAddress	"
 		BindIP = "0.0.0.0";
 		Res |= GConfig.GetString("LoginService.Initialization.IPAddress", IPAddress);
-		Res |= GConfig.GetString("Initialization", "IPAddress", IPAddress, "LoginService.ini");
-		Res |= GConfig.GetString("Initialization", "ExternalIPAddress", TempExternalAddress, "LoginService.ini");
-		Res |= GConfig.GetString("Initialization", "LocalIPAddress", TempLocalAddress, "LoginService.ini");
-		Res |= GConfig.GetInt("Initialization", "Port", Port, "LoginService.ini");
+		Res |= GConfig.GetString("LoginService.Initialization.ExternalIPAddress", TempExternalAddress);
+		Res |= GConfig.GetString("LoginService.Initialization.LocalIPAddress", TempLocalAddress);
+		Res |= GConfig.GetInt("LoginService.Initialization.Port", Port);
 		if (Port < 0 || Port > 0xFFFF)
 		{
 			//TC_LOG_ERROR("server.rest", "Specified login service port (%d) out of allowed range (1-65535), defaulting to 8081", _port);
@@ -163,13 +162,13 @@ public:
 
 	void Run()
 	{
-		soap soapServer(SOAP_C_UTFSTRING, SOAP_C_UTFSTRING);
+		soap SoapInstance(SOAP_C_UTFSTRING, SOAP_C_UTFSTRING);
 
 		// check every 3 seconds if world ended
-		soapServer.accept_timeout = 3;
-		soapServer.recv_timeout = 5;
-		soapServer.send_timeout = 5;
-		if (!soap_valid_socket(soap_bind(&soapServer, BindIP.c_str(), Port, 100)))
+		SoapInstance.accept_timeout = 3;
+		SoapInstance.recv_timeout = 5;
+		SoapInstance.send_timeout = 5;
+		if (!soap_valid_socket(soap_bind(&SoapInstance, BindIP.c_str(), Port, 100)))
 		{
 			//TC_LOG_ERROR("server.rest", "Couldn't bind to %s:%d", _bindIP.c_str(), _port);
 			return;
@@ -194,23 +193,22 @@ public:
 			{ nullptr, nullptr }
 		};
 
-		soap_register_plugin_arg(&soapServer, &http_get, (void*)&handle_get_plugin);
-		soap_register_plugin_arg(&soapServer, &http_post, handlers);
+		soap_register_plugin_arg(&SoapInstance, &http_get, (void*)&handle_get_plugin);
+		soap_register_plugin_arg(&SoapInstance, &http_post, handlers);
 		//soap_register_plugin_arg(&soapServer, &ContentTypePlugin::Init, (void*)"application/json;charset=utf-8");
 
 		// Use our already ready ssl context
 		GSsl.Initialize();
-		soapServer.ctx = GSsl.Context.native_handle();
-		soapServer.ssl_flags = SOAP_SSL_RSA;
+		SoapInstance.ctx = GSsl.Context.native_handle();
+		SoapInstance.ssl_flags = SOAP_SSL_RSA;
 
 		while (!Stopped)
 		{
-			if (!soap_valid_socket(soap_accept(&soapServer)))
+			if (!soap_valid_socket(soap_accept(&SoapInstance)))
 				continue;   // ran into an accept timeout
 
-			std::shared_ptr<soap> soapClient = std::make_shared<soap>(soapServer);
-			asio::ip::address_v4 address(soapClient->ip);
-			if (soap_ssl_accept(soapClient.get()) != SOAP_OK)
+			asio::ip::address_v4 address(SoapInstance.ip);
+			if (soap_ssl_accept(&SoapInstance) != SOAP_OK)
 			{
 				//TC_LOG_DEBUG("server.rest", "Failed SSL handshake from IP=%s", address.to_string().c_str());
 				continue;
@@ -218,16 +216,16 @@ public:
 
 			//TC_LOG_DEBUG("server.rest", "Accepted connection from IP=%s", address.to_string().c_str());
 
-			auto SoapMain = [soapClient]
+			auto SoapMain = [&SoapInstance]
 			{
-				soap_serve(soapClient.get());
+				soap_serve(&SoapInstance);
 			};
 
 			std::thread(SoapMain).detach();
 		}
 
 		// and release the context handle here - soap does not own it so it should not free it on exit
-		soapServer.ctx = nullptr;
+		SoapInstance.ctx = nullptr;
 
 		//TC_LOG_INFO("server.rest", "Login service exiting...");
 
@@ -249,7 +247,16 @@ public:
 	//friend int32 handle_get_plugin(soap* soapClient);
 	int32 HandleGet(soap* soapClient)
 	{
-		return 0;
+		asio::ip::address_v4 address(soapClient->ip);
+		std::string ip_address = address.to_string();
+
+		//TC_LOG_DEBUG("server.rest", "[%s:%d] Handling GET request path=\"%s\"", ip_address.c_str(), soapClient->port, soapClient->path);
+
+		static std::string const expectedPath = "/bnetserver/login/";
+		if (strstr(soapClient->path, expectedPath.c_str()) != &soapClient->path[0])
+			return 404;
+
+		return 0;// SendResponse(soapClient, _formInputs);
 	}
 
 	//friend int32 handle_post_plugin(soap* soapClient);
@@ -257,6 +264,17 @@ public:
 	{
 		return 0;
 	}
+
+	/*
+	int32 LoginRESTService::SendResponse(soap* soapClient, google::protobuf::Message const& response)
+	{
+		std::string jsonResponse = JSON::Serialize(response);
+
+		soap_response(soapClient, SOAP_FILE);
+		soap_send_raw(soapClient, jsonResponse.c_str(), jsonResponse.length());
+		return soap_end_send(soapClient);
+	}
+	*/
 
 
 	void CleanupLoginTickets(const asio::error_code& error)
