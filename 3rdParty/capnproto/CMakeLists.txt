@@ -5,7 +5,9 @@ SET( INCLUDE
 )
 SET( LINK
 )
-add_definitions(/wd4244 /wd4267 /wd4018 /wd4355 /wd4800 /wd4251 /wd4996 /wd4146 /wd4305)
+if(MSVC)
+	add_definitions(/wd4244 /wd4267 /wd4018 /wd4355 /wd4800 /wd4251 /wd4996 /wd4146 /wd4305)
+endif()
 create_project(STATIC "${DEFINE}" "${INCLUDE}" "${LINK}")
 
 if(TARGET ${PROJECT_NAME})

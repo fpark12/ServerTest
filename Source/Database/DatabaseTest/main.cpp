@@ -1,7 +1,10 @@
 #include "DatabaseOperation.h"
-#define _CRTDBG_MAP_ALLOC
 #include <stdlib.h>
+
+#if PLATFORM_WINDOWS
+#define _CRTDBG_MAP_ALLOC
 #include <crtdbg.h>
+#endif
 
 int main()
 {
@@ -20,7 +23,7 @@ int main()
 			exit(EXIT_FAILURE);
 		}
 
-		char* sql = "SELECT `sex`, `age`, `name` FROM `user` WHERE `score` = ?";
+		char sql [] = "SELECT `sex`, `age`, `name` FROM `user` WHERE `score` = ?";
 
 		if (mysql_stmt_prepare(stmt, sql, strlen(sql)))
 		{
@@ -47,5 +50,7 @@ int main()
 			exit(EXIT_FAILURE);
 		}
 	}
+#if PLATFORM_WINDOWS
 	_CrtDumpMemoryLeaks();
+#endif
 }

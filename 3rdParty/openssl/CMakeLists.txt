@@ -4,8 +4,9 @@ SET( INCLUDE
 )
 SET( LINK
 )
-
-add_definitions(/wd4244 /wd4267 /wd4331)
+if(MSVC)
+	add_definitions(/wd4244 /wd4267 /wd4331)
+endif()
 
 file( READ opensslconf.h.in CONF )
 string( REPLACE "#undef OPENSSL_EXPORT_VAR_AS_FUNCTION" "#cmakedefine OPENSSL_EXPORT_VAR_AS_FUNCTION" CONF "${CONF}" )
@@ -26,6 +27,10 @@ file( WRITE ${CMAKE_CURRENT_BINARY_DIR}/openssl/opensslconf.h.in "${CONF}" )
 
 ## AND MINGW AND NOT CYGWIN? or? at least msvc needs OPENSSL_EXPORT_VAR_AS_FUNCTION
 add_definitions( -DOPENSSL_NO_ASM )
+
+if(XCODE)
+  add_definitions( -DOPENSSL_SYSNAME_MACOSX )
+endif()
 
 if( WIN32 )
   add_definitions( -DOPENSSL_SYSNAME_WIN32 )

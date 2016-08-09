@@ -5,6 +5,12 @@
 #define LOCK2 LockGuard LOCK_(lock, __LINE__) = []()
 #define SCOPED_LOCK(x) LockGuard LOCK_(lock, __LINE__); LOCK_(lock, __LINE__) << &x << [&]()
 
+#if PLATFORM_WINDOWS
+#define FORCEINLINE __forceinline
+#else
+#define FORCEINLINE inline
+#endif
+
 typedef void(*LambdaFuncType)();
 
 struct LockGuard
@@ -29,14 +35,14 @@ struct LockGuard
 	}
 	*/
 
-	__forceinline LockGuard& operator<< (std::mutex* Mutex)
+	FORCEINLINE LockGuard& operator<< (std::mutex* Mutex)
 	{
 		this->Mutex = Mutex;
 		return *this;
 	}
 
 	template<class Callable>
-	__forceinline void operator<< (Callable Lambda)
+	FORCEINLINE void operator<< (Callable Lambda)
 	{
 		Mutex->lock();
 		Lambda();
