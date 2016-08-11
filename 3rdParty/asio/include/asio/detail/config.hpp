@@ -541,7 +541,9 @@
 #endif // !defined(ASIO_WINDOWS)
 
 // Hack: Assume target windows machine is at least XP
+#ifndef _WIN32_WINNT
 #  define _WIN32_WINNT 0x0501
+#endif
 // Windows: target OS version.
 #if defined(ASIO_WINDOWS) || defined(__CYGWIN__)
 # if !defined(_WIN32_WINNT) && !defined(_WIN32_WINDOWS)

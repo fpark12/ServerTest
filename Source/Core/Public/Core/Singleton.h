@@ -3,13 +3,14 @@
 class Singleton
 {
 private:
+protected:
 	Singleton() = default;
 	virtual ~Singleton() = default;
 	Singleton(Singleton const&) = delete;
 	Singleton& operator=(Singleton const&) = delete;
 
 public:
-	static Singleton& Instance();
+	//static Singleton& Instance();
 
 };
 //#define GLoginService Singleton::Instance()

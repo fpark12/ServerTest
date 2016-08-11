@@ -17,123 +17,119 @@
  */
 
 #pragma once
-	class ConfigFile
+class Core_API ConfigFile
+{
+public:
+	// Construct INIReader and parse given filename. See ini.h for more info
+	// about the parsing.
+	ConfigFile();
+	~ConfigFile();
+
+	// Return the result of ini_parse(), i.e., 0 on success, line number of
+	// first error on parse error, or -1 on file open error.
+	int LoadFile(std::string Filename);
+
+	bool GetString(std::string Key, std::string& Output) const;
+	bool GetLong(std::string Key, long& Output) const;
+	bool GetDouble(std::string Key, double& Output) const;
+	bool GetBoolean(std::string Key, bool& Output) const;
+
+	// Get a string value from INI file, returning default_value if not found.
+	bool GetString(std::string section, std::string name, std::string& OutString) const;
+
+	// Get an integer (long) value from INI file, returning default_value if
+	// not found or not a valid integer (decimal "1234", "-1234", or hex "0x4d2").
+	bool GetLong(std::string section, std::string name, long& Output) const;
+
+	// Get a real (floating point double) value from INI file, returning
+	// default_value if not found or not a valid floating point value
+	// according to strtod().
+	bool GetDouble(std::string section, std::string name, double& Output) const;
+
+	// Get a boolean value from INI file, returning default_value if not found or if
+	// not a valid true/false value. Valid true values are "true", "yes", "on", "1",
+	// and valid false values are "false", "no", "off", "0" (not case sensitive).
+	bool GetBoolean(std::string section, std::string name, bool& Output) const;
+
+	// Returns all the section names from the INI file, in alphabetical order, but in the
+	// original casing
+	std::set<std::string> GetSections() const;
+
+	// Returns all the field names from a section in the INI file, in alphabetical order,
+	// but in the original casing. Returns an empty set if the field name is unknown
+	std::set<std::string> GetFields(std::string section) const;
+
+	std::string GetFilename() const
 	{
-	public:
-		// Construct INIReader and parse given filename. See ini.h for more info
-		// about the parsing.
-		ConfigFile();
-		~ConfigFile();
+		return Filename;
+	}
 
-		// Return the result of ini_parse(), i.e., 0 on success, line number of
-		// first error on parse error, or -1 on file open error.
-		int LoadFile(std::string Filename);
+private:
+	std::string Filename;
+	int Error;
+	std::map<std::string, std::string> Values;
+	std::set<std::string> Sections;
+	// Because we want to retain the original casing in _fields, but
+	// want lookups to be case-insensitive, we need both _fields and _values
+	std::map<std::string, std::set<std::string>*> Fields;
+	static std::string MakeKey(std::string section, std::string name);
+	static int ValueHandler(void* user, const char* section, const char* name, const char* value);
+};
 
-		bool GetString(std::string Key, std::string& Output) const;
-		bool GetLong(std::string Key, long& Output) const;
-		bool GetDouble(std::string Key, double& Output) const;
-		bool GetBoolean(std::string Key, bool& Output) const;
+class Config
+{
+private:
+	Config() = default;
+	~Config() = default;
+	Config(Config const&) = delete;
+	Config& operator=(Config const&) = delete;
 
-		// Get a string value from INI file, returning default_value if not found.
-		bool GetString(std::string section, std::string name, std::string& OutString) const;
+	std::list<ConfigFile> ConfigFiles;
+	static std::mutex ConfigLock;
+	const ConfigFile* Find(std::string const& Filename) const;
 
-		// Get an integer (long) value from INI file, returning default_value if
-		// not found or not a valid integer (decimal "1234", "-1234", or hex "0x4d2").
-		bool GetLong(std::string section, std::string name, long& Output) const;
-
-		// Get a real (floating point double) value from INI file, returning
-		// default_value if not found or not a valid floating point value
-		// according to strtod().
-		bool GetDouble(std::string section, std::string name, double& Output) const;
-
-		// Get a boolean value from INI file, returning default_value if not found or if
-		// not a valid true/false value. Valid true values are "true", "yes", "on", "1",
-		// and valid false values are "false", "no", "off", "0" (not case sensitive).
-		bool GetBoolean(std::string section, std::string name, bool& Output) const;
-
-		// Returns all the section names from the INI file, in alphabetical order, but in the
-		// original casing
-		std::set<std::string> GetSections() const;
-
-		// Returns all the field names from a section in the INI file, in alphabetical order,
-		// but in the original casing. Returns an empty set if the field name is unknown
-		std::set<std::string> GetFields(std::string section) const;
-
-		std::string GetFilename() const
-		{
-			return Filename;
-		}
-
-	private:
-		std::string Filename;
-		int Error;
-		std::map<std::string, std::string> Values;
-		std::set<std::string> Sections;
-		// Because we want to retain the original casing in _fields, but
-		// want lookups to be case-insensitive, we need both _fields and _values
-		std::map<std::string, std::set<std::string>*> Fields;
-		static std::string MakeKey(std::string section, std::string name);
-		static int ValueHandler(void* user, const char* section, const char* name, const char* value);
-	};
-
-	class Config
+public:
+	static Config& Instance()
 	{
-	private:
-		Config() = default;
-		~Config() = default;
-		//Config(Config const&) = delete;
-		//Config& operator=(Config const&) = delete;
+		static Config instance;
+		return instance;
+	}
 
-		std::list<ConfigFile> ConfigFiles;
-		static std::mutex Lock;
-		const ConfigFile* Find(std::string const& Filename) const;
+	// Method used only for loading main configuration files
+	bool Load(std::string const& Filename);
+	bool Reload(std::string const& Filename);
 
-	public:
-		static Config& Instance();
+	//Temp
+	const ConfigFile* GetFile(std::string const& Filename);
 
-		// Method used only for loading main configuration files
-		bool Load(std::string const& Filename);
-		bool Reload(std::string const& Filename);
+	//
+	bool GetString(const std::string& Key, std::string& Value) const;
+	bool GetBool(const std::string& Key, bool& Value) const;
+	bool GetLong(const std::string& Key, long& Value) const;
+	bool GetInt(const std::string& Key, int& Value) const;
+	bool GetDouble(const std::string& Key, double& Value) const;
+	bool GetFloat(const std::string& Key, float& Value) const;
 
-		//Temp
-		const ConfigFile* GetFile(std::string const& Filename)
-		{
-			for (const auto& i : ConfigFiles)
-			{
-				if (i.GetFilename() == Filename)
-				{
-					return &i;
-				}
-			}
+	bool GetString(std::string const& section, std::string const& Key, std::string& Value, std::string const& Filename) const;
+	bool GetBool(std::string const& section, std::string const& Key, bool& Value, std::string const& Filename) const;
+	bool GetLong(std::string const& section, std::string const& Key, long& Value, std::string const& Filename) const;
+	bool GetInt(std::string const& section, std::string const& Key, int& Value, std::string const& Filename) const;
+	bool GetDouble(std::string const& section, std::string const& Key, double& Value, std::string const& Filename) const;
+	bool GetFloat(std::string const& section, std::string const& Key, float& Value, std::string const& Filename) const;
 
-			return nullptr;
-		}
+	std::list<std::string> GetFilenames() const;
+	std::list<std::string> GetKeysByString(std::string const& Key, std::string const& Filename) const;
+	std::set<std::string> GetKeys(std::string const& Filename) const;
 
-		//
-		bool GetString(const std::string& Key, std::string& Value) const;
-		bool GetBool(const std::string& Key, bool& Value) const;
-		bool GetLong(const std::string& Key, long& Value) const;
-		bool GetInt(const std::string& Key, int& Value) const;
-		bool GetDouble(const std::string& Key, double& Value) const;
-		bool GetFloat(const std::string& Key, float& Value) const;
-
-		bool GetString(std::string const& section, std::string const& Key, std::string& Value, std::string const& Filename) const;
-		bool GetBool(std::string const& section, std::string const& Key, bool& Value, std::string const& Filename) const;
-		bool GetLong(std::string const& section, std::string const& Key, long& Value, std::string const& Filename) const;
-		bool GetInt(std::string const& section, std::string const& Key, int& Value, std::string const& Filename) const;
-		bool GetDouble(std::string const& section, std::string const& Key, double& Value, std::string const& Filename) const;
-		bool GetFloat(std::string const& section, std::string const& Key, float& Value, std::string const& Filename) const;
-
-		std::list<std::string> GetFilenames() const;
-		std::list<std::string> GetKeysByString(std::string const& Key, std::string const& Filename) const;
-		std::set<std::string> GetKeys(std::string const& Filename) const;
-
-	private:
-		bool Unload(std::string const& Filename);
-	};
+private:
+	bool Unload(std::string const& Filename);
+};
 
 #define GConfig GConfigRef
-	extern Config& GConfigRef;
+static Config& GConfigRef = Config::Instance();
+//Core_API_Singleton(std::mutex Config::ConfigLock);
 
-	//static_assert(std::is_pod<Config>::value, "Config is not POD!");
+//extern Config& GConfigRef;
+
+//static_assert(std::is_pod<Config>::value, "Config is not POD!");
 

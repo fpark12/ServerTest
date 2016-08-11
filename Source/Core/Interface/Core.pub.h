@@ -6,6 +6,10 @@ Low level includes.
 #include "Public/Core/StandardLibraries.h"
 #include "Public/Core/Platform.h"
 #include "Public/Core/AssertionMacros.h"
+/*----------------------------------------------------------------------------
+----------------------------------------------------------------------------*/
+#include "Public/Core/Singleton.h"
+
 
 #include "Public/Config/Config.h"
 #include "Public/Logging/Log.h"
@@ -15,3 +19,4 @@ Low level includes.
 // #include "Public/AssertionMacros.h"
 // #include "Private/SimpleIni/ConvertUTF.h"
 #include "Public/Core/Guard.h"
+#include "Public/CoreGlobals.h"

@@ -1,3 +1,4 @@
+#include "Public/Core/Singleton.h"
 
 #include "class.h"
 #include "asio.hpp"
@@ -34,8 +35,6 @@ private:
 ::LoginService& LoginServiceRef = LoginService::Instance();
 
 Ssl& SslRef = Ssl::Instance();
-
-
 int main()
 {
 	asio::io_service IoService;
