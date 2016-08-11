@@ -4,12 +4,12 @@ SET( DEFINE
 SET( INCLUDE
 	Core
 	mysql
-	capnproto
+	libprotobuf
 )
 SET( LINK
 	Core
 	mysql
-	capnproto
+	libprotobuf
 )
 
 create_project(STATIC "${DEFINE}" "${INCLUDE}" "${LINK}")
