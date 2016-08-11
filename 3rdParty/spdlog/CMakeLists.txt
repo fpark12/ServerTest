@@ -1,10 +1,8 @@
 SET( DEFINE
 )
 SET( INCLUDE
-spdlog
 )
 SET( LINK
-spdlog
+3rdParty/mysql/lib/libmysql.lib
 )
-
 create_project(STATIC "${DEFINE}" "${INCLUDE}" "${LINK}")

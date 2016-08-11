@@ -1,10 +1,8 @@
 SET( DEFINE
 )
 SET( INCLUDE
-spdlog
 )
 SET( LINK
-spdlog
 )
 
 create_project(STATIC "${DEFINE}" "${INCLUDE}" "${LINK}")

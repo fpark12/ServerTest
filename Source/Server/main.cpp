@@ -31,6 +31,11 @@ private:
 };
 
 
+::LoginService& LoginServiceRef = LoginService::Instance();
+
+Ssl& SslRef = Ssl::Instance();
+
+
 int main()
 {
 	asio::io_service IoService;

@@ -3,8 +3,8 @@
 /*----------------------------------------------------------------------------
 Low level includes.
 ----------------------------------------------------------------------------*/
-#include "Public/StandardLibraries.h"
-#include "Public/Platform.h"
-#include "Public/AssertionMacros.h"
+#include "Public/Core/StandardLibraries.h"
+#include "Public/Core/Platform.h"
+#include "Public/Core/AssertionMacros.h"
 
 #include "Public/CoreGlobals.h"
