@@ -5,7 +5,7 @@ SET( INCLUDE
 SET( LINK
 )
 if(MSVC)
-	add_definitions(/wd4244 /wd4267 /wd4331)
+	add_definitions(/wd4244 /wd4267 /wd4331 /wd4273 /wd4311 /wd4996)
 endif()
 
 file( READ opensslconf.h.in CONF )
