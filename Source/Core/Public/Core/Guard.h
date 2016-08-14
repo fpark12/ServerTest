@@ -11,6 +11,22 @@
 #define FORCEINLINE inline
 #endif
 
+#define STR_CONCAT(a, b) STR_CONCAT_I(a, b)
+#define STR_CONCAT_I(a, b) STR_CONCAT_II(~, a ## b)
+#define STR_CONCAT_II(p, res) res
+
+// This is the meat, a static instance of a class whose constructor runs your code
+#define STATIC_EXECUTE_I(func_name)               \
+static struct func_name {                         \
+  func_name();                                    \
+} STR_CONCAT(func_name, __var);                 \
+func_name::func_name()  // followed by { ... }
+
+#define STATIC_EXECUTE STATIC_EXECUTE_I(STR_CONCAT(__StaticExecute__, __LINE__))
+#define BEFORE_MAIN() STATIC_EXECUTE_I(__BeforeMain__)
+
+
+
 typedef void(*LambdaFuncType)();
 
 struct LockGuard

@@ -17,7 +17,7 @@
  */
 
 #pragma once
-class Core_API ConfigFile
+class ConfigFile
 {
 public:
 	// Construct INIReader and parse given filename. See ini.h for more info

@@ -7,4 +7,4 @@ SET( LINK
 spdlog
 )
 
-create_project(STATIC "${DEFINE}" "${INCLUDE}" "${LINK}")
+create_project(SHARED "${DEFINE}" "${INCLUDE}" "${LINK}")

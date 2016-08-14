@@ -8,6 +8,7 @@ Low level includes.
 #include "Public/Core/AssertionMacros.h"
 /*----------------------------------------------------------------------------
 ----------------------------------------------------------------------------*/
+#include "Public/Core/Core.h"
 #include "Public/Core/Singleton.h"
 
 

@@ -35,10 +35,17 @@ private:
 ::LoginService& LoginServiceRef = LoginService::Instance();
 
 Ssl& SslRef = Ssl::Instance();
+BEFORE_MAIN()
+{
+	GCore;
+	Globals::GCoreInst;
+}
 int main()
 {
 	asio::io_service IoService;
 	//Config& GConfigRef2 = Config::Instance();
+
+	GLog.Init();
 
 	Config::Instance();
 	bool result = GConfig.Load("config.ini");
