@@ -84,7 +84,7 @@ goto ReadyToBuild
 call "%VsComnToolsPath%/../../VC/bin/x86_amd64/vcvarsx86_amd64.bat" >NUL
 :ReadyToBuild
 echo Purify is setting up project files...
-if NOT EXIST %~dp0\Build (
+if NOT EXIST %~dp0\Build\CMakeCache.txt (
 	goto InitialBuild
 ) else (
 	goto Rebuild
@@ -105,7 +105,6 @@ goto GenerateSolutionIcon
 
 :Rebuild
 pushd %~dp0\Build
-1>NUL 2>NUL "%CMakePath%" -G %CMakeArg% %~dp0
 1>NUL 2>NUL "%CMakePath%" -G %CMakeArg% %~dp0
 popd
 pushd %~dp0

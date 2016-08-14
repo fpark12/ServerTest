@@ -2,7 +2,6 @@
 #include "asio.hpp"
 #include <asio/ssl/context.hpp>
 
-#include "Public/Config/config.h"
 #include <chrono>
 
 #include "httpget.h"

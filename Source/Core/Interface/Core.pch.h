@@ -3,9 +3,8 @@
 /*----------------------------------------------------------------------------
 Low level includes.
 ----------------------------------------------------------------------------*/
-#include "Public/Core/StandardLibraries.h"
-#include "Public/Core/Platform.h"
-#include "Public/Core/AssertionMacros.h"
-
-#include "Public/Core/Core.h"
-#include "Public/Core/Singleton.h"
+#include "Private/Core/StandardLibraries.h"
+#include "Private/Core/Platform.h"
+#include "Private/Core/AssertionMacros.h"
+#include "Private/Core/Singleton.h"
+#include "Private/Core/Guard.h"

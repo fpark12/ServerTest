@@ -17,7 +17,7 @@
  */
 
 #pragma once
-class ConfigFile
+class Core_API ConfigFile
 {
 public:
 	// Construct INIReader and parse given filename. See ini.h for more info
@@ -76,33 +76,27 @@ private:
 	static int ValueHandler(void* user, const char* section, const char* name, const char* value);
 };
 
-class Config
+class Core_API Config
 {
+	DECLARE_SINGLETON(Config)
 private:
-	Config() = default;
-	~Config() = default;
-	Config(Config const&) = delete;
-	Config& operator=(Config const&) = delete;
 
 	std::list<ConfigFile> ConfigFiles;
 	static std::mutex ConfigLock;
 	const ConfigFile* Find(std::string const& Filename) const;
 
 public:
-	static Config& Instance()
-	{
-		static Config instance;
-		return instance;
-	}
 
 	// Method used only for loading main configuration files
 	bool Load(std::string const& Filename);
+	bool Unload(std::string const& Filename);
 	bool Reload(std::string const& Filename);
 
-	//Temp
 	const ConfigFile* GetFile(std::string const& Filename);
+	std::list<std::string> GetFilenames() const;
+	std::list<std::string> GetKeysByString(std::string const& Key, std::string const& Filename) const;
+	std::set<std::string> GetKeys(std::string const& Filename) const;
 
-	//
 	bool GetString(const std::string& Key, std::string& Value) const;
 	bool GetBool(const std::string& Key, bool& Value) const;
 	bool GetLong(const std::string& Key, long& Value) const;
@@ -117,19 +111,4 @@ public:
 	bool GetDouble(std::string const& section, std::string const& Key, double& Value, std::string const& Filename) const;
 	bool GetFloat(std::string const& section, std::string const& Key, float& Value, std::string const& Filename) const;
 
-	std::list<std::string> GetFilenames() const;
-	std::list<std::string> GetKeysByString(std::string const& Key, std::string const& Filename) const;
-	std::set<std::string> GetKeys(std::string const& Filename) const;
-
-private:
-	bool Unload(std::string const& Filename);
 };
-
-#define GConfig GConfigRef
-static Config& GConfigRef = Config::Instance();
-//Core_API_Singleton(std::mutex Config::ConfigLock);
-
-//extern Config& GConfigRef;
-
-//static_assert(std::is_pod<Config>::value, "Config is not POD!");
-

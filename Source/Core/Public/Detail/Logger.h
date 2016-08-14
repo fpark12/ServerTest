@@ -1,13 +1,13 @@
 #pragma once
 #include "spdlog/spdlog.h"
 
-class Log
+class Logger
 {
 private:
-	Log() = default;
-	~Log() = default;
-	Log(Log const&) = delete;
-	Log& operator=(Log const&) = delete;
+	Logger() = default;
+	~Logger() = default;
+	Logger(Logger const&) = delete;
+	Logger& operator=(Logger const&) = delete;
 
 public:
 	void Init()
@@ -57,12 +57,12 @@ public:
 		SPDLOG_TRACE(console, "Enabled only #ifdef SPDLOG_TRACE_ON..{} ,{}", 1, 3.23);
 		SPDLOG_DEBUG(console, "Enabled only #ifdef SPDLOG_DEBUG_ON.. {} ,{}", 1, 3.23);
 	}
-	static Log& Instance()
+	static Logger& Instance()
 	{
-		static Log Instance;
+		static Logger Instance;
 		return Instance;
 	}
 };
 
 #define GLog GLogRef
-static Log& GLogRef = Log::Instance();
+static Logger& GLogRef = Logger::Instance();

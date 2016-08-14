@@ -22,19 +22,30 @@ if(TARGET ${PROJECT_NAME})
 	endforeach()
 
 	#write new stamp to file
-	file(WRITE ${${PROJECT_NAME}_BINARY_DIR}/proto.stamp "${newProtoStamp}")
+	if(EXISTS "${${PROJECT_NAME}_BINARY_DIR}/proto.stamp")
+		file(READ "${${PROJECT_NAME}_BINARY_DIR}/proto.stamp" oldProtoStamp)
+	endif()
+	if (NOT "${oldProtoStamp}" STREQUAL "${newProtoStamp}")
+		foreach(PROTO_FILE ${protoFiles})
+			get_filename_component(PROTO_FILE_DIR ${PROTO_FILE} DIRECTORY)
+			get_filename_component(PROTO_FILE_NAME ${PROTO_FILE} NAME_WE)
+
+			execute_process(
+				COMMAND ${ProtoCompiler}
+				-I=${PROTO_FILE_DIR}
+				--cpp_out=${${PROJECT_NAME}_BINARY_DIR}
+				${PROTO_FILE}
+			)
+		endforeach()
+		
+		file(WRITE ${${PROJECT_NAME}_BINARY_DIR}/proto.stamp "${newProtoStamp}")
+	endif()
 
 	set(newProtoSourceList "")
 	foreach(PROTO_FILE ${protoFiles})
 		get_filename_component(PROTO_FILE_DIR ${PROTO_FILE} DIRECTORY)
 		get_filename_component(PROTO_FILE_NAME ${PROTO_FILE} NAME_WE)
 
-		execute_process(
-			COMMAND ${ProtoCompiler}
-			-I=${PROTO_FILE_DIR}
-			--cpp_out=${${PROJECT_NAME}_BINARY_DIR}
-			${PROTO_FILE}
-		)
 		#message("${PROJECT_NAME}: ${${PROJECT_NAME}_BINARY_DIR}/${PROTO_FILE_NAME}.pb.cc")
 		#message("${PROJECT_NAME}: ${${PROJECT_NAME}_BINARY_DIR}/${PROTO_FILE_NAME}.pb.h")
 		target_sources(${PROJECT_NAME} PRIVATE ${${PROJECT_NAME}_BINARY_DIR}/${PROTO_FILE_NAME}.pb.cc)
@@ -90,4 +101,4 @@ if(TARGET ${PROJECT_NAME})
 		SET_PROPERTY(TARGET ${PROJECT_NAME}_UpdateProto		PROPERTY FOLDER CMakePredefinedTargets)
 	endif()
 
-endif()                                                     
+endif()

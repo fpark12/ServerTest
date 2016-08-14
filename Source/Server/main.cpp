@@ -1,5 +1,3 @@
-#include "Public/Core/Singleton.h"
-
 #include "class.h"
 #include "asio.hpp"
 #include "LoginService.h"
@@ -38,7 +36,6 @@ Ssl& SslRef = Ssl::Instance();
 BEFORE_MAIN()
 {
 	GCore;
-	Globals::GCoreInst;
 }
 int main()
 {
@@ -47,7 +44,6 @@ int main()
 
 	GLog.Init();
 
-	Config::Instance();
 	bool result = GConfig.Load("config.ini");
 	result = GConfig.Load("LoginService.ini");
 	GLoginService.Start(IoService);

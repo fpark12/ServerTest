@@ -1,5 +1,24 @@
 #pragma once
 
+#define DECLARE_SINGLETON(T) \
+private: \
+template<class U> friend class Singleton; \
+T() = default; \
+~T() = default; \
+T(T const&) = delete; \
+T& operator=(T const&) = delete;
+
+template<typename T>
+class Singleton {
+public:
+
+	static T& Instance()
+	{
+		static T Instance;
+		return Instance;
+	}
+};
+
 class Singleton2
 {
 private:
@@ -16,26 +35,6 @@ public:
 //#define GLoginService Singleton::Instance()
 //static_assert(std::is_pod<LoginService>::value, "LoginService is not POD!");
 
-template<typename T>
-class Singleton {
-public:
-
-	static T& Instance()
-	{
-		static T Instance;
-		return Instance;
-	}
-};
-
-template<typename T>
-class SingletonInstance {
-public:
-	static T& Instance()
-	{
-		static T Instance;
-		return Instance;
-	}
-};
 
 template<typename T>
 class Singleton3 {

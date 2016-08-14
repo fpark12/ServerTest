@@ -5,9 +5,9 @@ cd "%~dp0"
 del *.sln
 del *.lnk
 for /d %%a in ("PortableCMake*") do (rmdir /s /q %%~fa)
-#@rmdir /s /q CMake
-#@rmdir /s /q Purify
-@rmdir /s /q Build
+rem ## @rmdir /s /q CMake
+rem ## @rmdir /s /q Purify
+@rmdir /s /q "%~dp0/Build"
 cd Binaries/
 del *.exe
 del *.dll
