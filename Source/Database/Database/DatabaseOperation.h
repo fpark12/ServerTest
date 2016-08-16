@@ -47,7 +47,10 @@ private:
 
 	// Database Connection
 
-
+	// Utility Macro
+	#define DISALLOW_COPY(classname) \
+  classname(const classname&) = delete; \
+  classname& operator=(const classname&) = delete
 	DISALLOW_COPY(DatabaseOperation);
 
 public:

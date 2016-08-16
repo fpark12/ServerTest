@@ -19,14 +19,14 @@
 
  //#include "Errors.h"
  //#include "Log.h"
-#include "Config.h"
+#include "Public/Detail/Config.h"
+#include "ini.h"
 
 
 std::mutex Config::ConfigLock;
 
 //Config& GConfigRef = Config::Instance();
 
-#include "ini.h"
 
 ConfigFile::ConfigFile()
 {
@@ -242,30 +242,30 @@ bool Config::Load(std::string const& Filename)
 		return true;
 	}
 
-	ConfigFiles.emplace_back();
-	int res = ConfigFiles.back().LoadFile(Filename);
+	ConfigFilesList.emplace_back();
+	int res = ConfigFilesList.back().LoadFile(Filename);
 
 	if (res == 0)
 	{
-		ConfigFiles.back().GetFilename() = Filename;
+		ConfigFilesList.back().GetFilename() = Filename;
 		return true;
 	}
 	else
 	{
-		ConfigFiles.pop_back();
+		ConfigFilesList.pop_back();
 		return false;
 	}
 }
 
 bool Config::Unload(std::string const& Filename)
 {
-	auto i = std::begin(ConfigFiles);
+	auto i = std::begin(ConfigFilesList);
 
-	while (i != std::end(ConfigFiles))
+	while (i != std::end(ConfigFilesList))
 	{
 		if (i->GetFilename() == Filename)
 		{
-			i = ConfigFiles.erase(i);
+			i = ConfigFilesList.erase(i);
 		}
 		else
 		{
@@ -288,7 +288,7 @@ bool Config::Reload(std::string const& Filename)
 
 const ConfigFile* Config::GetFile(std::string const& Filename)
 {
-	for (const auto& i : ConfigFiles)
+	for (const auto& i : ConfigFilesList)
 	{
 		if (i.GetFilename() == Filename)
 		{
@@ -301,7 +301,7 @@ const ConfigFile* Config::GetFile(std::string const& Filename)
 
 const ConfigFile* Config::Find(std::string const& Filename) const
 {
-	for (const auto& i : ConfigFiles)
+	for (const auto& i : ConfigFilesList)
 	{
 		if (i.GetFilename() == Filename)
 		{
@@ -316,7 +316,7 @@ std::list<std::string> Config::GetFilenames() const
 	std::list<std::string> Filenames;
 	{
 		std::lock_guard<std::mutex> lock(ConfigLock);
-		for (auto& i : ConfigFiles)
+		for (auto& i : ConfigFilesList)
 		{
 			Filenames.push_back(i.GetFilename());
 		}

@@ -1,48 +1,15 @@
-#include "class.h"
-#include "asio.hpp"
 #include "LoginService.h"
 
-using namespace std;
-
-class LogFile
-{
-	std::mutex _mu;
-	ofstream _f;
-
-public:
-	LogFile()
-	{
-		_f.open("log.txt");
-	}
-
-	~LogFile()
-	{
-
-	}
-	void shared_print(std::string msg, int id)
-	{
-		std::lock_guard<mutex> locker(_mu);
-		_f << "From " << id << ": " << msg << endl;
-	}
-
-private:
-
-};
-
-
-::LoginService& LoginServiceRef = LoginService::Instance();
-
-Ssl& SslRef = Ssl::Instance();
 BEFORE_MAIN()
 {
 	GCore;
+	GLog.Init();
 }
 int main()
 {
 	asio::io_service IoService;
 	//Config& GConfigRef2 = Config::Instance();
 
-	GLog.Init();
 
 	bool result = GConfig.Load("config.ini");
 	result = GConfig.Load("LoginService.ini");
@@ -50,10 +17,10 @@ int main()
 	if (result)
 	{
 		auto names = GConfig.GetFilenames();
-		string a = "";
+		std::string a = "";
 		GConfig.GetString("section", "teststring", a, "config.ini");
 		//GConfigRef2.GetString("section", "teststring", a, "config.ini");
-		string b;
+		std::string b;
 		GConfig.GetString("section", "teststring", b, "config.ini");
 		auto c = GConfig.GetKeys("config.ini");
 	}

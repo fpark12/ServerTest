@@ -81,7 +81,7 @@ class Core_API Config
 	DECLARE_SINGLETON(Config)
 private:
 
-	std::list<ConfigFile> ConfigFiles;
+	std::list<ConfigFile> ConfigFilesList;
 	static std::mutex ConfigLock;
 	const ConfigFile* Find(std::string const& Filename) const;
 

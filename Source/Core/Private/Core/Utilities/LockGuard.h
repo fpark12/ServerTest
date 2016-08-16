@@ -1,4 +1,3 @@
-#include <functional>
 
 #define LOCK__(x, y)  x ## y
 #define LOCK_(x, y) LOCK__(x, y)

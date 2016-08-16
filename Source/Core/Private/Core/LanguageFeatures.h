@@ -24,6 +24,7 @@
 #include <set>
 #include <map>
 // --- Utility ---
+#include <functional>
 #include <memory>
 #include <utility>
 #include <string>
