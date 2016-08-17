@@ -1,7 +1,7 @@
-#include "DatabaseOperation.h"
-#include <vector>
+#include "SQLOperation.h"
+#include "DatabaseConnection.h"
 
-DatabaseOperation::DatabaseOperation() :
+SQLOperation::SQLOperation() :
 	MySqlStatementHandle(nullptr),
 	OperationFlag(SqlOperationFlag::Neither),
 	ParamCount(0),
@@ -9,9 +9,6 @@ DatabaseOperation::DatabaseOperation() :
 	ParamBindHandle(nullptr),
 	ParamDataSerialization(nullptr),
 	Storage(StatementStorage::None),
-	HasResult(false),
-	ResultMetaData(nullptr),
-	ResultDataFields(nullptr),
 	FieldBindHandle(nullptr),
 	RowCount(0),
 	FieldCount(0),
@@ -21,17 +18,18 @@ DatabaseOperation::DatabaseOperation() :
 {
 }
 
-DatabaseOperation::~DatabaseOperation()
+SQLOperation::~SQLOperation()
 {
 	ClearParam();
 	ClearResult();
 }
 
-void DatabaseOperation::ClearParam()
+void SQLOperation::ClearParam()
 {
 	if (ParamCount)
 	{
 		delete[] ParamDataSerialization;
+		ParamDataSerialization = nullptr;
 	}
 
 	if (ParamBindHandle)
@@ -49,16 +47,18 @@ void DatabaseOperation::ClearParam()
 	}
 
 	delete[] ParamBindHandle;
+	ParamBindHandle = nullptr;
 }
 
-void DatabaseOperation::ClearResult()
+void SQLOperation::ClearResult()
 {
-	if (HasResult)
+	if (FieldCount)
 	{
 		std::vector<uint32> extraMemoryItemIndex;
 
 		for (uint32 i = 0; i < FieldCount; ++i)
 		{
+			// TODO mysql variable length type
 			if (FieldBindHandle[i].buffer_type == MYSQL_TYPE_BLOB ||
 				FieldBindHandle[i].buffer_type == MYSQL_TYPE_VAR_STRING)
 			{
@@ -70,6 +70,7 @@ void DatabaseOperation::ClearResult()
 		}
 
 		delete[] FieldBindHandle;
+		FieldBindHandle = nullptr;
 
 		for (uint64 row = 0; row < RowCount; ++row)
 		{
@@ -81,11 +82,18 @@ void DatabaseOperation::ClearResult()
 		}
 
 		delete[] ResultSetDataSerialization;
+		ResultSetDataSerialization = nullptr;
 		delete[] RowDataSerialization;
+		RowDataSerialization = nullptr;
 	}
 }
 
-void DatabaseOperation::SetStatement(MYSQL_STMT* stmt)
+void SQLOperation::SetConnection(std::unique_ptr<DatabaseConnection> conn)
+{
+	//TODO
+}
+
+void SQLOperation::SetStatement(MYSQL_STMT* stmt)
 {
 	MySqlStatementHandle = stmt;
 	ParamCount = mysql_stmt_param_count(stmt);
@@ -101,12 +109,12 @@ void DatabaseOperation::SetStatement(MYSQL_STMT* stmt)
 	mysql_stmt_attr_set(stmt, STMT_ATTR_UPDATE_MAX_LENGTH, &bool_tmp);
 }
 
-void DatabaseOperation::SetOperationFlag(SqlOperationFlag flag)
+void SQLOperation::SetOperationFlag(SqlOperationFlag flag)
 {
 	OperationFlag = flag;
 }
 
-void DatabaseOperation::ExecuteStatement()
+void SQLOperation::Execute()
 {
 	if (ParamCount)
 	{
@@ -123,8 +131,6 @@ void DatabaseOperation::ExecuteStatement()
 
 	if (FieldCount)
 	{
-		HasResult = true;
-
 		// Init data serialization
 		FieldBindHandle = new MYSQL_BIND[FieldCount];
 		memset(FieldBindHandle, 0, sizeof(MYSQL_BIND)*FieldCount);
@@ -140,8 +146,8 @@ void DatabaseOperation::ExecuteStatement()
 		}
 
 		// get metadata
-		ResultMetaData = mysql_stmt_result_metadata(MySqlStatementHandle);
-		ResultDataFields = mysql_fetch_fields(ResultMetaData);
+		MYSQL_RES* resultMetaData = mysql_stmt_result_metadata(MySqlStatementHandle);
+		MYSQL_FIELD* resultDataFields = mysql_fetch_fields(resultMetaData);
 		RowCount = (uint64)mysql_stmt_num_rows(MySqlStatementHandle);
 
 		// bind result for fetching
@@ -154,20 +160,20 @@ void DatabaseOperation::ExecuteStatement()
 		for (uint32 i = 0; i < FieldCount; ++i)
 		{
 
-			uint32 size = SizeForType(&ResultDataFields[i]);
+			uint32 size = SizeForType(&resultDataFields[i]);
 
-			if (ResultDataFields[i].type == MYSQL_TYPE_VAR_STRING ||
-				ResultDataFields[i].type == MYSQL_TYPE_BLOB)
+			if (resultDataFields[i].type == MYSQL_TYPE_VAR_STRING ||
+				resultDataFields[i].type == MYSQL_TYPE_BLOB)
 			{
 				char* fieldBuffer = new char[size];
 				RowDataSerialization[i] = reinterpret_cast<uint64&>(fieldBuffer);
-				SetMySqlBind(&FieldBindHandle[i], ResultDataFields[i].type,
+				SetMySqlBind(&FieldBindHandle[i], resultDataFields[i].type,
 					fieldBuffer, false, size, size);
 			}
 			else
 			{
-				SetMySqlBind(&FieldBindHandle[i], ResultDataFields[i].type,
-					&RowDataSerialization[i], ResultDataFields[i].flags & UNSIGNED_FLAG);
+				SetMySqlBind(&FieldBindHandle[i], resultDataFields[i].type,
+					&RowDataSerialization[i], resultDataFields[i].flags & UNSIGNED_FLAG);
 			}
 		}
 
@@ -199,82 +205,87 @@ void DatabaseOperation::ExecuteStatement()
 	}
 }
 
-void DatabaseOperation::SetParamBool(uint8 index, bool&& value)
+void SQLOperation::Call()
+{
+	Execute();
+}
+
+void SQLOperation::SetParamBool(uint8 index, bool&& value)
 {
 	SetParamUInt8(index, uint8(value));
 }
 
-void DatabaseOperation::SetParamUInt8(uint8 index, uint8&& value)
+void SQLOperation::SetParamUInt8(uint8 index, uint8&& value)
 {
 	ParamSetMask ^= 0x00000001 << index;
 	ParamDataSerialization[index] = reinterpret_cast<uint64&>(value);
 	SetMySqlBind(&ParamBindHandle[index], MYSQL_TYPE_TINY, &ParamDataSerialization[index], true);
 }
 
-void DatabaseOperation::SetParamInt8(uint8 index, int8&& value)
+void SQLOperation::SetParamInt8(uint8 index, int8&& value)
 {
 	ParamSetMask ^= 0x00000001 << index;
 	ParamDataSerialization[index] = reinterpret_cast<uint64&>(value);
 	SetMySqlBind(&ParamBindHandle[index], MYSQL_TYPE_TINY, &ParamDataSerialization[index], false);
 }
 
-void DatabaseOperation::SetParamUInt16(uint8 index, uint16&& value)
+void SQLOperation::SetParamUInt16(uint8 index, uint16&& value)
 {
 	ParamSetMask ^= 0x00000001 << index;
 	ParamDataSerialization[index] = reinterpret_cast<uint64&>(value);
 	SetMySqlBind(&ParamBindHandle[index], MYSQL_TYPE_SHORT, &ParamDataSerialization[index], true);
 }
 
-void DatabaseOperation::SetParamInt16(uint8 index, int16&& value)
+void SQLOperation::SetParamInt16(uint8 index, int16&& value)
 {
 	ParamSetMask ^= 0x00000001 << index;
 	ParamDataSerialization[index] = reinterpret_cast<uint64&>(value);
 	SetMySqlBind(&ParamBindHandle[index], MYSQL_TYPE_SHORT, &ParamDataSerialization[index], false);
 }
 
-void DatabaseOperation::SetParamUInt32(uint8 index, uint32&& value)
+void SQLOperation::SetParamUInt32(uint8 index, uint32&& value)
 {
 	ParamSetMask ^= 0x00000001 << index;
 	ParamDataSerialization[index] = reinterpret_cast<uint64&>(value);
 	SetMySqlBind(&ParamBindHandle[index], MYSQL_TYPE_LONG, &ParamDataSerialization[index], true);
 }
 
-void DatabaseOperation::SetParamInt32(uint8 index, int32&& value)
+void SQLOperation::SetParamInt32(uint8 index, int32&& value)
 {
 	ParamSetMask ^= 0x00000001 << index;
 	ParamDataSerialization[index] = reinterpret_cast<uint64&>(value);
 	SetMySqlBind(&ParamBindHandle[index], MYSQL_TYPE_LONG, &ParamDataSerialization[index], false);
 }
 
-void DatabaseOperation::SetParamUInt64(uint8 index, uint64&& value)
+void SQLOperation::SetParamUInt64(uint8 index, uint64&& value)
 {
 	ParamSetMask ^= 0x00000001 << index;
 	ParamDataSerialization[index] = reinterpret_cast<uint64&>(value);
 	SetMySqlBind(&ParamBindHandle[index], MYSQL_TYPE_LONGLONG, &ParamDataSerialization[index], true);
 }
 
-void DatabaseOperation::SetParamInt64(uint8 index, int64&& value)
+void SQLOperation::SetParamInt64(uint8 index, int64&& value)
 {
 	ParamSetMask ^= 0x00000001 << index;
 	ParamDataSerialization[index] = reinterpret_cast<uint64&>(value);
 	SetMySqlBind(&ParamBindHandle[index], MYSQL_TYPE_LONGLONG, &ParamDataSerialization[index], false);
 }
 
-void DatabaseOperation::SetParamFloat(uint8 index, float&& value)
+void SQLOperation::SetParamFloat(uint8 index, float&& value)
 {
 	ParamSetMask ^= 0x00000001 << index;
 	ParamDataSerialization[index] = reinterpret_cast<uint64&>(value);
 	SetMySqlBind(&ParamBindHandle[index], MYSQL_TYPE_FLOAT, &ParamDataSerialization[index], (value > 0.0f));
 }
 
-void DatabaseOperation::SetParamDouble(uint8 index, double&& value)
+void SQLOperation::SetParamDouble(uint8 index, double&& value)
 {
 	ParamSetMask ^= 0x00000001 << index;
 	ParamDataSerialization[index] = reinterpret_cast<uint64&>(value);
 	SetMySqlBind(&ParamBindHandle[index], MYSQL_TYPE_DOUBLE, &ParamDataSerialization[index], (value > 0.0f));
 }
 
-void DatabaseOperation::SetParamString(uint8 index, char const* value)
+void SQLOperation::SetParamString(uint8 index, char const* value)
 {
 	ParamSetMask ^= 0x00000001 << index;
 
@@ -286,7 +297,7 @@ void DatabaseOperation::SetParamString(uint8 index, char const* value)
 	SetMySqlBind(&ParamBindHandle[index], MYSQL_TYPE_VAR_STRING, stringLocation, false, len, len - 1);
 }
 
-void DatabaseOperation::SetParamString(uint8 index, std::string&& value)
+void SQLOperation::SetParamString(uint8 index, std::string&& value)
 {
 	ParamSetMask ^= 0x00000001 << index;
 
@@ -298,7 +309,7 @@ void DatabaseOperation::SetParamString(uint8 index, std::string&& value)
 	SetMySqlBind(&ParamBindHandle[index], MYSQL_TYPE_VAR_STRING, stringLocation, false, len, len - 1);
 }
 
-void DatabaseOperation::SetParamBinary(uint8 index, const void* value, uint32 dataSize)
+void SQLOperation::SetParamBinary(uint8 index, const void* value, uint32 dataSize)
 {
 	ParamSetMask ^= 0x00000001 << index;
 
@@ -309,7 +320,7 @@ void DatabaseOperation::SetParamBinary(uint8 index, const void* value, uint32 da
 	SetMySqlBind(&ParamBindHandle[index], MYSQL_TYPE_BLOB, binaryLocation, false, dataSize, dataSize);
 }
 
-void DatabaseOperation::SetParamBinary(uint8 index, std::vector<uint8>&& value)
+void SQLOperation::SetParamBinary(uint8 index, std::vector<uint8>&& value)
 {
 	ParamSetMask ^= 0x00000001 << index;
 
@@ -321,16 +332,16 @@ void DatabaseOperation::SetParamBinary(uint8 index, std::vector<uint8>&& value)
 	SetMySqlBind(&ParamBindHandle[index], MYSQL_TYPE_BLOB, binaryLocation, false, dataSize, dataSize);
 }
 
-void DatabaseOperation::SetParamNull(uint8 index)
+void SQLOperation::SetParamNull(uint8 index)
 {
 	ParamSetMask ^= 0x00000001 << index;
 
 	SetMySqlBind(&ParamBindHandle[index], MYSQL_TYPE_NULL, NULL, false, 0, 0, true);
 }
 
-bool DatabaseOperation::GetNextRowOfResultSet()
+bool SQLOperation::GetNextRowOfResultSet()
 {
-	if (HasResult && CurrentRowCursor < RowCount)
+	if (FieldCount && CurrentRowCursor < RowCount)
 	{
 		CurrentRowCursor++;
 		return true;
@@ -341,72 +352,72 @@ bool DatabaseOperation::GetNextRowOfResultSet()
 	}
 }
 
-bool DatabaseOperation::GetBool(uint8 index)
+bool SQLOperation::GetBool(uint8 index)
 {
 	return bool(ResultSetDataSerialization[(CurrentRowCursor - 1)*FieldCount + index]);
 }
 
-uint8 DatabaseOperation::GetUInt8(uint8 index)
+uint8 SQLOperation::GetUInt8(uint8 index)
 {
 	return uint8(ResultSetDataSerialization[(CurrentRowCursor - 1)*FieldCount + index]);
 }
 
-int8 DatabaseOperation::GetInt8(uint8 index)
+int8 SQLOperation::GetInt8(uint8 index)
 {
 	return int8(ResultSetDataSerialization[(CurrentRowCursor - 1)*FieldCount + index]);
 }
 
-uint16 DatabaseOperation::GetUInt16(uint8 index)
+uint16 SQLOperation::GetUInt16(uint8 index)
 {
 	return uint16(ResultSetDataSerialization[(CurrentRowCursor - 1)*FieldCount + index]);
 }
 
-int16 DatabaseOperation::GetInt16(uint8 index)
+int16 SQLOperation::GetInt16(uint8 index)
 {
 	return int16(ResultSetDataSerialization[(CurrentRowCursor - 1)*FieldCount + index]);
 }
 
-uint32 DatabaseOperation::GetUInt32(uint8 index)
+uint32 SQLOperation::GetUInt32(uint8 index)
 {
 	return uint32(ResultSetDataSerialization[(CurrentRowCursor - 1)*FieldCount + index]);
 }
 
-int32 DatabaseOperation::GetInt32(uint8 index)
+int32 SQLOperation::GetInt32(uint8 index)
 {
 	return int32(ResultSetDataSerialization[(CurrentRowCursor - 1)*FieldCount + index]);
 }
 
-uint64 DatabaseOperation::GetUInt64(uint8 index)
+uint64 SQLOperation::GetUInt64(uint8 index)
 {
 	return uint64(ResultSetDataSerialization[(CurrentRowCursor - 1)*FieldCount + index]);
 }
 
-int64 DatabaseOperation::GetInt64(uint8 index)
+int64 SQLOperation::GetInt64(uint8 index)
 {
 	return int64(ResultSetDataSerialization[(CurrentRowCursor - 1)*FieldCount + index]);
 }
 
-float DatabaseOperation::GetFloat(uint8 index)
+float SQLOperation::GetFloat(uint8 index)
 {
 	return reinterpret_cast<float&>(ResultSetDataSerialization[(CurrentRowCursor - 1)*FieldCount + index]);
 }
 
-double DatabaseOperation::GetDouble(uint8 index)
+double SQLOperation::GetDouble(uint8 index)
 {
 	return reinterpret_cast<double&>(ResultSetDataSerialization[(CurrentRowCursor - 1)*FieldCount + index]);
 }
 
-char const* DatabaseOperation::GetCString(uint8 index)
+char const* SQLOperation::GetCString(uint8 index)
 {
 	return reinterpret_cast<char const*>(ResultSetDataSerialization[(CurrentRowCursor - 1)*FieldCount + index]);
 }
 
-std::string DatabaseOperation::GetString(uint8 index)
+std::string SQLOperation::GetString(uint8 index)
 {
 	return std::string(reinterpret_cast<char const*>(ResultSetDataSerialization[(CurrentRowCursor - 1)*FieldCount + index]));
 }
 
-std::vector<uint8> DatabaseOperation::GetBinary(uint8 index, std::size_t size)
+std::vector<uint8> SQLOperation::GetBinary(uint8 index, std::size_t size)
 {
 	std::vector<uint8> bytes(size, 0);
 	void* binaryBuffer = reinterpret_cast<void*>(ResultSetDataSerialization[(CurrentRowCursor - 1)*FieldCount + index]);
@@ -418,7 +429,7 @@ std::vector<uint8> DatabaseOperation::GetBinary(uint8 index, std::size_t size)
 	return bytes;
 }
 
-void DatabaseOperation::SetMySqlBind(MYSQL_BIND* mySqlBind, enum_field_types bufferType, void* bufferLocation, bool isUnsigned, uint32 bufferLength /*= 0*/, uint32 dataSize /*= 0*/, bool isNull /*= 0*/)
+void SQLOperation::SetMySqlBind(MYSQL_BIND* mySqlBind, enum_field_types bufferType, void* bufferLocation, bool isUnsigned, uint32 bufferLength /*= 0*/, uint32 dataSize /*= 0*/, bool isNull /*= 0*/)
 {
 	mySqlBind->buffer_type = bufferType;
 	mySqlBind->buffer = bufferLocation;
@@ -445,7 +456,7 @@ void DatabaseOperation::SetMySqlBind(MYSQL_BIND* mySqlBind, enum_field_types buf
 	mySqlBind->is_unsigned = isUnsigned;
 }
 
-uint32 DatabaseOperation::SizeForType(MYSQL_FIELD* field)
+uint32 SQLOperation::SizeForType(MYSQL_FIELD* field)
 {
 	switch (field->type)
 	{
@@ -495,7 +506,7 @@ uint32 DatabaseOperation::SizeForType(MYSQL_FIELD* field)
 	}
 }
 
-bool DatabaseOperation::FetchNextRow()
+bool SQLOperation::FetchNextRow()
 {
 	int retval = mysql_stmt_fetch(MySqlStatementHandle);
 	return retval == 0 || retval == MYSQL_DATA_TRUNCATED;

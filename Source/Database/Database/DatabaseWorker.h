@@ -1,43 +1,32 @@
 #pragma once
-#include <mysql.h>
-#include <thread>
-#include <string>
 
-class PreparedStatement;
-
-struct SchemaAccessInfo
-{
-	std::string Hostname;
-	std::string Username;
-	std::string Password;
-	std::string Schema;
-};
-class TaskResultPairQueue;
+class DatabaseConnection;
+class SQLOperation;
 
 class DatabaseWorker
 {
 public:
-	DatabaseWorker();
-	DatabaseWorker(SchemaAccessInfo* _connInfo, TaskResultPairQueue* taskQueue);
+	DatabaseWorker(std::unique_ptr<ProducerConsumerQueue<SQLOperation*>> newQueue, std::unique_ptr<DatabaseConnection> connection);
 	~DatabaseWorker();
 
-	bool OpenConnection();
+	bool SwitchConnection(std::unique_ptr<ProducerConsumerQueue<SQLOperation*>> newQueue, std::unique_ptr<DatabaseConnection> connection);
 
-	bool CloseConnection();
-
-	MYSQL* GetConnection();
-
-private:
-	bool DoTask(PreparedStatement* statement);
-	void Work();
+	bool IsFree()
+	{
+		return Free;
+	}
 
 private:
-	SchemaAccessInfo* ConnectionCreateInfo;
-	MYSQL* MysqlConnection;
-	TaskResultPairQueue* taskQueue;
-	MYSQL_STMT* Stmt;
-	MYSQL_BIND* Bind;
-	std::thread WorkerThread;
+	std::mutex ResourceMutex;
+	std::unique_ptr<ProducerConsumerQueue<SQLOperation*>> SQLOperationTaskQueue;
+	std::unique_ptr<DatabaseConnection> MySQLConnectionHandle;
 
-	DISALLOW_COPY(DatabaseWorker);
+	void WorkerThread();
+	std::thread WorkingThread;
+
+	std::atomic_bool CancelationToken;
+	std::atomic_bool Free;
+
+	DatabaseWorker(DatabaseWorker const& right) = delete;
+	DatabaseWorker& operator=(DatabaseWorker const& right) = delete;
 };

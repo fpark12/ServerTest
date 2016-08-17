@@ -15,7 +15,6 @@
 * with this program. If not, see <http://www.gnu.org/licenses/>.
 */
 #pragma once
-#include "StandardLibraries.h"
 
 template <typename T>
 class ProducerConsumerQueue

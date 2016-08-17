@@ -1,5 +1,6 @@
 #pragma once
 #include "Public/Detail/Config.h"
+#include "Public/Detail/Logger.h"
 
 class Core
 {

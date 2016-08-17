@@ -1,43 +1,78 @@
-/*
 #include "DatabaseWorker.h"
+#include "SQLOperation.h"
+#include "DatabaseConnection.h"
 
-
-bool DatabaseWorker::OpenConnection()
+DatabaseWorker::DatabaseWorker(std::unique_ptr<ProducerConsumerQueue<SQLOperation*>> newQueue, std::unique_ptr<DatabaseConnection> connection)
 {
-	MysqlConnection = mysql_init(NULL);
+	std::lock_guard<std::mutex> lock(ResourceMutex);
+	MySQLConnectionHandle = std::move(connection);
+	SQLOperationTaskQueue = std::move(newQueue);
+	CancelationToken = false;
+	Free = false;
+	WorkingThread = std::thread(&DatabaseWorker::WorkerThread, this);
+}
 
-	if (!MysqlConnection)
-	{
-		//TODO Error Log
-		return false;
-	}
+DatabaseWorker::~DatabaseWorker()
+{
+	CancelationToken = true;
 
-	MysqlConnection = mysql_real_connect(
-		MysqlConnection,
-		ConnectionCreateInfo->Hostname.c_str(),
-		ConnectionCreateInfo->Username.c_str(),
-		ConnectionCreateInfo->Password.c_str(),
-		ConnectionCreateInfo->Schema.c_str(),
-		0, NULL, 0);
+	SQLOperationTaskQueue->Cancel();
 
-	if (!connect)
-	{
-		//TODO Error Log
-		return false;
-	}
+	WorkingThread.join();
+}
 
+bool DatabaseWorker::SwitchConnection(std::unique_ptr<ProducerConsumerQueue<SQLOperation*>> newQueue, std::unique_ptr<DatabaseConnection> connection)
+{
+	std::lock_guard<std::mutex> lock(ResourceMutex);
+	MySQLConnectionHandle = std::move(connection);
+	SQLOperationTaskQueue = std::move(newQueue);
 	return true;
 }
 
-bool DatabaseWorker::CloseConnection()
+void DatabaseWorker::WorkerThread()
 {
-	mysql_close(MysqlConnection);
-	return true;
-}
+	while (!SQLOperationTaskQueue)
+	{
+		if (CancelationToken)
+		{
+			return;
+		}
+		Free = true;
+	}
+	Free = false;
 
-MYSQL* DatabaseWorker::GetConnection()
-{
-	return MysqlConnection;
-}
+	for (;;)
+	{
+		SQLOperation* operation = nullptr;
 
-*/
+		SCOPED_LOCK(ResourceMutex)
+		{
+			SQLOperationTaskQueue->WaitAndPop(operation);
+		};
+
+		while (!operation)
+		{
+			Free = true;
+			if (CancelationToken)
+			{
+				return;
+			}
+
+			{
+				std::lock_guard<std::mutex> lock(ResourceMutex);
+				SQLOperationTaskQueue->WaitAndPop(operation);
+			}
+		}
+		Free = false;
+
+		operation->SetConnection(MySQLConnectionHandle);
+		operation->Call();
+
+		delete operation;
+
+		if (CancelationToken)
+		{
+			return;
+		}
+	}
+}
