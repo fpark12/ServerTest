@@ -249,10 +249,11 @@ int main()
 		char* sql = "SELECT `sex`, `age`, `name` FROM `user` WHERE `id` = ?";
 
 		SQLOperation op(&dbConn);
+		std::string test = "tempString1tempString2tempString3tempString4tempString5tempString6";
+		op.MoveParamString(0, std::move(test));
 		op.SetStatement(sql);
 		op.SetParamInt32(0, 1);
-		std::string test = "abcdefg";
-		op.MoveParamString(0, std::move(test));
+		memset(&test, 0, sizeof(std::string));
 
 		dbConn.AddTask(&op);
 		DatabaseWorker worker(&dbConn);

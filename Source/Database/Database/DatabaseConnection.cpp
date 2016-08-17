@@ -5,6 +5,7 @@ DatabaseConnection::DatabaseConnection(DatabaseConnectionInfo& _info) :
 	ConnectionInfo(_info),
 	OperationQueue(new ProducerConsumerQueue<SQLOperation*>())
 {
+	/* todo: constructor should be no-throw
 	if (Connect())
 	{
 		//TODO error log
@@ -14,6 +15,7 @@ DatabaseConnection::DatabaseConnection(DatabaseConnectionInfo& _info) :
 	{
 		//TODO error log
 	}
+	*/
 }
 
 DatabaseConnection::~DatabaseConnection()

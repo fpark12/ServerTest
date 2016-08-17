@@ -363,7 +363,7 @@ void SQLOperation::MoveParamString(uint8 index, std::string&& value)
 {
 	ParamSetBitMask |= 1 << index;
 
-	char temp [sizeof(std::string)];
+	char temp[sizeof(std::string)] = { 0 };
 	std::string* tempString = reinterpret_cast<std::string*>(&temp);
 	*tempString = std::move(value);
 
