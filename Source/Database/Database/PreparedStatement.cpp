@@ -34,7 +34,7 @@ void PreparedStatement::ClearParameters()
 		MySqlBindHandle[i].length = NULL;
 		delete[](char*) MySqlBindHandle[i].buffer;
 		MySqlBindHandle[i].buffer = NULL;
-		ParamSetMask &= ~(0x00000001 << i);
+		ParamSetMask &= ~(1 << i);
 	}
 }
 

@@ -13,3 +13,7 @@
 #ifdef VOID
 #undef VOID
 #endif
+
+#ifdef CONST
+#undef CONST
+#endif

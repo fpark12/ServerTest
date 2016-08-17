@@ -251,6 +251,8 @@ int main()
 		SQLOperation op(&dbConn);
 		op.SetStatement(sql);
 		op.SetParamInt32(0, 1);
+		std::string test = "abcdefg";
+		op.MoveParamString(0, std::move(test));
 
 		dbConn.AddTask(&op);
 		DatabaseWorker worker(&dbConn);
@@ -259,9 +261,9 @@ int main()
 
 		while (op.GetNextRowOfResultSet())
 		{
-			int32 a = op.GetInt32(0);
-			int32 b = op.GetInt32(1);
-			std::string c = op.GetString(2);
+			int32 a = op.GetResultInt32(0);
+			int32 b = op.GetResultInt32(1);
+			std::string c = op.GetResultString(2);
 			std::cout << "Sex: " << a << ", Age: " << b << ", Name: " << c << std::endl;
 		}
 	}

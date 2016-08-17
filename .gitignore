@@ -82,11 +82,13 @@ Binaries/
 !3rdParty/libprotobuf/protoc.exe
 !*.proto
 
-#capnproto
+# capnproto
 !3rdParty/capnproto/capnp.exe
 !3rdParty/capnproto/capnpc-c++.exe
 !*.capnp
 
+# mysql
+!3rdParty/mysql/lib/libmysql.dll
 
 
 
