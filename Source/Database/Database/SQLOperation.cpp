@@ -1,7 +1,8 @@
 #include "SQLOperation.h"
 #include "DatabaseConnection.h"
 
-SQLOperation::SQLOperation() :
+SQLOperation::SQLOperation(DatabaseConnection* conn) :
+	MySqlConnectionHandle(conn),
 	MySqlStatementHandle(nullptr),
 	OperationFlag(SqlOperationFlag::Neither),
 	ParamCount(0),
@@ -14,7 +15,8 @@ SQLOperation::SQLOperation() :
 	FieldCount(0),
 	CurrentRowCursor(0),
 	RowDataSerialization(nullptr),
-	ResultSetDataSerialization(nullptr)
+	ResultSetDataSerialization(nullptr),
+	IsQueryDone(false)
 {
 }
 
@@ -88,9 +90,9 @@ void SQLOperation::ClearResult()
 	}
 }
 
-void SQLOperation::SetConnection(std::unique_ptr<DatabaseConnection> conn)
+void SQLOperation::SetConnection(DatabaseConnection* conn)
 {
-	//TODO
+	MySqlConnectionHandle = conn;
 }
 
 void SQLOperation::SetStatement(MYSQL_STMT* stmt)
@@ -107,6 +109,19 @@ void SQLOperation::SetStatement(MYSQL_STMT* stmt)
 	/// "If set to 1, causes mysql_stmt_store_result() to update the metadata MYSQL_FIELD->max_length value."
 	my_bool bool_tmp = 1;
 	mysql_stmt_attr_set(stmt, STMT_ATTR_UPDATE_MAX_LENGTH, &bool_tmp);
+}
+
+void SQLOperation::SetStatement(char* sql)
+{
+	MYSQL_STMT* stmt = MySqlConnectionHandle->MySqlStatementHandle;
+
+	if (mysql_stmt_prepare(stmt, sql, strlen(sql)))
+	{
+		//TODO error log
+		exit(EXIT_FAILURE);
+	}
+
+	SetStatement(stmt);
 }
 
 void SQLOperation::SetOperationFlag(SqlOperationFlag flag)
@@ -208,6 +223,7 @@ void SQLOperation::Execute()
 void SQLOperation::Call()
 {
 	Execute();
+	IsQueryDone = true;
 }
 
 void SQLOperation::SetParamBool(uint8 index, bool&& value)
@@ -297,7 +313,18 @@ void SQLOperation::SetParamString(uint8 index, char const* value)
 	SetMySqlBind(&ParamBindHandle[index], MYSQL_TYPE_VAR_STRING, stringLocation, false, len, len - 1);
 }
 
-void SQLOperation::SetParamString(uint8 index, std::string&& value)
+void SQLOperation::MoveParamString(uint8 index, char* value)
+{
+	ParamSetMask ^= 0x00000001 << index;
+
+	uint32 len = uint32(strlen(value)) + 1;
+	char* stringLocation = value;
+
+	ParamDataSerialization[index] = reinterpret_cast<uint64&>(stringLocation);
+	SetMySqlBind(&ParamBindHandle[index], MYSQL_TYPE_VAR_STRING, stringLocation, false, len, len - 1);
+}
+
+void SQLOperation::SetParamString(uint8 index, std::string& value)
 {
 	ParamSetMask ^= 0x00000001 << index;
 
@@ -307,6 +334,17 @@ void SQLOperation::SetParamString(uint8 index, std::string&& value)
 
 	ParamDataSerialization[index] = reinterpret_cast<uint64&>(stringLocation);
 	SetMySqlBind(&ParamBindHandle[index], MYSQL_TYPE_VAR_STRING, stringLocation, false, len, len - 1);
+}
+
+void SQLOperation::MoveParamString(uint8 index, std::string&& value)
+{
+	ParamSetMask ^= 0x00000001 << index;
+
+	uint32 len = value.size() + 1;
+	const char* stringLocation = value.c_str();
+
+	ParamDataSerialization[index] = reinterpret_cast<uint64&>(stringLocation);
+	SetMySqlBind(&ParamBindHandle[index], MYSQL_TYPE_VAR_STRING, (void*)stringLocation, false, len, len - 1);
 }
 
 void SQLOperation::SetParamBinary(uint8 index, const void* value, uint32 dataSize)
@@ -320,6 +358,16 @@ void SQLOperation::SetParamBinary(uint8 index, const void* value, uint32 dataSiz
 	SetMySqlBind(&ParamBindHandle[index], MYSQL_TYPE_BLOB, binaryLocation, false, dataSize, dataSize);
 }
 
+void SQLOperation::MoveParamBinary(uint8 index, const void* value, uint32 dataSize)
+{
+	ParamSetMask ^= 0x00000001 << index;
+
+	const void* binaryLocation = value;
+
+	ParamDataSerialization[index] = reinterpret_cast<uint64&>(binaryLocation);
+	SetMySqlBind(&ParamBindHandle[index], MYSQL_TYPE_BLOB, (void*)binaryLocation, false, dataSize, dataSize);
+}
+
 void SQLOperation::SetParamBinary(uint8 index, std::vector<uint8>&& value)
 {
 	ParamSetMask ^= 0x00000001 << index;
@@ -327,6 +375,17 @@ void SQLOperation::SetParamBinary(uint8 index, std::vector<uint8>&& value)
 	uint32 dataSize = value.size();
 	char* binaryLocation = new char[dataSize];
 	memcpy(binaryLocation, value.data(), dataSize);
+
+	ParamDataSerialization[index] = reinterpret_cast<uint64&>(binaryLocation);
+	SetMySqlBind(&ParamBindHandle[index], MYSQL_TYPE_BLOB, binaryLocation, false, dataSize, dataSize);
+}
+
+void SQLOperation::MoveParamBinary(uint8 index, std::vector<uint8>&& value)
+{
+	ParamSetMask ^= 0x00000001 << index;
+
+	uint32 dataSize = value.size();
+	void* binaryLocation = value.data();
 
 	ParamDataSerialization[index] = reinterpret_cast<uint64&>(binaryLocation);
 	SetMySqlBind(&ParamBindHandle[index], MYSQL_TYPE_BLOB, binaryLocation, false, dataSize, dataSize);

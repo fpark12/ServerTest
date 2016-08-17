@@ -18,17 +18,25 @@ class DatabaseConnection
 {
 private:
 	friend class DatabaseWorker;
+	friend class SQLOperation;
+
+	MYSQL* MySqlHandle;
+	MYSQL_STMT* MySqlStatementHandle;
+	DatabaseConnectionInfo ConnectionInfo;
+
+	ProducerConsumerQueue<SQLOperation*>* OperationQueue;
 
 public:
 	
 	DatabaseConnection(DatabaseConnectionInfo& _info);
+	~DatabaseConnection();
 
-	bool Connect();
+	void AddTask(SQLOperation* operation);
 
 private:
-	MYSQL* MySqlHandle;
-	DatabaseConnectionInfo ConnectionInfo;
 
-	ProducerConsumerQueue<SQLOperation*>* OperationQueue;
+	uint32 Connect();
+
+	uint32 InitStatement();
 	
 };

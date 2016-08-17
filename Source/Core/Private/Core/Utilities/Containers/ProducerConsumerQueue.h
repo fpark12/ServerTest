@@ -27,7 +27,10 @@ private:
 
 public:
 
-	ProducerConsumerQueue<T>() : _shutdown(false) {}
+	ProducerConsumerQueue<T>() : 
+		_shutdown(false)
+	{
+	}
 
 	void Push(const T& value)
 	{

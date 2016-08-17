@@ -26,6 +26,7 @@ class SQLOperation
 private:
 
 	// General
+	DatabaseConnection* MySqlConnectionHandle;
 	MYSQL_STMT* MySqlStatementHandle;
 	SqlOperationFlag OperationFlag;
 
@@ -44,14 +45,15 @@ private:
 	uint64* RowDataSerialization;
 	uint64* ResultSetDataSerialization;
 
-	// Database Connection
+	// Status
+	std::atomic_bool IsQueryDone;
 
 
 	DISALLOW_COPY(SQLOperation);
 
 public:
 
-	SQLOperation();
+	SQLOperation(DatabaseConnection* conn);
 	~SQLOperation();
 
 	void ClearParam();
@@ -70,14 +72,20 @@ public:
 		RowCount = 0;
 		FieldCount = 0;
 		CurrentRowCursor = 0;
+		IsQueryDone = false;
 	}
 
 	// init params
 	void SetConnection(DatabaseConnection* conn);
 	void SetStatement(MYSQL_STMT* stmt);
+	void SetStatement(char* sql);
 	void SetOperationFlag(SqlOperationFlag flag);
 	void Execute();
 	void Call();
+	bool IsDone()
+	{
+		return IsQueryDone;
+	}
 
 	void SetParamBool(uint8 index, bool&& value);
 	void SetParamUInt8(uint8 index, uint8&& value);
@@ -91,9 +99,13 @@ public:
 	void SetParamFloat(uint8 index, float&& value);
 	void SetParamDouble(uint8 index, double&& value);
 	void SetParamString(uint8 index, char const* value);
-	void SetParamString(uint8 index, std::string&& value);
+	void MoveParamString(uint8 index, char* value);
+	void SetParamString(uint8 index, std::string& value);
+	void MoveParamString(uint8 index, std::string&& value);
 	void SetParamBinary(uint8 index, const void* value, uint32 dataSize);
+	void MoveParamBinary(uint8 index, const void* value, uint32 dataSize);
 	void SetParamBinary(uint8 index, std::vector<uint8>&& value);
+	void MoveParamBinary(uint8 index, std::vector<uint8>&& value);
 	void SetParamNull(uint8 index);
 
 	bool GetNextRowOfResultSet();

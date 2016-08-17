@@ -1,11 +1,12 @@
 #include "SQLOperation.h"
+#include "DatabaseConnection.h"
+#include "DatabaseWorker.h"
 #define _CRTDBG_MAP_ALLOC
-#include <stdlib.h>
 #include <crtdbg.h>
-#include <thread>
 
 std::mutex queryMutex;
 
+/*
 void QueryAndPrint(MYSQL* mysql)
 {
 	MYSQL_STMT* stmt = mysql_stmt_init(mysql);
@@ -23,7 +24,6 @@ void QueryAndPrint(MYSQL* mysql)
 	}
 	queryMutex.unlock();
 
-	/*
 	DatabaseOperation Op;
 	Op.SetStatement(stmt);
 	Op.SetParamString(0, "Sealina");
@@ -43,7 +43,6 @@ void QueryAndPrint(MYSQL* mysql)
 		fprintf(stderr, " %s\n", mysql_stmt_error(stmt));
 		exit(EXIT_FAILURE);
 	}
-	*/
 }
 
 void QueryAndPrint2(MYSQL* mysql)
@@ -63,7 +62,6 @@ void QueryAndPrint2(MYSQL* mysql)
 	}
 	queryMutex.unlock();
 
-	/*
 	DatabaseOperation Op;
 	Op.SetStatement(stmt);
 	Op.SetParamInt32(0, 3);
@@ -83,11 +81,17 @@ void QueryAndPrint2(MYSQL* mysql)
 		fprintf(stderr, " %s\n", mysql_stmt_error(stmt));
 		exit(EXIT_FAILURE);
 	}
-	*/
+}
+*/
+BEFORE_MAIN()
+{
+	GCore.Init();
 }
 
 int main()
 {
+	GConsole.Print("abcd");
+
 	{
 		/*MYSQL* mysql = mysql_init(NULL);
 
@@ -119,6 +123,7 @@ int main()
 			connections[i] = m;
 		}*/
 
+		/*
 		MYSQL* mysql = mysql_init(NULL);
 
 		if (!mysql_real_connect(mysql, "localhost", "root", "Keathalin21", "testserver", 0, NULL, 0))
@@ -224,7 +229,6 @@ int main()
 		t1.join();
 		t2.join();
 
-		/*
 		if (t1.joinable())
 		{
 			t1.join();
@@ -235,6 +239,31 @@ int main()
 		}
 		*/
 
+		DatabaseConnectionInfo dbInfo;
+		dbInfo.Hostname = "localhost";
+		dbInfo.Username = "root";
+		dbInfo.Password = "Keathalin21";
+		dbInfo.Schema = "testserver";
+		dbInfo.Port = 3306;
+		DatabaseConnection dbConn(dbInfo);
+		char* sql = "SELECT `sex`, `age`, `name` FROM `user` WHERE `id` = ?";
+
+		SQLOperation op(&dbConn);
+		op.SetStatement(sql);
+		op.SetParamInt32(0, 1);
+
+		dbConn.AddTask(&op);
+		DatabaseWorker worker(&dbConn);
+
+		while (!op.IsDone());
+
+		while (op.GetNextRowOfResultSet())
+		{
+			int32 a = op.GetInt32(0);
+			int32 b = op.GetInt32(1);
+			std::string c = op.GetString(2);
+			std::cout << "Sex: " << a << ", Age: " << b << ", Name: " << c << std::endl;
+		}
 	}
 	_CrtDumpMemoryLeaks();
 }

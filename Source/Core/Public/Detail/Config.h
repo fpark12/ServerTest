@@ -17,6 +17,10 @@
  */
 
 #pragma once
+#ifndef Core_API
+#error "not defined"
+#endif
+
 class Core_API ConfigFile
 {
 public:

@@ -6,10 +6,10 @@ class SQLOperation;
 class DatabaseWorker
 {
 public:
-	DatabaseWorker(std::unique_ptr<ProducerConsumerQueue<SQLOperation*>> newQueue, std::unique_ptr<DatabaseConnection> connection);
+	DatabaseWorker(DatabaseConnection* connection);
 	~DatabaseWorker();
 
-	bool SwitchConnection(std::unique_ptr<ProducerConsumerQueue<SQLOperation*>> newQueue, std::unique_ptr<DatabaseConnection> connection);
+	void SwitchConnection(DatabaseConnection* connection);
 
 	bool IsFree()
 	{
@@ -18,8 +18,8 @@ public:
 
 private:
 	std::mutex ResourceMutex;
-	std::unique_ptr<ProducerConsumerQueue<SQLOperation*>> SQLOperationTaskQueue;
-	std::unique_ptr<DatabaseConnection> MySQLConnectionHandle;
+	ProducerConsumerQueue<SQLOperation*>* SQLOperationTaskQueue;
+	DatabaseConnection* MySQLConnectionHandle;
 
 	void WorkerThread();
 	std::thread WorkingThread;

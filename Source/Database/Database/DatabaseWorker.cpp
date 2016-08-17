@@ -2,11 +2,13 @@
 #include "SQLOperation.h"
 #include "DatabaseConnection.h"
 
-DatabaseWorker::DatabaseWorker(std::unique_ptr<ProducerConsumerQueue<SQLOperation*>> newQueue, std::unique_ptr<DatabaseConnection> connection)
+DatabaseWorker::DatabaseWorker(DatabaseConnection* connection)
 {
-	std::lock_guard<std::mutex> lock(ResourceMutex);
-	MySQLConnectionHandle = std::move(connection);
-	SQLOperationTaskQueue = std::move(newQueue);
+	SCOPED_LOCK(ResourceMutex)
+	{
+		MySQLConnectionHandle = connection;
+		SQLOperationTaskQueue = connection->OperationQueue;
+	};
 	CancelationToken = false;
 	Free = false;
 	WorkingThread = std::thread(&DatabaseWorker::WorkerThread, this);
@@ -21,12 +23,13 @@ DatabaseWorker::~DatabaseWorker()
 	WorkingThread.join();
 }
 
-bool DatabaseWorker::SwitchConnection(std::unique_ptr<ProducerConsumerQueue<SQLOperation*>> newQueue, std::unique_ptr<DatabaseConnection> connection)
+void DatabaseWorker::SwitchConnection(DatabaseConnection* connection)
 {
-	std::lock_guard<std::mutex> lock(ResourceMutex);
-	MySQLConnectionHandle = std::move(connection);
-	SQLOperationTaskQueue = std::move(newQueue);
-	return true;
+	SCOPED_LOCK(ResourceMutex)
+	{
+		MySQLConnectionHandle = connection;
+		SQLOperationTaskQueue = connection->OperationQueue;
+	};
 }
 
 void DatabaseWorker::WorkerThread()
@@ -67,8 +70,6 @@ void DatabaseWorker::WorkerThread()
 
 		operation->SetConnection(MySQLConnectionHandle);
 		operation->Call();
-
-		delete operation;
 
 		if (CancelationToken)
 		{
