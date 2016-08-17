@@ -17,6 +17,10 @@ public:
 	#define GConsole GCore.ConsoleInstance
 	#define GLog GCore.LoggerInstance
 
+	//SslContext& GSslContextInst = Singleton<SslContext>().Instance();
+	//#define GSslContext GCore.GSslContextInst
+
+
 	int Init()
 	{
 		// Initialize Core components

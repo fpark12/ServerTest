@@ -1,4 +1,4 @@
-#include "LoginService.h"
+#include "Server.h"
 
 BEFORE_MAIN()
 {
@@ -7,9 +7,8 @@ BEFORE_MAIN()
 int main()
 {
 	asio::io_service IoService;
-	//Config& GConfigRef2 = Config::Instance();
-	GConsole.Print("w/e man.");
-	GLog.Critical("Support for int: {0:d};  hex: {0:x};  oct: {0:o}; bin: {0:b}", 42);
+	//GConsole.Print("w/e man.");
+	//GLog.Critical("Support for int: {0:d};  hex: {0:x};  oct: {0:o}; bin: {0:b}", 42);
 
 	bool result = GConfig.Load("config.ini");
 	result = GConfig.Load("LoginService.ini");
