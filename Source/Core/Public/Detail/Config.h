@@ -78,7 +78,7 @@ private:
 
 class Core_API Config
 {
-	DECLARE_SINGLETON(Config)
+	DECLARE_SINGLETON(Config);
 private:
 
 	std::list<ConfigFile> ConfigFilesList;
@@ -86,7 +86,6 @@ private:
 	const ConfigFile* Find(std::string const& Filename) const;
 
 public:
-
 	// Method used only for loading main configuration files
 	bool Load(std::string const& Filename);
 	bool Unload(std::string const& Filename);
@@ -110,5 +109,4 @@ public:
 	bool GetInt(std::string const& section, std::string const& Key, int& Value, std::string const& Filename) const;
 	bool GetDouble(std::string const& section, std::string const& Key, double& Value, std::string const& Filename) const;
 	bool GetFloat(std::string const& section, std::string const& Key, float& Value, std::string const& Filename) const;
-
 };

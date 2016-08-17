@@ -8,6 +8,10 @@ T() = default; \
 T(T const&) = delete; \
 T& operator=(T const&) = delete;
 
+#define DEFINE_SINGLETON(T) \
+static T& G#T = Singleton<T>().Instance();
+
+
 template<typename T>
 class Singleton {
 public:

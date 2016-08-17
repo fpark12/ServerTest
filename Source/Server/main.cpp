@@ -2,14 +2,14 @@
 
 BEFORE_MAIN()
 {
-	GCore;
-	GLog.Init();
+	GCore.Init();
 }
 int main()
 {
 	asio::io_service IoService;
 	//Config& GConfigRef2 = Config::Instance();
 
+	GLog.Critical("Support for int: {0:d};  hex: {0:x};  oct: {0:o}; bin: {0:b}", 42);
 
 	bool result = GConfig.Load("config.ini");
 	result = GConfig.Load("LoginService.ini");
