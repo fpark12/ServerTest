@@ -9,7 +9,8 @@ private:
 public:
 	void Init()
 	{
-		Console = spdlog::stdout_logger_mt("console", true);
+		//Console = spdlog::stdout_logger_mt("console", true);
+		Console = spdlog::get("Console");
 	}
 
 

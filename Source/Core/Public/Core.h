@@ -11,13 +11,16 @@ class Core
 	DECLARE_SINGLETON(Core)
 public:
 	Config& ConfigInstance = Singleton<Config>().Instance();
+	Console& ConsoleInstance = Singleton<Console>().Instance();
 	Logger& LoggerInstance = Singleton<Logger>().Instance();
 	#define GConfig GCore.ConfigInstance
+	#define GConsole GCore.ConsoleInstance
 	#define GLog GCore.LoggerInstance
 
 	int Init()
 	{
 		// Initialize Core components
+		ConsoleInstance.Init();
 		LoggerInstance.Init();
 
 		return 0;
