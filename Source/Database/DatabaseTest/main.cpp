@@ -1,5 +1,5 @@
-#include "SQLOperation.h"
-#include "DatabaseConnection.h"
+#include "Public/Detail/SQLOperation.h"
+#include "SQLConnection.h"
 #include "DatabaseWorker.h"
 #define _CRTDBG_MAP_ALLOC
 #include <crtdbg.h>
@@ -248,18 +248,13 @@ int main()
 		Res |= GConfig.GetString("Database.Initialization.Schema", dbInfo.Schema);
 		Res |= GConfig.GetUInt("Database.Initialization.Port", dbInfo.Port);
 
-		dbInfo.Hostname = "localhost";
-		dbInfo.Username = "root";
-		dbInfo.Password = "Keathalin21";
-		dbInfo.Schema = "testserver";
-		dbInfo.Port = 3306;
-		DatabaseConnection dbConn(dbInfo);
+		SQLConnection dbConn(dbInfo);
 		char* sql = "SELECT `sex`, `age`, `name` FROM `user` WHERE `id` = ?";
 
 		SQLOperation op(&dbConn);
 		std::string test = "abc";// "tempString1tempString2tempString3tempString4tempString5tempString6";
-		op.MoveParamString(0, std::move(test));
 		op.SetStatement(sql);
+		op.MoveParamString(0, std::move(test));
 		op.SetParamInt32(0, 1);
 		memset(&test, 0, sizeof(std::string));
 

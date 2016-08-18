@@ -1,11 +1,11 @@
-#include "DatabaseConnection.h"
+#include "SQLConnection.h"
 #include "DatabaseWorker.h"
 
-DatabaseConnection::DatabaseConnection(DatabaseConnectionInfo& _info) : 
+SQLConnection::SQLConnection(DatabaseConnectionInfo& _info) : 
 	ConnectionInfo(_info),
 	OperationQueue(new ProducerConsumerQueue<SQLOperation*>())
 {
-	/* todo: constructor should be no-throw
+	//* todo: constructor should be no-throw
 	if (Connect())
 	{
 		//TODO error log
@@ -15,10 +15,10 @@ DatabaseConnection::DatabaseConnection(DatabaseConnectionInfo& _info) :
 	{
 		//TODO error log
 	}
-	*/
+	//*/
 }
 
-DatabaseConnection::~DatabaseConnection()
+SQLConnection::~SQLConnection()
 {
 	if (mysql_stmt_close(MySqlStatementHandle))
 	{
@@ -31,12 +31,12 @@ DatabaseConnection::~DatabaseConnection()
 	mysql_close(MySqlHandle);
 }
 
-void DatabaseConnection::AddTask(SQLOperation* operation)
+void SQLConnection::AddTask(SQLOperation* operation)
 {
 	OperationQueue->Push(operation);
 }
 
-uint32 DatabaseConnection::Connect()
+uint32 SQLConnection::Connect()
 {
 	MYSQL* initMysql = mysql_init(NULL);
 	if (!initMysql)
@@ -51,20 +51,7 @@ uint32 DatabaseConnection::Connect()
 		ConnectionInfo.Username.c_str(), ConnectionInfo.Password.c_str(),
 		ConnectionInfo.Schema.c_str(), ConnectionInfo.Port, NULL, 0);
 
-	if (MySqlHandle)
-	{
-		// TODO Logger: Get library & server version info
-		// TC_LOG_INFO("sql.sql", "MySQL client library: %s", mysql_get_client_info());
-		// TC_LOG_INFO("sql.sql", "MySQL server ver: %s ", mysql_get_server_info(m_Mysql));
-
-		// TODO Logger: Success message TC_LOG_INFO("sql.sql", "Connected to MySQL database at %s", m_connectionInfo.host.c_str());
-
-		mysql_autocommit(MySqlHandle, 1); //Turn on auto commit mode
-
-		mysql_set_character_set(MySqlHandle, "utf8");
-		return 0;
-	}
-	else
+	if (!MySqlHandle)
 	{
 		// TODO Error Log: unsuccess message TC_LOG_ERROR("sql.sql", "Could not connect to MySQL database at %s: %s", m_connectionInfo.host.c_str(), mysql_error(mysqlInit));
 		// mysql_errno(mysqlInit)
@@ -72,9 +59,20 @@ uint32 DatabaseConnection::Connect()
 		mysql_close(initMysql);
 		return error_code;
 	}
+
+	// TODO Logger: Get library & server version info
+	// TC_LOG_INFO("sql.sql", "MySQL client library: %s", mysql_get_client_info());
+	// TC_LOG_INFO("sql.sql", "MySQL server ver: %s ", mysql_get_server_info(m_Mysql));
+
+	// TODO Logger: Success message TC_LOG_INFO("sql.sql", "Connected to MySQL database at %s", m_connectionInfo.host.c_str());
+
+	mysql_autocommit(MySqlHandle, 1); //Turn on auto commit mode
+
+	mysql_set_character_set(MySqlHandle, "utf8");
+	return 0;
 }
 
-uint32 DatabaseConnection::InitStatement()
+uint32 SQLConnection::InitStatement()
 {
 	MySqlStatementHandle = mysql_stmt_init(MySqlHandle);
 	if (!MySqlStatementHandle)

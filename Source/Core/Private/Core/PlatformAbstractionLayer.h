@@ -31,8 +31,8 @@ typedef PlatformTypes::CHAR8			UTF8CHAR;	///< An 8-bit character containing a UT
 typedef PlatformTypes::CHAR16			UCS2CHAR;	///< A 16-bit character containing a UCS2 (Unicode, 16-bit, fixed-width) code unit, used for compatibility with 'Windows TCHAR' across multiple platforms.
 typedef PlatformTypes::CHAR16			UTF16CHAR;	///< A 16-bit character containing a UTF16 (Unicode, 16-bit, variable-width) code unit.
 typedef PlatformTypes::CHAR32			UTF32CHAR;	///< A 32-bit character containing a UTF32 (Unicode, 32-bit, fixed-width) code unit.
-													//typedef PlatformTypes::SIZE_T			SIZE_T;		///< A signed integer the same size as a pointer
 
+typedef PlatformTypes::SIZE_T			size_t;		///< An unsigned integer the same size as a pointer
 typedef PlatformTypes::UPTRINT			UPTRINT;	///< An unsigned integer the same size as a pointer
 typedef PlatformTypes::PTRINT			PTRINT;		///< A signed integer the same size as a pointer
 typedef PlatformTypes::TYPE_OF_NULL		TYPE_OF_NULL;	///< The type of the NULL constant.

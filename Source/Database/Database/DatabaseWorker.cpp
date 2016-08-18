@@ -1,8 +1,8 @@
 #include "DatabaseWorker.h"
 #include "SQLOperation.h"
-#include "DatabaseConnection.h"
+#include "SQLConnection.h"
 
-DatabaseWorker::DatabaseWorker(DatabaseConnection* connection)
+DatabaseWorker::DatabaseWorker(SQLConnection* connection)
 {
 	SCOPED_LOCK(ResourceMutex)
 	{
@@ -23,7 +23,7 @@ DatabaseWorker::~DatabaseWorker()
 	WorkingThread.join();
 }
 
-void DatabaseWorker::SwitchConnection(DatabaseConnection* connection)
+void DatabaseWorker::SwitchConnection(SQLConnection* connection)
 {
 	SCOPED_LOCK(ResourceMutex)
 	{

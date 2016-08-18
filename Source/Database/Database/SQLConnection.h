@@ -14,7 +14,7 @@ struct DatabaseConnectionInfo
 	uint32 Port;
 };
 
-class DatabaseConnection
+class SQLConnection
 {
 private:
 	friend class DatabaseWorker;
@@ -28,8 +28,8 @@ private:
 
 public:
 	
-	DatabaseConnection(DatabaseConnectionInfo& _info);
-	~DatabaseConnection();
+	SQLConnection(DatabaseConnectionInfo& _info);
+	~SQLConnection();
 
 	void AddTask(SQLOperation* operation);
 

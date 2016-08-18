@@ -1,15 +1,15 @@
 #pragma once
 
-class DatabaseConnection;
+class SQLConnection;
 class SQLOperation;
 
 class DatabaseWorker
 {
 public:
-	DatabaseWorker(DatabaseConnection* connection);
+	DatabaseWorker(SQLConnection* connection);
 	~DatabaseWorker();
 
-	void SwitchConnection(DatabaseConnection* connection);
+	void SwitchConnection(SQLConnection* connection);
 
 	bool IsFree()
 	{
@@ -19,7 +19,7 @@ public:
 private:
 	std::mutex ResourceMutex;
 	ProducerConsumerQueue<SQLOperation*>* SQLOperationTaskQueue;
-	DatabaseConnection* MySQLConnectionHandle;
+	SQLConnection* MySQLConnectionHandle;
 
 	void WorkerThread();
 	std::thread WorkingThread;

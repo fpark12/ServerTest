@@ -6,9 +6,9 @@
 struct WindowsPlatformTypes : public GenericPlatformTypes
 {
 	#ifdef _WIN64
-	typedef std::int64_t		SIZE_T;
+	typedef std::uint64_t		SIZE_T;
 	#else
-	typedef std::int32_t		SIZE_T;
+	typedef std::uint32_t		SIZE_T;
 	#endif
 };
 
