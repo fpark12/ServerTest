@@ -7,7 +7,11 @@
 
 #if PLATFORM_WINDOWS
 #include "Private/Core/Platforms/WindowsPlatform.h"
+#elif PLATFORM_MACOS
+#include "Private/Core/Platforms/MacPlatform.h"
 #endif
+
+
 
 //------------------------------------------------------------------
 // Transfer the platform types to global types

@@ -68,6 +68,7 @@ private:
 	inline Singleton3& operator=(Singleton3 const&) { return *this; }
 };    //    end of class Singleton
 
+/* won't compile on mac
 template<typename T>
 typename T& Singleton3<T>::Instance() {
 	if (Singleton3::instance_ == 0) {
@@ -102,3 +103,5 @@ inline void Singleton3<T>::DestroyInstance(T* p) {
 
 template<typename T>
 typename T* Singleton3<T>::instance_ = 0;
+
+*/

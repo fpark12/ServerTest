@@ -9,7 +9,7 @@
 /**
 * Mac specific types
 **/
-struct FMacPlatformTypes : public FGenericPlatformTypes
+struct MacPlatformTypes : public GenericPlatformTypes
 {
 	typedef unsigned int		DWORD;
 	typedef size_t				SIZE_T;
@@ -17,7 +17,7 @@ struct FMacPlatformTypes : public FGenericPlatformTypes
 	typedef char16_t			CHAR16;
 };
 
-typedef FMacPlatformTypes FPlatformTypes;
+typedef MacPlatformTypes PlatformTypes;
 
 // Base defines, must define these for the platform, there are no defaults
 #define PLATFORM_DESKTOP				1
@@ -67,6 +67,21 @@ typedef FMacPlatformTypes FPlatformTypes;
 #define OPERATOR_DELETE_THROW_SPEC _NOEXCEPT
 #define OPERATOR_NEW_NOTHROW_SPEC  _NOEXCEPT
 #define OPERATOR_DELETE_NOTHROW_SPEC  _NOEXCEPT
+
+#if PLATFORM_WINDOWS
+#  define TRINITY_PATH_MAX MAX_PATH
+#  define _USE_MATH_DEFINES
+#  ifndef DECLSPEC_NORETURN
+#    define DECLSPEC_NORETURN __declspec(noreturn)
+#  endif //DECLSPEC_NORETURN
+#  ifndef DECLSPEC_DEPRECATED
+#    define DECLSPEC_DEPRECATED __declspec(deprecated)
+#  endif //DECLSPEC_DEPRECATED
+#else //PLATFORM != PLATFORM_WINDOWS
+#  define TRINITY_PATH_MAX PATH_MAX
+#  define DECLSPEC_NORETURN
+#  define DECLSPEC_DEPRECATED
+#endif //PLATFORM
 
 // DLL export and import definitions
 #define DLLEXPORT

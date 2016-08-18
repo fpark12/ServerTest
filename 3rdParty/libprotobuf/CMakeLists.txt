@@ -8,6 +8,11 @@ SET( LINK
 if(MSVC)
 	add_definitions(/wd4244 /wd4267 /wd4018 /wd4355 /wd4800 /wd4251 /wd4996 /wd4146 /wd4305)
 endif()
+
+if(XCODE)
+	add_definitions(-DHAVE_PTHREAD)
+endif()
+
 create_project(STATIC "${DEFINE}" "${INCLUDE}" "${LINK}")
 
 if(TARGET ${PROJECT_NAME})
@@ -20,14 +25,13 @@ if(TARGET ${PROJECT_NAME})
 		file(GLOB_RECURSE ProtoCompiler ${CMAKE_SOURCE_DIR}/protoc)
 	endif()
 
-
 	file(GLOB_RECURSE existingProtoSourceList ${${PROJECT_NAME}_BINARY_DIR}/*.pb.cc ${${PROJECT_NAME}_BINARY_DIR}/*.pb.h)
 	#build new proto stamp
 	set(newProtoStamp "")
 	foreach(newFile ${protoFiles})
 		file(TIMESTAMP ${newFile} newStamp)
 		list(APPEND newProtoStamp "${newFile}, ${newStamp}")
-		message("newfile: ${newFile}, ${newStamp}")
+		#message("newfile: ${newFile}, ${newStamp}")
 	endforeach()
 
 	#read old stamp
@@ -35,18 +39,14 @@ if(TARGET ${PROJECT_NAME})
 		file(READ "${${PROJECT_NAME}_BINARY_DIR}/proto.stamp" oldProtoStamp)
 	endif()
 
-	message("oldProtoStamp: ${oldProtoStamp}")
-	message("newProtoStamp: ${newProtoStamp}")
+	#message("oldProtoStamp: ${oldProtoStamp}")
+	#message("newProtoStamp: ${newProtoStamp}")
 
 	if (NOT "${oldProtoStamp}" STREQUAL "${newProtoStamp}")
-
-			message("run ${ProtoCompiler}")
-
 
 		foreach(PROTO_FILE ${protoFiles})
 			get_filename_component(PROTO_FILE_DIR ${PROTO_FILE} DIRECTORY)
 			get_filename_component(PROTO_FILE_NAME ${PROTO_FILE} NAME_WE)
-
 
 			execute_process(
 				COMMAND ${ProtoCompiler}
