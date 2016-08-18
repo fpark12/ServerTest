@@ -10,6 +10,24 @@ int main()
 	//GConsole.Print("w/e man.");
 	//GLog.Critical("Support for int: {0:d};  hex: {0:x};  oct: {0:o}; bin: {0:b}", 42);
 
+	std::string value;
+	value = "abcdefghijklmnop";
+	value = "abcd" "efgh" "ijkl" "mno";
+	value.shrink_to_fit();
+	char temp[sizeof(std::string)] = { 0 };
+	std::string* tempString = reinterpret_cast<std::string*>(&temp);
+	*tempString = std::move(value);
+	auto ptr = const_cast<std::string*>(reinterpret_cast<const std::string*>(tempString->c_str()));
+	if (ptr > tempString && ptr < (tempString + sizeof(std::string)))
+	{
+		// In struct storage
+		std::string newStr = tempString->c_str();
+	}
+	else
+	{
+		// malloc storage
+	}
+
 	bool result = GConfig.Load("config.ini");
 	result = GConfig.Load("LoginService.ini");
 	GLoginService.Start(IoService);

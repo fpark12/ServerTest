@@ -249,7 +249,7 @@ int main()
 		char* sql = "SELECT `sex`, `age`, `name` FROM `user` WHERE `id` = ?";
 
 		SQLOperation op(&dbConn);
-		std::string test = "tempString1tempString2tempString3tempString4tempString5tempString6";
+		std::string test = "abc";// "tempString1tempString2tempString3tempString4tempString5tempString6";
 		op.MoveParamString(0, std::move(test));
 		op.SetStatement(sql);
 		op.SetParamInt32(0, 1);

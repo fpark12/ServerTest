@@ -363,9 +363,23 @@ void SQLOperation::MoveParamString(uint8 index, std::string&& value)
 {
 	ParamSetBitMask |= 1 << index;
 
+	value = "abcdefghijklmnop";
+	value = "abcd" "efgh" "ijkl" "mno";
+	value.shrink_to_fit();
 	char temp[sizeof(std::string)] = { 0 };
 	std::string* tempString = reinterpret_cast<std::string*>(&temp);
 	*tempString = std::move(value);
+	auto ptr = const_cast<std::string*>(reinterpret_cast<const std::string*>(tempString->c_str()));
+	if (ptr > tempString && ptr < (tempString + sizeof(std::string)))
+	{
+		// In struct storage
+		std::string newStr = tempString->c_str();
+	}
+	else
+	{
+		// malloc storage
+	}
+
 
 	uint32 len = value.size() + 1;
 	const char* stringLocation = value.c_str();
