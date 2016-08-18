@@ -408,6 +408,28 @@ bool Config::GetLong(const std::string& Key, long& Value) const
 	return ConfigFile->GetLong(Subkey, Value);
 }
 
+bool Config::GetUInt(const std::string& Key, uint32& Value) const
+{
+	size_t FilenameEnd = Key.find_first_of(".", 0);
+	std::string Filename = Key.substr(0, FilenameEnd);
+	std::string Subkey = Key.substr(FilenameEnd + 1);
+	std::transform(Subkey.begin(), Subkey.end(), Subkey.begin(), ::tolower);
+
+	const ConfigFile* ConfigFile = this->Find(Filename);
+	if (!ConfigFile)
+	{
+		return false;
+	}
+	long Long;
+	bool bResult = ConfigFile->GetLong(Subkey, Long);
+	if (bResult == 0)
+	{
+		Value = (uint32)Long;
+	}
+
+	return bResult;
+}
+
 bool Config::GetInt(const std::string& Key, int& Value) const
 {
 	size_t FilenameEnd = Key.find_first_of(".", 0);
@@ -497,6 +519,11 @@ bool Config::GetLong(std::string const& Section, std::string const& Key, long& V
 		return false;
 	}
 	return ConfigFile->GetLong(Section.c_str(), Key.c_str(), Value);
+}
+
+bool Config::GetUInt(std::string const& section, std::string const& Key, uint32& Value, std::string const& Filename) const
+{
+	return false;
 }
 
 bool Config::GetInt(std::string const& Section, std::string const& Key, int& Value, const std::string& Filename) const

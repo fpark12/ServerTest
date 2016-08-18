@@ -103,6 +103,7 @@ public:
 	bool GetString(const std::string& Key, std::string& Value) const;
 	bool GetBool(const std::string& Key, bool& Value) const;
 	bool GetLong(const std::string& Key, long& Value) const;
+	bool GetUInt(const std::string& Key, uint32& Value) const;
 	bool GetInt(const std::string& Key, int& Value) const;
 	bool GetDouble(const std::string& Key, double& Value) const;
 	bool GetFloat(const std::string& Key, float& Value) const;
@@ -110,6 +111,7 @@ public:
 	bool GetString(std::string const& section, std::string const& Key, std::string& Value, std::string const& Filename) const;
 	bool GetBool(std::string const& section, std::string const& Key, bool& Value, std::string const& Filename) const;
 	bool GetLong(std::string const& section, std::string const& Key, long& Value, std::string const& Filename) const;
+	bool GetUInt(std::string const& section, std::string const& Key, uint32& Value, std::string const& Filename) const;
 	bool GetInt(std::string const& section, std::string const& Key, int& Value, std::string const& Filename) const;
 	bool GetDouble(std::string const& section, std::string const& Key, double& Value, std::string const& Filename) const;
 	bool GetFloat(std::string const& section, std::string const& Key, float& Value, std::string const& Filename) const;

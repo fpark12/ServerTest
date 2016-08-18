@@ -239,7 +239,15 @@ int main()
 		}
 		*/
 
+		GConfig.Load("Database.ini");
+		bool Res;
 		DatabaseConnectionInfo dbInfo;
+		Res |= GConfig.GetString("Database.Initialization.Hostname", dbInfo.Hostname);
+		Res |= GConfig.GetString("Database.Initialization.Username", dbInfo.Username);
+		Res |= GConfig.GetString("Database.Initialization.Password", dbInfo.Password);
+		Res |= GConfig.GetString("Database.Initialization.Schema", dbInfo.Schema);
+		Res |= GConfig.GetUInt("Database.Initialization.Port", dbInfo.Port);
+
 		dbInfo.Hostname = "localhost";
 		dbInfo.Username = "root";
 		dbInfo.Password = "Keathalin21";
