@@ -1,6 +1,6 @@
 #pragma once
-#include "Private/Detail/SQLOpertion/SQLOperationParamsArchive.h"
-#include "Private/Detail/SQLOpertion/SQLOperationResultSet.h"
+#include "Private/Detail/SQLOperation/SQLOperationParamsArchive.h"
+#include "Private/Detail/SQLOperation/SQLOperationResultSet.h"
 
 class SQLConnection;
 

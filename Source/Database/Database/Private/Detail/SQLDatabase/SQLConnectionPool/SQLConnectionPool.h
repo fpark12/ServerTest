@@ -1,5 +1,5 @@
 #pragma once
-#include "Private/Detail/SQLConnectionPool/SQLConnection.h"
+#include "Private/Detail/SQLDatabase/SQLConnectionPool/SQLConnection.h"
 
 struct SQLConnectionInfo;
 class SQLConnection;
