@@ -233,7 +233,8 @@ void SQLOperationParamsArchive::SetParamBind(MYSQL_BIND* mySqlBind, enum_field_t
 		else
 		{
 			// todo: create out own bind class to wrap length instead of malloc
-			mySqlBind->length = new unsigned long(dataSize);
+			// edit: actually, check if length_value works instead
+			mySqlBind->length_value = uint32(dataSize);
 		}
 	}
 	/*
