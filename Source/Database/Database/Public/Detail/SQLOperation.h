@@ -23,6 +23,7 @@ enum class SQLOperationResult
 
 class SQLOperation : public SQLOperationParamsArchive, public SQLOperationResultSet
 {
+	DISABLE_COPY_AND_ASSIGN(SQLOperation);
 
 private:
 
@@ -31,7 +32,6 @@ private:
 	MYSQL_STMT* Statement;
 	SqlOperationFlag OperationFlag;
 
-	DISALLOW_COPY(SQLOperation);
 
 public:
 

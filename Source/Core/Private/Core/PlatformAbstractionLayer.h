@@ -69,6 +69,10 @@ typedef PlatformTypes::TYPE_OF_NULLPTR	TYPE_OF_NULLPTR; ///< The type of the C++
 #define QueryMaxParamCount 32
 
 // Utility Macro
-#define DISALLOW_COPY(classname) \
-  classname(const classname&) = delete; \
-  classname& operator=(const classname&) = delete
+#define DISABLE_COPY(T) \
+  T(const T&) = delete; \
+  void operator=(const T&) = delete
+
+#define DISABLE_COPY_AND_ASSIGN(T) \
+  T(const T&) = delete; \
+  void operator=(const T&) = delete

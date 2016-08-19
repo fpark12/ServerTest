@@ -5,7 +5,7 @@ class SQLOperation;
 
 class SQLThread
 {
-	DISALLOW_COPY(SQLThread);
+	DISABLE_COPY(SQLThread);
 
 public:
 	SQLThread();
