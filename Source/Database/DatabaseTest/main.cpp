@@ -1,8 +1,11 @@
 #include "Public/Detail/SQLOperation.h"
 #include "SQLConnection.h"
 #include "DatabaseWorker.h"
+
+#if PLATFORM_WINDOWS
 #define _CRTDBG_MAP_ALLOC
 #include <crtdbg.h>
+#endif
 
 std::mutex queryMutex;
 
@@ -271,5 +274,7 @@ int main()
 			std::cout << "Sex: " << a << ", Age: " << b << ", Name: " << c << std::endl;
 		}
 	}
+#if PLATFORM_WINDOWS
 	_CrtDumpMemoryLeaks();
+#endif
 }
