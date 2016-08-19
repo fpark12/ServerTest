@@ -54,17 +54,17 @@ void SQLOperation::SetStatement(MYSQL_STMT* Statement)
 
 void SQLOperation::SetStatement(char* StatementString)
 {
-	MYSQL_STMT* PStatement = Connection->MySqlStatementHandle;
+// 	MYSQL_STMT* PStatement = Connection->MySqlStatementHandle;
+// 
+// 	int Result = mysql_stmt_prepare(PStatement, StatementString, uint32(strlen(StatementString)));
+// 	if (Result)
+// 	{
+// 		const char* err = mysql_stmt_error(PStatement);
+// 		//TODO error log
+// 		exit(EXIT_FAILURE);
+// 	}
 
-	int Result = mysql_stmt_prepare(PStatement, StatementString, uint32(strlen(StatementString)));
-	if (Result)
-	{
-		const char* err = mysql_stmt_error(PStatement);
-		//TODO error log
-		exit(EXIT_FAILURE);
-	}
-
-	SetStatement(PStatement);
+//	SetStatement(PStatement);
 }
 
 void SQLOperation::SetOperationFlag(SqlOperationFlag flag)
