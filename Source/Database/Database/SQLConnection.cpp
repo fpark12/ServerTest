@@ -1,39 +1,15 @@
 #include "SQLConnection.h"
-#include "DatabaseWorker.h"
 
-SQLConnection::SQLConnection(DatabaseConnectionInfo& _info) : 
-	ConnectionInfo(_info),
-	OperationQueue(new ProducerConsumerQueue<SQLOperation*>())
+SQLConnection::SQLConnection(SQLConnectionInfo& _info) : 
+	ConnectionInfo(_info)
 {
-	//* todo: constructor should be no-throw
-	if (Connect())
-	{
-		//TODO error log
-	}
-
-	if (InitStatement())
-	{
-		//TODO error log
-	}
-	//*/
 }
 
 SQLConnection::~SQLConnection()
 {
-	if (mysql_stmt_close(MySqlStatementHandle))
-	{
-		// fprintf(stderr, " failed while closing the statement\n");
-		// fprintf(stderr, " %s\n", mysql_stmt_error(stmt));
-		// TODO error code
-		exit(EXIT_FAILURE);
-	}
+	//TODO free up all the prepared statements
 
 	mysql_close(MySqlHandle);
-}
-
-void SQLConnection::AddTask(SQLOperation* operation)
-{
-	OperationQueue->Push(operation);
 }
 
 uint32 SQLConnection::Connect()
@@ -72,14 +48,8 @@ uint32 SQLConnection::Connect()
 	return 0;
 }
 
-uint32 SQLConnection::InitStatement()
+uint32 SQLConnection::InitPreparedStatements()
 {
-	MySqlStatementHandle = mysql_stmt_init(MySqlHandle);
-	if (!MySqlStatementHandle)
-	{
-		//TODO error log
-		return mysql_errno(MySqlHandle);
-	}
 	return 0;
 }
 

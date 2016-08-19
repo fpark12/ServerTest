@@ -1,6 +1,8 @@
 #pragma once
+/*
 #include "SQLConnection.h"
-#include "DatabaseConnectionPool.h"
-#include "DatabaseWorker.h"
-#include "DatabaseWorkerPool.h"
+#include "SQLConnectionPool.h"
+#include "SQLThread.h"
+#include "SQLThreadPool.h"
 #include "SQLOperation.h"
+*/

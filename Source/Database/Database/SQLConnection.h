@@ -1,10 +1,6 @@
 #pragma once
-#include <mysql.h>
 
-class SQLOperation;
-class DatabaseWorker;
-
-struct DatabaseConnectionInfo
+struct SQLConnectionInfo
 {
 	// port number is included in hostname
 	std::string Hostname;
@@ -17,26 +13,18 @@ struct DatabaseConnectionInfo
 class SQLConnection
 {
 private:
-	friend class DatabaseWorker;
+	friend class SQLThread;
 	friend class SQLOperation;
 
 	MYSQL* MySqlHandle;
-	MYSQL_STMT* MySqlStatementHandle;
-	DatabaseConnectionInfo ConnectionInfo;
-
-	ProducerConsumerQueue<SQLOperation*>* OperationQueue;
+	std::vector<MYSQL_STMT*> PreparedStatementRepository;
+	SQLConnectionInfo ConnectionInfo;
 
 public:
 	
-	SQLConnection(DatabaseConnectionInfo& _info);
+	SQLConnection(SQLConnectionInfo& _info);
 	~SQLConnection();
-
-	void AddTask(SQLOperation* operation);
-
-private:
-
 	uint32 Connect();
-
-	uint32 InitStatement();
-	
+	virtual uint32 InitPreparedStatements();
+		
 };
