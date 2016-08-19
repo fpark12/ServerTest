@@ -44,10 +44,14 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #if FMT_USE_WINDOWS_H
 # if defined(NOMINMAX) || defined(FMT_WIN_MINMAX)
+#  define _WINSOCKAPI_    // stops windows.h including winsock.h
 #  include <windows.h>
+#  undef _WINSOCKAPI_    // stops windows.h including winsock.h
 # else
 #  define NOMINMAX
+#  define _WINSOCKAPI_    // stops windows.h including winsock.h
 #  include <windows.h>
+#  undef _WINSOCKAPI_    // stops windows.h including winsock.h
 #  undef NOMINMAX
 # endif
 #endif

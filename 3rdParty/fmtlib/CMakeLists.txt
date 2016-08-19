@@ -1,10 +1,8 @@
 SET( DEFINE
-SPDLOG_FMT_EXTERNAL
+FMT_HEADER_ONLY
 )
 SET( INCLUDE
-fmtlib
 )
 SET( LINK
-fmtlib
 )
 create_project(STATIC "${DEFINE}" "${INCLUDE}" "${LINK}")

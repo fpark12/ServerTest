@@ -240,7 +240,9 @@ int main()
 		{
 			t2.join();
 		}
-		*/
+*/
+
+		//std::string s = fmt::format("{0}{1}{0}", "abra", "cad");
 
 		GConfig.Load("Database.ini");
 		bool Res;
