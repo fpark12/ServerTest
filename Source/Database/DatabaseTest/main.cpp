@@ -27,12 +27,17 @@ int main()
 		Res |= GConfig.GetUInt("DatabaseTest.LoginDatabase.Port", dbInfo.Port);
 		Res |= GConfig.GetUInt("DatabaseTest.LoginDatabase.ConnectionCount", dbInfo.ConnectionCount);
 
+		#define GDatabase Database
+
 		SQLDatabase Database();
+
+		GDatabase
+
 		Database.Schemas[enum::LoginDatabase];
 		SQLOperation op(LoginConnectionPool);
 		op.SetPreparedStatement(enum::GET_CHARACTERS);
 		op.SetParam(0, xxx);
-		op.AsyncQuery();
+		GDatabase.AsyncQuery(op);
 		//Database.Connect();
 
 		SQLConnection dbConn(dbInfo);
