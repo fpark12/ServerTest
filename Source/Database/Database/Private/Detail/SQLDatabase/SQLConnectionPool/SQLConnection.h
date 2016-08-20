@@ -8,6 +8,7 @@ struct SQLConnectionInfo
 	std::string Password;
 	std::string Schema;
 	uint32 Port;
+	uint32 ConnectionCount;
 };
 
 class SQLConnection

@@ -8,7 +8,21 @@ private:
 	SQLConnectionPool ConnectionPool;
 	SQLThreadPool ThreadPool;
 
+	SQLConnectionInfo ConnectionInfo;
 public:
 	SQLDatabase() = default;
+	SQLDatabase(SQLConnectionInfo& ConnectionInfo)
+	{
+		this->ConnectionInfo = ConnectionInfo;
+	}
+
+	void Connect()
+	{
+		for (int i = 0; i < ConnectionInfo.ConnectionCount; i++)
+		{
+
+		}
+	}
+
 	~SQLDatabase() = default;
 };

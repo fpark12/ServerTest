@@ -20,14 +20,15 @@ int main()
 		GConfig.Load("DatabaseTest.ini");
 		bool Res;
 		SQLConnectionInfo dbInfo;
-		Res |= GConfig.GetString("Database.Initialization.Hostname", dbInfo.Hostname);
-		Res |= GConfig.GetString("Database.Initialization.Username", dbInfo.Username);
-		Res |= GConfig.GetString("Database.Initialization.Password", dbInfo.Password);
-		Res |= GConfig.GetString("Database.Initialization.Schema", dbInfo.Schema);
-		Res |= GConfig.GetUInt("Database.Initialization.Port", dbInfo.Port);
+		Res |= GConfig.GetString("DatabaseTest.LoginDatabase.Hostname", dbInfo.Hostname);
+		Res |= GConfig.GetString("DatabaseTest.LoginDatabase.Username", dbInfo.Username);
+		Res |= GConfig.GetString("DatabaseTest.LoginDatabase.Password", dbInfo.Password);
+		Res |= GConfig.GetString("DatabaseTest.LoginDatabase.Schema", dbInfo.Schema);
+		Res |= GConfig.GetUInt("DatabaseTest.LoginDatabase.Port", dbInfo.Port);
+		Res |= GConfig.GetUInt("DatabaseTest.LoginDatabase.ConnectionCount", dbInfo.ConnectionCount);
 
-		SQLDatabase Database;
-
+		SQLDatabase Database(dbInfo);
+		Database.Connect();
 
 		SQLConnection dbConn(dbInfo);
 		char* sql = "SELECT `sex`, `age`, `name` FROM `user` WHERE `id` = ?";
