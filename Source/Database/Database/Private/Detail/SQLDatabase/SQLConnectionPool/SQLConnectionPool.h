@@ -5,22 +5,25 @@ struct SQLConnectionInfo;
 class SQLConnection;
 class SQLOperation;
 
-template <typename T>
+
+struct SQLConnectionPoolInfo : SQLConnectionInfo
+{
+	int ConnectionCount;
+};
+
 class SQLConnectionPool
 {
 
 private:
 	friend class SQLThread;
 
-	int MaxConnection;
-	SQLConnectionInfo SchemaConnectionInfo;
-	std::vector<T*> Connections;
-	ProducerConsumerQueue<SQLOperation*> TaskQueue;
+	SQLConnectionPoolInfo ConnectionPoolInfo;
+	std::vector<SQLConnection> Connections;
+	std::vector<char*> PreparedStatementStrings;
 
 public:
-	SQLConnectionPool() = default;
+	SQLConnectionPool(SQLConnectionPoolInfo& info);
 	~SQLConnectionPool() = default;
-	
-	SQLConnectionPool(int _max_connection_per_schema);
 
+	void Init();
 };

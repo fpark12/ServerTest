@@ -8,24 +8,21 @@ struct SQLConnectionInfo
 	std::string Password;
 	std::string Schema;
 	uint32 Port;
-	uint32 ConnectionCount;
 };
 
 class SQLConnection
 {
 private:
-	friend class SQLThread;
-	friend class SQLOperation;
 
 	MYSQL* MySqlHandle;
-	std::vector<MYSQL_STMT*> PreparedStatementRepository;
-	SQLConnectionInfo ConnectionInfo;
+	std::vector<MYSQL_STMT*> PreparedStatements;
+	SQLConnectionInfo* ConnectionInfo;
 
 public:
 	
 	SQLConnection(SQLConnectionInfo& _info);
 	~SQLConnection();
 	uint32 Connect();
-	virtual uint32 InitPreparedStatements();
+	virtual uint32 InitPreparedStatements(std::vector<char*>& preparedStmtStrings);
 		
 };

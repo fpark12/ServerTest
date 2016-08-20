@@ -1,8 +1,25 @@
 #include "SQLConnectionPool.h"
 
-SQLConnectionPool::SQLConnectionPool(int _max_connection_per_schema) :
-	MaxConnectionPerSchema(_max_connection_per_schema)
+SQLConnectionPool::SQLConnectionPool(SQLConnectionPoolInfo& info) : ConnectionPoolInfo(info)
 {
-	// Connections.reserve(Schema::Count * MaxConnectionPerSchema);
+
+}
+
+void SQLConnectionPool::Init()
+{
+	Connections.resize(ConnectionPoolInfo.ConnectionCount);
+	for (int i = 0; i < ConnectionPoolInfo.ConnectionCount; ++i)
+	{
+		Connections[i] = SQLConnection(SQLConnectionInfo(ConnectionPoolInfo));
+		if (Connections[i].Connect())
+		{
+			// Error handling
+		}
+		
+		if (Connections[i].InitPreparedStatements(PreparedStatementStrings))
+		{
+			// Error handling
+		}
+	}
 }
 
