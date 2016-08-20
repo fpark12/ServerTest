@@ -3,7 +3,6 @@
 #include "SQLOperation.h"
 
 SQLThread::SQLThread() :
-	SQLOperationTaskQueue(&ConnectionPool.TaskQueue),
 	CancelationToken(false),
 	WorkingThread(&SQLThread::WorkerThread, this)
 {
@@ -13,40 +12,24 @@ SQLThread::~SQLThread()
 {
 	CancelationToken = true;
 
-	SQLOperationTaskQueue->Cancel();
 
 	WorkingThread.join();
 }
 
 void SQLThread::WorkerThread()
 {
-	while (!SQLOperationTaskQueue)
+	// check conditional variable
+	/*
+	while ( true )
 	{
-		if (CancelationToken)
-		{
-			return;
-		}
+		sleep(10);
 	}
 
-	while (true)
+	operation->Call();
+
+	if (CancelationToken)
 	{
-		SQLOperation* operation = nullptr;
-
-		SQLOperationTaskQueue->WaitAndPop(operation);
-
-		while (!operation)
-		{
-			if (CancelationToken)
-			{
-				return;
-			}
-		}
-
-		operation->Call();
-
-		if (CancelationToken)
-		{
-			return;
-		}
+		return;
 	}
+	//*/
 }

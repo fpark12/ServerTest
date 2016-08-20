@@ -2,6 +2,8 @@
 
 void SQLThreadPool::SpawnThread()
 {
-
+	if (Threads.size() < MaxThreadCount)
+	{
+		Threads.push_back(new SQLThread());
+	}
 }
-

@@ -27,8 +27,13 @@ int main()
 		Res |= GConfig.GetUInt("DatabaseTest.LoginDatabase.Port", dbInfo.Port);
 		Res |= GConfig.GetUInt("DatabaseTest.LoginDatabase.ConnectionCount", dbInfo.ConnectionCount);
 
-		SQLDatabase Database(dbInfo);
-		Database.Connect();
+		SQLDatabase Database();
+		Database.Schemas[enum::LoginDatabase];
+		SQLOperation op(LoginConnectionPool);
+		op.SetPreparedStatement(enum::GET_CHARACTERS);
+		op.SetParam(0, xxx);
+		op.AsyncQuery();
+		//Database.Connect();
 
 		SQLConnection dbConn(dbInfo);
 		char* sql = "SELECT `sex`, `age`, `name` FROM `user` WHERE `id` = ?";

@@ -12,8 +12,6 @@ public:
 	~SQLThread();
 
 private:
-	ProducerConsumerQueue<SQLOperation*>* SQLOperationTaskQueue;
-
 	void WorkerThread();
 	std::thread WorkingThread;
 
