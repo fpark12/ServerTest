@@ -8,4 +8,7 @@ private:
 	SQLConnectionPool ConnectionPool;
 	SQLThreadPool ThreadPool;
 
+public:
+	SQLDatabase() = default;
+	~SQLDatabase() = default;
 };

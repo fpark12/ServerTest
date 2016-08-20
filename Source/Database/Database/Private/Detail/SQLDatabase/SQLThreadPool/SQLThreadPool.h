@@ -3,11 +3,12 @@
 
 class SQLThreadPool
 {
-	DECLARE_SINGLETON(SQLThreadPool)
 private:
 
 public:
 	void SpawnThread();
+	SQLThreadPool() = default;
+	~SQLThreadPool() = default;
 };
 
-static SQLThreadPool& ThreadPool = Singleton<SQLThreadPool>().Instance();
+//static SQLThreadPool& ThreadPool = Singleton<SQLThreadPool>().Instance();

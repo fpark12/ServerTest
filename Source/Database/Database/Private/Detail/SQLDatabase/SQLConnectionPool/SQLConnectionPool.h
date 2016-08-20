@@ -7,7 +7,6 @@ class SQLOperation;
 
 class SQLConnectionPool
 {
-	DECLARE_SINGLETON(SQLConnectionPool)
 
 private:
 	friend class SQLThread;
@@ -18,6 +17,8 @@ private:
 	ProducerConsumerQueue<SQLOperation*> TaskQueue;
 
 public:
+	SQLConnectionPool() = default;
+	~SQLConnectionPool() = default;
 
 	enum Schema
 	{
