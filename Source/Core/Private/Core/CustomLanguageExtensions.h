@@ -6,3 +6,4 @@
 
 // Containers
 #include "Private/Core/Utilities/Containers/ProducerConsumerQueue.h"
+#include "Private/Core/Utilities/Containers/ConcurrentQueue"
