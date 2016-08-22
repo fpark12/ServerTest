@@ -5,7 +5,7 @@ SQLConnectionPool::SQLConnectionPool(SQLConnectionPoolInfo& info) : ConnectionPo
 
 }
 
-void SQLConnectionPool::Init()
+uint32 SQLConnectionPool::InitConnection()
 {
 	Connections.resize(ConnectionPoolInfo.ConnectionCount);
 	for (int i = 0; i < ConnectionPoolInfo.ConnectionCount; ++i)
@@ -13,13 +13,14 @@ void SQLConnectionPool::Init()
 		Connections[i] = SQLConnection(SQLConnectionInfo(ConnectionPoolInfo));
 		if (Connections[i].Connect())
 		{
-			// Error handling
+			//TODO Error handling
 		}
 		
 		if (Connections[i].InitPreparedStatements(PreparedStatementStrings))
 		{
-			// Error handling
+			//TODO Error handling
 		}
 	}
+	return 0;
 }
 

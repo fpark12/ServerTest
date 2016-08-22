@@ -48,8 +48,34 @@ uint32 SQLConnection::Connect()
 	return 0;
 }
 
-uint32 SQLConnection::InitPreparedStatements()
+uint32 SQLConnection::InitPreparedStatements(std::vector<char*>& preparedStmtStrings)
 {
+	for (auto& stmt : preparedStmtStrings)
+	{
+		if (PrepareStatement(stmt))
+		{
+			//TODO Error Handling
+		}
+	}
+	return 0;
+}
+
+uint32 SQLConnection::PrepareStatement(char* stmtString)
+{
+	MYSQL_STMT* MySQLStatement = mysql_stmt_init(MySqlHandle);
+	if (!MySQLStatement)
+	{
+		//TODO Error handling
+		return 1;
+	}
+
+	if (mysql_stmt_prepare(MySQLStatement, stmtString, static_cast<unsigned long>(strlen(stmtString))))
+	{
+		//TODO Error handling
+		return 1;
+	}
+
+	PreparedStatements.push_back(MySQLStatement);
 	return 0;
 }
 

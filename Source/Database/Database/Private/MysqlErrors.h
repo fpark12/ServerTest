@@ -1,3 +1,0 @@
-#pragma once
-
-#define CREATE_MYSQL_CONNECTION_NOT_ENOUGH_MEMORY 1

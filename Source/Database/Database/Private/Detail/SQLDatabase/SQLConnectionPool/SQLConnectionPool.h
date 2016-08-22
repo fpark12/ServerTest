@@ -19,11 +19,14 @@ private:
 
 	SQLConnectionPoolInfo ConnectionPoolInfo;
 	std::vector<SQLConnection> Connections;
+	std::vector<std::atomic<bool>> IsConectionInUse;
 	std::vector<char*> PreparedStatementStrings;
 
 public:
 	SQLConnectionPool(SQLConnectionPoolInfo& info);
 	~SQLConnectionPool() = default;
 
-	void Init();
+	uint32 InitConnection();
+
+
 };

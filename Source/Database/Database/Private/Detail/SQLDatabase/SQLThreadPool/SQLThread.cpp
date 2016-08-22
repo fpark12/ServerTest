@@ -18,6 +18,11 @@ SQLThread::~SQLThread()
 
 void SQLThread::WorkerThread()
 {
+	while (true)
+	{
+
+	}
+
 	// check conditional variable
 	/*
 	while ( true )

@@ -1,5 +1,5 @@
 #pragma once
-#include "SQLThread.h"
+#include "Private/Detail/SQLDatabase/SQLThreadPool/SQLThread.h"
 
 class SQLThreadPool
 {
@@ -11,8 +11,6 @@ private:
 
 public:
 	void SpawnThread();
-	SQLThreadPool() = default;
-	~SQLThreadPool() = default;
 	void SetMaxThread(int maxThread) { MaxThreadCount = maxThread; }
 	void SetDefaultMaxThread()
 	{
