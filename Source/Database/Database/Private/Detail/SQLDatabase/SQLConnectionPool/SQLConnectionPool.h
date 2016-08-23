@@ -8,7 +8,7 @@ class SQLOperation;
 
 struct SQLConnectionPoolInfo : SQLConnectionInfo
 {
-	int ConnectionCount;
+	uint32 ConnectionCount;
 };
 
 class SQLConnectionPool
@@ -19,7 +19,7 @@ private:
 
 	SQLConnectionPoolInfo ConnectionPoolInfo;
 	std::vector<SQLConnection> Connections;
-	std::vector<std::atomic<bool>> IsConectionInUse;
+	// won't compile std::vector<std::atomic<bool>> IsConectionInUse;
 	std::vector<char*> PreparedStatementStrings;
 
 public:

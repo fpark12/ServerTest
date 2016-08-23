@@ -19,7 +19,7 @@ int main()
 	{
 		GConfig.Load("DatabaseTest.ini");
 		bool Res;
-		SQLConnectionInfo dbInfo;
+		SQLConnectionPoolInfo dbInfo;
 		Res |= GConfig.GetString("DatabaseTest.LoginDatabase.Hostname", dbInfo.Hostname);
 		Res |= GConfig.GetString("DatabaseTest.LoginDatabase.Username", dbInfo.Username);
 		Res |= GConfig.GetString("DatabaseTest.LoginDatabase.Password", dbInfo.Password);
@@ -31,15 +31,15 @@ int main()
 
 		SQLDatabase Database();
 
-		GDatabase
+		GDatabase;
 
+		/*
 		Database.Schemas[enum::LoginDatabase];
 		SQLOperation op(LoginConnectionPool);
 		op.SetPreparedStatement(enum::GET_CHARACTERS);
 		op.SetParam(0, xxx);
 		GDatabase.AsyncQuery(op);
 		//Database.Connect();
-
 		SQLConnection dbConn(dbInfo);
 		char* sql = "SELECT `sex`, `age`, `name` FROM `user` WHERE `id` = ?";
 
@@ -62,6 +62,8 @@ int main()
 			std::string c = op.GetResultString(2);
 			std::cout << "Sex: " << a << ", Age: " << b << ", Name: " << c << std::endl;
 		}
+		*/
+
 	}
 #if PLATFORM_WINDOWS
 	_CrtDumpMemoryLeaks();
