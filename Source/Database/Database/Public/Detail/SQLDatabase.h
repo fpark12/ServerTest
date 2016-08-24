@@ -1,6 +1,5 @@
 #pragma once
 #include "Private/Detail/SQLDatabase/SQLConnectionPool/SQLConnectionPool.h"
-#include "Private/Detail/SQLDatabase/SQLThreadPool/SQLThreadPool.h"
 #include "Public/Detail/SQLOperation.h"
 
 class SQLDatabase
@@ -11,16 +10,21 @@ private:
 	std::vector<SQLConnectionPool> ConnectionPool;
 	std::vector<SQLConnectionPoolInfo> ConnectionPoolInfo;
 	moodycamel::ConcurrentQueue<SQLOperation*> TaskQueue;
+
 public:
 
-	SQLDatabase(std::vector<SQLConnectionPoolInfo>& infoList) :
-		ConnectionPoolInfo(infoList)
+	void AddSchema(uint32 index, SQLConnectionPoolInfo& poolInfo)
 	{
-		ConnectionPool.reserve(infoList.size());
-		for (auto& info: infoList)
+		if (ConnectionPool.size() <= index)
 		{
-			ConnectionPool.push_back(SQLConnectionPool(info));
+			ConnectionPool.resize(index + 1);
+			ConnectionPool[index] = SQLConnectionPool(poolInfo);
 		}
+	}
+
+	SQLConnection* GetFreeConnectionByType(uint32 index)
+	{
+		return ConnectionPool[index].GetFreeConnection();
 	}
 
 	uint32 InitConnection()

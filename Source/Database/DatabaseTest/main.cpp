@@ -27,11 +27,17 @@ int main()
 		Res |= GConfig.GetUInt("DatabaseTest.LoginDatabase.Port", dbInfo.Port);
 		Res |= GConfig.GetUInt("DatabaseTest.LoginDatabase.ConnectionCount", dbInfo.ConnectionCount);
 
-		#define GDatabase Database
+		enum DatabaseIndex
+		{
+			ServerTest
+		};
 
-		SQLDatabase Database();
-
-		GDatabase;
+		GDatabase.AddSchema(ServerTest, dbInfo);
+		GDatabase.InitConnection();
+		SQLOperation operation(GDatabase.GetFreeConnectionByType(ServerTest));
+		operation.SetStatement("SELECT `sex`, `age`, `name` FROM `user` WHERE `id` = ?");
+		operation.SetParamInt32(0, 1);
+		GDatabase.AddTask(&operation);
 
 		/*
 		Database.Schemas[enum::LoginDatabase];

@@ -1,5 +1,4 @@
 #include "SQLThread.h"
-#include "SQLConnectionPool.h"
 #include "SQLOperation.h"
 #include "SQLDatabase.h"
 

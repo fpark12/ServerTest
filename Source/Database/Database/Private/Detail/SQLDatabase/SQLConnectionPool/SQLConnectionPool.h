@@ -8,14 +8,14 @@ class SQLOperation;
 
 struct SQLConnectionPoolInfo : SQLConnectionInfo
 {
-	uint32 ConnectionCount;
+	static const int32 InvalidConnectionPool = -1;
+	int32 ConnectionCount;
 };
 
 class SQLConnectionPool
 {
 
 private:
-	friend class SQLThread;
 
 	SQLConnectionPoolInfo ConnectionPoolInfo;
 	std::vector<SQLConnection> Connections;
@@ -23,13 +23,15 @@ private:
 	std::vector<char*> PreparedStatementStrings;
 
 public:
+
+	SQLConnectionPool();
+	SQLConnectionPool(SQLConnectionPool&&) = default;
+	SQLConnectionPool& operator=(SQLConnectionPool&&) = default;
+
 	SQLConnectionPool(SQLConnectionPoolInfo& info);
 	~SQLConnectionPool() = default;
 
 	uint32 InitConnection();
 
-	SQLConnection* GetFreeConnection()
-	{
-
-	}
+	SQLConnection* GetFreeConnection();
 };

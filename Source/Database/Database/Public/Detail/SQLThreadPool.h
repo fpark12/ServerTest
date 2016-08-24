@@ -3,7 +3,7 @@
 
 class SQLThreadPool
 {
-	DECLARE_SINGLETON(SQLThreadPool)
+	DECLARE_SINGLETON(SQLThreadPool);
 
 private:
 	int MaxThreadCount;
@@ -18,4 +18,4 @@ public:
 	}
 };
 
-static SQLThreadPool& ThreadPool = Singleton<SQLThreadPool>().Instance();
+static SQLThreadPool& GThreadPool = Singleton<SQLThreadPool>().Instance();

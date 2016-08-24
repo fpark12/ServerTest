@@ -13,6 +13,7 @@ struct SQLConnectionInfo
 class SQLConnection
 {
 	friend class SQLOperation;
+	friend class SQLConnectionPool;
 
 private:
 
@@ -24,6 +25,8 @@ private:
 public:
 	
 	SQLConnection();
+	SQLConnection(SQLConnection&&) = default;
+	SQLConnection& operator=(SQLConnection&&) = default;
 	SQLConnection(SQLConnectionInfo& _info);
 	~SQLConnection();
 	uint32 Connect();

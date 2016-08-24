@@ -1,4 +1,4 @@
-#include "Private/Detail/SQLDatabase/SQLThreadPool/SQLThreadPool.h"
+#include "Public/Detail/SQLThreadPool.h"
 
 
 void SQLThreadPool::SpawnThread()
