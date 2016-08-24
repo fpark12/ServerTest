@@ -23,8 +23,11 @@
 
 #ifdef _WIN32
 #include <ma_config_win.h>
+#elif __APPLE__
+#include <ma_config_macos.h>
 #else
 #include <ma_config.h>
+
 #if defined(__cplusplus) && defined(inline)
 #undef inline				/* fix configure problem */
 #endif
@@ -363,9 +366,9 @@ typedef int	(*qsort_cmp)(const void *,const void *);
 #define qsort_t RETQSORTTYPE	/* Broken GCC cant handle typedef !!!! */
 #endif
 
-#ifdef HAVE_SYS_SOCKET_H
+//#ifdef HAVE_SYS_SOCKET_H
 #include <sys/socket.h>
-#endif
+//#endif
 typedef SOCKET_SIZE_TYPE size_socket;
 
 #ifndef SOCKOPT_OPTLEN_TYPE

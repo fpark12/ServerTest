@@ -19,6 +19,7 @@
   Author: Georg Richter
 
  *************************************************************************************/
+#if _WIN32
 #ifndef _ma_schannel_h_
 #define _ma_schannel_h_
 
@@ -83,3 +84,4 @@ size_t ma_schannel_write_encrypt(MARIADB_PVIO *pvio,
 
 
 #endif /* _ma_schannel_h_ */
+#endif _WIN32

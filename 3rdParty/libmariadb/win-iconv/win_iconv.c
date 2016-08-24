@@ -4,6 +4,7 @@
  * This file is placed in the public domain.
  */
 
+#if _WIN32
 /* for WC_NO_BEST_FIT_CHARS */
 #ifndef WINVER
 # define WINVER 0x0500
@@ -2048,4 +2049,6 @@ main(int argc, char **argv)
     return 0;
 }
 #endif
+
+#endif _WIN32
 

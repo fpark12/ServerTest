@@ -75,6 +75,9 @@ Build/
 CMake/
 Binaries/
 
+# Ignore MacOS disc cache
+.DS_Store
+
 # Include CMake Files
 !*.cmake
 

@@ -19,6 +19,7 @@
   Author: Georg Richter
 
  *************************************************************************************/
+#if _WIN32
 #include "ma_schannel.h"
 #include <assert.h>
 
@@ -972,3 +973,5 @@ my_bool ma_tls_get_protocol_version(MARIADB_TLS *ctls, struct st_ssl_version *ve
   return 0;
 }
 /* }}} */
+
+#endif _WIN32

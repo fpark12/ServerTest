@@ -17,6 +17,7 @@
   51 Franklin St., Fifth Floor, Boston, MA 02110, USA
 
  *************************************************************************************/
+#if _WIN32
 #include "ma_schannel.h"
 
 #pragma comment (lib, "crypt32.lib")
@@ -545,3 +546,5 @@ unsigned int ma_tls_get_finger_print(MARIADB_TLS *ctls, unsigned char *fp, unsig
   CertGetCertificateContextProperty(pRemoteCertContext, CERT_HASH_PROP_ID, fp, (DWORD *)&len);
   return len;
 }
+
+#endif _WIN32

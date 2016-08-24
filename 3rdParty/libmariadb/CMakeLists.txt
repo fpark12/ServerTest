@@ -1,19 +1,89 @@
 SET( DEFINE
 )
 SET( INCLUDE
+openssl
 zlib
 )
 SET( LINK
+openssl
 zlib
 )
-#get_target_property(${PROJECT_NAME} SOURCES ${current_sources})
+
+IF(NOT WIN32)
+  INCLUDE(${CMAKE_CURRENT_SOURCE_DIR}/cmake/FindIconv.cmake)
+  set( LINK ${LINK} ${ICONV_LIBRARIES})
+ENDIF()
+
+create_project(STATIC "${DEFINE}" "${INCLUDE}" "${LINK}")
+
+message("${ICONV_LIBRARIES}")
+
+IF(WIN32)
+  SET(SYSTEM_LIBS ws2_32 advapi32 kernel32)
+ELSE()
+  SET(SYSTEM_LIBS ${LIBPTHREAD} ${LIBDL} ${LIBM})
+  IF(ICONV_EXTERNAL)
+    SET(SYSTEM_LIBS ${SYSTEM_LIBS} ${ICONV_LIBRARIES})
+  ENDIF()
+ENDIF()
+IF(WITH_SSL)
+  SET(SYSTEM_LIBS ${SYSTEM_LIBS} ${SSL_LIBRARIES})
+ENDIF()
+MARK_AS_ADVANCED(SYSTEM_LIBS)
+
+IF(UNIX)
+  #SEARCH_LIBRARY(LIBDL dlopen "dl")
+  #SEARCH_LIBRARY(LIBM floor m)
+  #SEARCH_LIBRARY(LIBPTHREAD pthread_getspecific "pthread;pthreads")
+  #SEARCH_LIBRARY(LIBNSL gethostbyname_r "nsl_r;nsl")
+  #SEARCH_LIBRARY(LIBSOCKET setsockopt socket)
+  FIND_PACKAGE(Threads)
+  SET(CMAKE_REQUIRED_LIBRARIES ${CMAKE_REQUIRED_LIBRARIES} ${LIBNSL} ${LIBBIND} ${LIBICONV}
+    ${LIBSOCKET} ${LIBDL} ${LIBM} ${LIBPTHREAD})
+  SET(SYSTEM_LIBS ${LIBNSL} ${LIBBIND} ${LIBICONV}
+    ${LIBSOCKET} ${LIBDL} ${LIBM} ${LIBPTHREAD})
+  MESSAGE(STATUS "SYSTEM_LIBS ${SYSTEM_LIBS}")
+  #remove possible dups from required libraries
+  LIST(LENGTH CMAKE_REQUIRED_LIBRARIES rllength)
+  IF(${rllength} GREATER 0)
+    LIST(REMOVE_DUPLICATES CMAKE_REQUIRED_LIBRARIES)
+  ENDIF()
+ENDIF()
+
+TARGET_LINK_LIBRARIES(${PROJECT_NAME} ${SYSTEM_LIBS})
+
 if(MSVC)
 	add_definitions(/wd4996)
 endif()
-create_project(STATIC "${DEFINE}" "${INCLUDE}" "${LINK}")
+
+SET(PROTOCOL_VERSION 10) # we adapted new password option from PHP's mysqlnd !
+SET(MARIADB_CLIENT_VERSION_MAJOR "10")
+SET(MARIADB_CLIENT_VERSION_MINOR "1")
+SET(MARIADB_CLIENT_VERSION_PATCH "7")
+SET(MARIADB_CLIENT_VERSION "${MARIADB_CLIENT_VERSION_MAJOR}.${MARIADB_CLIENT_VERSION_MINOR}.${MARIADB_CLIENT_VERSION_PATCH}")
+MATH(EXPR MARIADB_VERSION_ID "${MARIADB_CLIENT_VERSION_MAJOR} * 10000 +
+                              ${MARIADB_CLIENT_VERSION_MINOR} * 100   +
+                              ${MARIADB_CLIENT_VERSION_PATCH}")
+IF (NOT MARIADB_PORT)
+  SET(MARIADB_PORT 3306)
+ENDIF ()
+IF(NOT MARIADB_UNIX_ADDR)
+  SET(MARIADB_UNIX_ADDR "/tmp/mysql.sock")
+ENDIF()
+
+# todo: we don't character sets in share - all is compiled in
+SET(SHAREDIR "share")
+SET(DEFAULT_CHARSET_HOME "${CMAKE_INSTALL_PREFIX}")
+
+
+# check for various include files
+#####INCLUDE(${PROJECT_SOURCE_DIR}/cmake/CheckIncludeFiles.cmake)
+# check for various functions
+#####INCLUDE(${PROJECT_SOURCE_DIR}/cmake/CheckFunctions.cmake)
+# check for various types
+#####INCLUDE(${${PROJECT_NAME}_SOURCE_DIR}/cmake/CheckTypes.cmake)
 
 if(TARGET ${PROJECT_NAME})
-
 	MACRO(REGISTER_PLUGIN name source struct type target allow)
 	  SET(PLUGIN_TYPE ${${name}})
 	  IF(NOT PLUGIN_TYPE STREQUAL "OFF" AND NOT PLUGIN_TYPE)
@@ -105,12 +175,12 @@ if(TARGET ${PROJECT_NAME})
 	# since some files contain multiple plugins, remove duplicates from source files 
 	LIST(REMOVE_DUPLICATES LIBMARIADB_SOURCES)
 
-	CONFIGURE_FILE(${PROJECT_SOURCE_DIR}/libmariadb/ma_client_plugin.c.in
-	  ${PROJECT_BINARY_DIR}/libmariadb/ma_client_plugin.c)
+	CONFIGURE_FILE(${CMAKE_CURRENT_SOURCE_DIR}/include/ma_config.h.in ${CMAKE_CURRENT_BINARY_DIR}/ma_config.h)
+	CONFIGURE_FILE(${CMAKE_CURRENT_SOURCE_DIR}/include/mariadb_version.h.in ${CMAKE_CURRENT_BINARY_DIR}/mariadb_version.h)
+	CONFIGURE_FILE(${CMAKE_CURRENT_SOURCE_DIR}/${PROJECT_NAME}/ma_client_plugin.c.in ${CMAKE_CURRENT_BINARY_DIR}/ma_client_plugin.c)
 
 	MARK_AS_ADVANCED(LIBMARIADB_SOURCES)
 
-	CONFIGURE_FILE(${CMAKE_CURRENT_SOURCE_DIR}/${PROJECT_NAME}/ma_client_plugin.c.in ${CMAKE_CURRENT_BINARY_DIR}/ma_client_plugin.c)
 	target_sources(${PROJECT_NAME} PRIVATE ${CMAKE_CURRENT_BINARY_DIR}/ma_client_plugin.c) 
 	SOURCE_GROUP("${PROJECT_NAME}" FILES ${CMAKE_CURRENT_BINARY_DIR}/ma_client_plugin.c)
 endif()
@@ -140,18 +210,19 @@ IF(NOT WITH_SSL AND NOT WITH_SSL STREQUAL "OFF")
   ENDIF()
 ENDIF()
 
+
 IF(NOT WITH_SSL STREQUAL "OFF")
   IF(WITH_SSL STREQUAL "OPENSSL")
-    FIND_PACKAGE(OpenSSL)
-    IF(OPENSSL_FOUND)
-      ADD_DEFINITIONS(-DHAVE_OPENSSL -DHAVE_TLS)
-      SET(SSL_SOURCES "${PROJECT_SOURCE_DIR}/libmariadb/secure/openssl.c")
-      SET(SSL_LIBRARIES ${OPENSSL_LIBRARIES} ${OPENSSL_CRYPTO_LIBRARIES})
-      INCLUDE_DIRECTORIES(BEFORE ${OPENSSL_INCLUDE_DIR})
-      MESSAGE(STATUS "OpenSSL version: ${OPENSSL_VERSION}")
-    ELSE()
-      MESSAGE(WARNING "OpenSSL not found")
-    ENDIF()
+    #FIND_PACKAGE(OpenSSL)
+    #IF(OPENSSL_FOUND)
+    #  ADD_DEFINITIONS(-DHAVE_OPENSSL -DHAVE_TLS)
+    #  SET(SSL_SOURCES "${PROJECT_SOURCE_DIR}/libmariadb/secure/openssl.c")
+    #  SET(SSL_LIBRARIES ${OPENSSL_LIBRARIES} ${OPENSSL_CRYPTO_LIBRARIES})
+    #  INCLUDE_DIRECTORIES(BEFORE ${OPENSSL_INCLUDE_DIR})
+    #  MESSAGE(STATUS "OpenSSL version: ${OPENSSL_VERSION}")
+    #ELSE()
+    #  MESSAGE(WARNING "OpenSSL not found")
+    #ENDIF()
   ENDIF()
   IF(WITH_SSL STREQUAL "GNUTLS")
     FIND_PACKAGE(GnuTLS)

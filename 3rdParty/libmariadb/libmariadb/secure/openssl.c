@@ -17,7 +17,7 @@
   51 Franklin St., Fifth Floor, Boston, MA 02110, USA
 
  *************************************************************************************/
-
+#if OPENSSL_FOUND
 #ifdef HAVE_OPENSSL
 #include <ma_global.h>
 #include <ma_sys.h>
@@ -754,3 +754,5 @@ my_bool ma_tls_get_protocol_version(MARIADB_TLS *ctls, struct st_ssl_version *ve
 }
 
 #endif
+
+#endif OPENSSL_FOUND

@@ -26,6 +26,8 @@ ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 POSSIBILITY OF SUCH DAMAGE.
 */
 
+#if _WIN32
+
 #include <windows.h>
 #include <stdio.h>
 
@@ -148,3 +150,5 @@ void sspi_errmsg(int err, char *buf, size_t size)
       *p= 0;
   }
 }
+
+#endif _WIN32
