@@ -1,7 +1,12 @@
 #include "SQLConnection.h"
 
+SQLConnection::SQLConnection() : IsFree(true)
+{
+
+}
+
 SQLConnection::SQLConnection(SQLConnectionInfo& _info) : 
-	ConnectionInfo(_info)
+	IsFree(true), ConnectionInfo(_info)
 {
 }
 

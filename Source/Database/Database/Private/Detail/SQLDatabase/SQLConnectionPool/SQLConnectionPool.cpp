@@ -7,10 +7,10 @@ SQLConnectionPool::SQLConnectionPool(SQLConnectionPoolInfo& info) : ConnectionPo
 
 uint32 SQLConnectionPool::InitConnection()
 {
-	Connections.resize(ConnectionPoolInfo.ConnectionCount);
+	Connections.reserve(ConnectionPoolInfo.ConnectionCount);
 	for (int i = 0; i < ConnectionPoolInfo.ConnectionCount; ++i)
 	{
-		Connections[i] = SQLConnection(SQLConnectionInfo(ConnectionPoolInfo));
+		Connections.push_back(SQLConnection(ConnectionPoolInfo));
 		if (Connections[i].Connect())
 		{
 			//TODO Error handling

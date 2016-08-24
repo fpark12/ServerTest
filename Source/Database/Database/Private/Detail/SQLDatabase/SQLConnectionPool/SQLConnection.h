@@ -12,15 +12,18 @@ struct SQLConnectionInfo
 
 class SQLConnection
 {
+	friend class SQLOperation;
+
 private:
 
 	MYSQL* MySqlHandle;
 	std::vector<MYSQL_STMT*> PreparedStatements;
 	SQLConnectionInfo ConnectionInfo;
+	std::atomic_bool IsFree;
 
 public:
 	
-	SQLConnection() = default;
+	SQLConnection();
 	SQLConnection(SQLConnectionInfo& _info);
 	~SQLConnection();
 	uint32 Connect();

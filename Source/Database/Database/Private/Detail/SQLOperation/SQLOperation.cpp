@@ -31,9 +31,10 @@ SQLOperation::~SQLOperation()
 
 
 
-void SQLOperation::SetConnection(SQLConnection* Connection)
+void SQLOperation::SetConnection(SQLConnection* conn)
 {
-	this->Connection = Connection;
+	Connection = conn;
+	Connection->IsFree = false;
 }
 
 void SQLOperation::SetStatement(MYSQL_STMT* Statement)
@@ -52,19 +53,24 @@ void SQLOperation::SetStatement(MYSQL_STMT* Statement)
 	mysql_stmt_attr_set(Statement, STMT_ATTR_UPDATE_MAX_LENGTH, &bool_tmp);
 }
 
+// Prerequisite: this operation already have a connection
 void SQLOperation::SetStatement(char* StatementString)
 {
-// 	MYSQL_STMT* PStatement = Connection->MySqlStatementHandle;
-// 
-// 	int Result = mysql_stmt_prepare(PStatement, StatementString, uint32(strlen(StatementString)));
-// 	if (Result)
-// 	{
-// 		const char* err = mysql_stmt_error(PStatement);
-// 		//TODO error log
-// 		exit(EXIT_FAILURE);
-// 	}
+	if (!Connection)
+	{
+		//TODO Error handling
+		exit(EXIT_FAILURE);
+	}
+	MYSQL_STMT* TempStatement = mysql_stmt_init(Connection->MySqlHandle);
 
-//	SetStatement(PStatement);
+	if (mysql_stmt_prepare(TempStatement, StatementString, uint32(strlen(StatementString))))
+	{
+		const char* err = mysql_stmt_error(Statement);
+		//TODO error log
+		exit(EXIT_FAILURE);
+	}
+
+	SetStatement(TempStatement);
 }
 
 void SQLOperation::SetOperationFlag(SqlOperationFlag flag)
@@ -167,8 +173,13 @@ void SQLOperation::Call()
 {
 	Execute();
 	SQLOperationResult = SQLOperationResult::Success;
+	ReleaseConnection();
 }
 
+bool SQLOperation::IsDone()
+{
+	return SQLOperationResult == SQLOperationResult::Success;
+}
 
 uint32 SQLOperation::SizeForType(MYSQL_FIELD* field)
 {
@@ -224,4 +235,10 @@ bool SQLOperation::FetchNextRow()
 {
 	int retval = mysql_stmt_fetch(Statement);
 	return retval == 0 || retval == MYSQL_DATA_TRUNCATED;
+}
+
+void SQLOperation::ReleaseConnection()
+{
+	Connection->IsFree = true;
+	Connection = nullptr;
 }

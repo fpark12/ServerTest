@@ -10,7 +10,7 @@ class SQLDatabase
 private:
 	std::vector<SQLConnectionPool> ConnectionPool;
 	std::vector<SQLConnectionPoolInfo> ConnectionPoolInfo;
-	ProducerConsumerQueue<SQLOperation> TaskQueue;
+	moodycamel::ConcurrentQueue<SQLOperation*> TaskQueue;
 public:
 
 	SQLDatabase(std::vector<SQLConnectionPoolInfo>& infoList) :
@@ -35,8 +35,39 @@ public:
 		return 0;
 	}
 
-	void Dispatch()
+	uint32 AddTask(SQLOperation* operation)
 	{
+		if (!TaskQueue.try_enqueue(operation))
+		{
+			//TODO Error handling
+			return 1;
+		}
+		return 0;
+	}
 
+	uint32 BulkAddTasks(std::vector<SQLOperation*>& operations)
+	{
+		if (!
+			TaskQueue.try_enqueue_bulk(std::make_move_iterator(operations.begin()), 
+				operations.size())
+			)
+		{
+			//TODO Error handling
+			return 1;
+		}
+		return 0;
+	}
+
+	SQLOperation* NextTask()
+	{
+		SQLOperation* next = nullptr;
+		if (!TaskQueue.try_dequeue(next))
+		{
+			//TODO Error handling
+			return nullptr;
+		}
+		return next;
 	}
 };
+
+static SQLDatabase& GDatabase = Singleton<SQLDatabase>().Instance();

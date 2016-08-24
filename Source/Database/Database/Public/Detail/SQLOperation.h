@@ -61,16 +61,7 @@ public:
 	void SetOperationFlag(SqlOperationFlag flag);
 	void Execute();
 	void Call();
-	bool IsDone()
-	{
-		if (SQLOperationResult == SQLOperationResult::Success)
-		{
-			return true;
-		}
-
-		return false;
-	}
-
+	bool IsDone();
 
 private:
 
@@ -78,4 +69,5 @@ private:
 
 	bool FetchNextRow();
 
+	void ReleaseConnection();
 };

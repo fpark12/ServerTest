@@ -28,5 +28,8 @@ public:
 
 	uint32 InitConnection();
 
+	SQLConnection* GetFreeConnection()
+	{
 
+	}
 };

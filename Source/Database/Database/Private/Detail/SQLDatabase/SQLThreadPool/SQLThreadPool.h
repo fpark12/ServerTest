@@ -18,4 +18,4 @@ public:
 	}
 };
 
-//static SQLThreadPool& ThreadPool = Singleton<SQLThreadPool>().Instance();
+static SQLThreadPool& ThreadPool = Singleton<SQLThreadPool>().Instance();
