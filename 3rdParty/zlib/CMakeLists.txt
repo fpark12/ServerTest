@@ -1,15 +1,7 @@
 SET( DEFINE
-	CAPNP_LITE
 )
 SET( INCLUDE
-	Core
-	libmariadb
-	libprotobuf
 )
 SET( LINK
-	Core
-	libmariadb
-	libprotobuf
 )
-
 create_project(STATIC "${DEFINE}" "${INCLUDE}" "${LINK}")
