@@ -25,8 +25,25 @@ private:
 public:
 	
 	SQLConnection();
-	SQLConnection(SQLConnection&&) = default;
-	SQLConnection& operator=(SQLConnection&&) = default;
+	SQLConnection(SQLConnection&& Other) :
+		MySqlHandle(std::move(Other.MySqlHandle)),
+		PreparedStatements(std::move(Other.PreparedStatements)),
+		ConnectionInfo(std::move(Other.ConnectionInfo)),
+		IsFree(std::move(Other.IsFree.load()))
+	{
+	}
+	SQLConnection& operator=(SQLConnection&& Other)
+	{
+		if (MySqlHandle)
+		{
+			MySqlHandle = std::move(Other.MySqlHandle);
+			PreparedStatements = std::move(Other.PreparedStatements);
+		}
+
+		IsFree = std::move(Other.IsFree.load());
+		ConnectionInfo = std::move(Other.ConnectionInfo);
+		return *this;
+	}
 	SQLConnection(SQLConnectionInfo& _info);
 	~SQLConnection();
 	uint32 Connect();

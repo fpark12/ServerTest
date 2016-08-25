@@ -61,7 +61,7 @@ public:
 	void SetOperationFlag(SqlOperationFlag flag);
 	void Execute();
 	void Call();
-	bool IsDone();
+	bool Completed();
 
 private:
 

@@ -367,7 +367,10 @@ typedef int	(*qsort_cmp)(const void *,const void *);
 #endif
 
 //#ifdef HAVE_SYS_SOCKET_H
+#ifdef _WIN32
+#else
 #include <sys/socket.h>
+#endif
 //#endif
 typedef SOCKET_SIZE_TYPE size_socket;
 

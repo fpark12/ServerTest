@@ -17,7 +17,7 @@ uint32 SQLConnectionPool::InitConnection()
 		Connections.resize(ConnectionPoolInfo.ConnectionCount);
 		for (int i = 0; i < ConnectionPoolInfo.ConnectionCount; ++i)
 		{
-			Connections[i] = std::move(SQLConnection(ConnectionPoolInfo));
+			Connections[i] = ((SQLConnection &&) std::move(SQLConnection(ConnectionPoolInfo)));
 			if (Connections[i].Connect())
 			{
 				//TODO Error handling

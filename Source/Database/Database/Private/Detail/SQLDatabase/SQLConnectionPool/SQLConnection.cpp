@@ -5,16 +5,20 @@ SQLConnection::SQLConnection() : IsFree(true)
 
 }
 
-SQLConnection::SQLConnection(SQLConnectionInfo& _info) : 
-	IsFree(true), ConnectionInfo(_info)
+SQLConnection::SQLConnection(SQLConnectionInfo& _info) :
+	MySqlHandle(nullptr),
+	IsFree(true),
+	ConnectionInfo(_info)
 {
 }
 
 SQLConnection::~SQLConnection()
 {
 	//TODO free up all the prepared statements
-
-	mysql_close(MySqlHandle);
+	if (MySqlHandle)
+	{
+		mysql_close(MySqlHandle);
+	}
 }
 
 uint32 SQLConnection::Connect()
@@ -37,6 +41,7 @@ uint32 SQLConnection::Connect()
 		// TODO Error Log: unsuccess message TC_LOG_ERROR("sql.sql", "Could not connect to MySQL database at %s: %s", m_connectionInfo.host.c_str(), mysql_error(mysqlInit));
 		// mysql_errno(mysqlInit)
 		uint32 error_code = mysql_errno(initMysql);
+		mysql_print_error(initMysql);
 		mysql_close(initMysql);
 		return error_code;
 	}

@@ -2,7 +2,7 @@
 
 struct SQLOperationResultSet
 {
-	enum class SQLOperationResult
+	enum class SQLOperationStatus
 	{
 		Success,
 		Failed,
@@ -19,7 +19,7 @@ struct SQLOperationResultSet
 	uint64* ResultSetData;
 
 	// Status
-	std::atomic<SQLOperationResult> SQLOperationResult;
+	std::atomic<SQLOperationStatus> SQLOperationStatus = SQLOperationStatus::None;
 
 	void ClearResultSet();
 	bool GetNextRowOfResultSet();

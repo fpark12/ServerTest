@@ -856,4 +856,7 @@ struct st_mariadb_methods {
 }
 #endif
 
+/* Extension */
+#include "ma_extension.h"
+
 #endif

@@ -14,7 +14,7 @@ BEFORE_MAIN()
 
 int main()
 {
-	GConsole.Print("abcd");
+	//GConsole.Print("abcd");
 
 	{
 		GConfig.Load("DatabaseTest.ini");
@@ -35,9 +35,17 @@ int main()
 		GDatabase.AddSchema(ServerTest, dbInfo);
 		GDatabase.InitConnection();
 		SQLOperation operation(GDatabase.GetFreeConnectionByType(ServerTest));
-		operation.SetStatement("SELECT `sex`, `age`, `name` FROM `user` WHERE `id` = ?");
+		operation.SetStatement("DROP TABLE IF EXISTS debug_example");
+		//operation.SetStatement("CREATE TABLE debug_example (id int not null, my_name varchar(50), PRIMARY KEY(id))");
+		//operation.SetStatement("SELECT `sex`, `age`, `name` FROM `user` WHERE `id` = ?");
 		operation.SetParamInt32(0, 1);
 		GDatabase.AddTask(&operation);
+
+		while (!operation.Completed())
+		{
+			int i = 0;
+		}
+
 
 		/*
 		Database.Schemas[enum::LoginDatabase];

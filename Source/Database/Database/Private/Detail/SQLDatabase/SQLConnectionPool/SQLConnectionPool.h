@@ -9,7 +9,7 @@ class SQLOperation;
 struct SQLConnectionPoolInfo : SQLConnectionInfo
 {
 	static const int32 InvalidConnectionPool = -1;
-	int32 ConnectionCount;
+	uint32 ConnectionCount;
 };
 
 class SQLConnectionPool
