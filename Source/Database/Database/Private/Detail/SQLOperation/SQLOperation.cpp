@@ -172,13 +172,13 @@ void SQLOperation::Execute()
 void SQLOperation::Call()
 {
 	Execute();
-	SQLOperationResult = SQLOperationResult::Success;
+	SQLOperationStatus = SQLOperationStatus::Success;
 	ReleaseConnection();
 }
 
-bool SQLOperation::IsDone()
+bool SQLOperation::Completed()
 {
-	return SQLOperationResult == SQLOperationResult::Success;
+	return SQLOperationStatus == SQLOperationStatus::Success;
 }
 
 uint32 SQLOperation::SizeForType(MYSQL_FIELD* field)
