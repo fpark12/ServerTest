@@ -21,6 +21,14 @@ enum class SQLOperationResult
 	Count
 };
 
+enum class SQLOperationStatus
+{
+	Success,
+	Failed,
+	None,
+	Count
+};
+
 class SQLOperation : public SQLOperationParamsArchive, public SQLOperationResultSet
 {
 	DISABLE_COPY_AND_ASSIGN(SQLOperation);
@@ -31,7 +39,7 @@ private:
 	SQLConnection* Connection;
 	MYSQL_STMT* Statement;
 	SqlOperationFlag OperationFlag;
-
+	std::atomic<SQLOperationStatus> SQLOperationStatus = SQLOperationStatus::None;
 
 public:
 

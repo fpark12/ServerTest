@@ -20,7 +20,7 @@ private:
 	MYSQL* MySqlHandle;
 	std::vector<MYSQL_STMT*> PreparedStatements;
 	SQLConnectionInfo ConnectionInfo;
-	std::atomic_bool IsFree;
+	std::atomic<bool> IsFree;
 
 public:
 	

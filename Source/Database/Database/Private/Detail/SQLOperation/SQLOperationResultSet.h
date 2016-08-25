@@ -2,13 +2,6 @@
 
 struct SQLOperationResultSet
 {
-	enum class SQLOperationStatus
-	{
-		Success,
-		Failed,
-		None,
-		Count
-	};
 
 	// Field: for output
 	MYSQL_BIND* FieldBinds;
@@ -17,9 +10,6 @@ struct SQLOperationResultSet
 	uint64 CurrentRowCursor;
 	uint64* RowData;
 	uint64* ResultSetData;
-
-	// Status
-	std::atomic<SQLOperationStatus> SQLOperationStatus = SQLOperationStatus::None;
 
 	void ClearResultSet();
 	bool GetNextRowOfResultSet();

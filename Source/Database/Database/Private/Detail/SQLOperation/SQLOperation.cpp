@@ -239,6 +239,9 @@ bool SQLOperation::FetchNextRow()
 
 void SQLOperation::ReleaseConnection()
 {
-	Connection->IsFree = true;
-	Connection = nullptr;
+	if (Connection)
+	{
+		Connection->IsFree = true;
+		Connection = nullptr;
+	}
 }
