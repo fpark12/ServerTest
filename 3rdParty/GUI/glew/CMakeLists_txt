@@ -1,0 +1,8 @@
+SET( DEFINE
+	GLEW_STATIC
+)
+SET( INCLUDE
+)
+SET( LINK
+)
+create_project(STATIC "${DEFINE}" "${INCLUDE}" "${LINK}")

@@ -21,7 +21,7 @@ int main(int argc, char *argv[])
 
   mysql= mysql_init(NULL);
 
-  if (!mysql_real_connect(mysql, "localhost", "root", "password", "test", 0, "/tmp/mysql.sock", 0))
+  if (!mysql_real_connect(mysql, "localhost.mac", "root", "password", "test", 0, "/tmp/mysql.sock", 0))
     show_error(mysql);
 
   query= "DROP TABLE IF EXISTS debug_example";

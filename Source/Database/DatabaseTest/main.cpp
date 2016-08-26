@@ -27,7 +27,7 @@ int main()
 		Res |= GConfig.GetUInt("DatabaseTest.LoginDatabase.Port", dbInfo.Port);
 		Res |= GConfig.GetUInt("DatabaseTest.LoginDatabase.ConnectionCount", dbInfo.ConnectionCount);
 
-		enum DatabaseIndex
+		enum Schemas
 		{
 			ServerTest
 		};
@@ -39,7 +39,11 @@ int main()
 		//operation.SetStatement("CREATE TABLE debug_example (id int not null, my_name varchar(50), PRIMARY KEY(id))");
 		//operation.SetStatement("SELECT `sex`, `age`, `name` FROM `user` WHERE `id` = ?");
 		operation.SetParamInt32(0, 1);
-		GDatabase.AddTask(&operation);
+		for (int i = 0; i < 1000; i++)
+		{
+			operation.Call();
+		}
+		//GDatabase.AddTask(&operation);
 
 		while (!operation.Completed())
 		{

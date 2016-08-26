@@ -1,0 +1,9 @@
+SET( DEFINE
+GLEW_STATIC
+)
+SET( INCLUDE
+)
+SET( LINK
+opengl32.lib
+)
+create_project(STATIC "${DEFINE}" "${INCLUDE}" "${LINK}")
