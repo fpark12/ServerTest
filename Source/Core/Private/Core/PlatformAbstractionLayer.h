@@ -37,8 +37,8 @@ typedef PlatformTypes::CHAR16			UTF16CHAR;	///< A 16-bit character containing a 
 typedef PlatformTypes::CHAR32			UTF32CHAR;	///< A 32-bit character containing a UTF32 (Unicode, 32-bit, fixed-width) code unit.
 
 typedef PlatformTypes::SIZE_T			size_t;		///< An unsigned integer the same size as a pointer
-typedef PlatformTypes::UPTRINT			UPTRINT;	///< An unsigned integer the same size as a pointer
-typedef PlatformTypes::PTRINT			PTRINT;		///< A signed integer the same size as a pointer
+typedef PlatformTypes::UPTRINT			uptrint;	///< An unsigned integer the same size as a pointer
+typedef PlatformTypes::PTRINT			ptrint;		///< A signed integer the same size as a pointer
 typedef PlatformTypes::TYPE_OF_NULL		TYPE_OF_NULL;	///< The type of the NULL constant.
 typedef PlatformTypes::TYPE_OF_NULLPTR	TYPE_OF_NULLPTR; ///< The type of the C++ nullptr keyword.
 

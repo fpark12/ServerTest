@@ -21,8 +21,15 @@ enum class SQLOperationStatus
 	Count
 };
 
-union SQLOperationStatement
+union USQLOperationConnection
 {
+	uptrint SchemaIndex;
+	SQLConnection* Connection;
+};
+
+union USQLOperationStatement
+{
+	uptrint PreparedStatementIndex;
 	MYSQL_STMT* PreparedStatement;
 	char* RawStringStatement;
 };
@@ -34,21 +41,23 @@ class SQLOperation : public SQLOperationParamsArchive, public SQLOperationResult
 private:
 
 	// General
-	SQLConnection* Connection;
-	SQLOperationStatement Statement;
+	uint32 SchemaIndex;
+	USQLOperationConnection Connection;
+	USQLOperationStatement Statement;
 	SQLOperationFlag OperationFlag;
 	std::atomic<SQLOperationStatus> OperationStatus = SQLOperationStatus::None;
 
 public:
 
 	SQLOperation(SQLConnection* conn);
+	SQLOperation(uint32 SchemaIndex);
 	~SQLOperation();
 
 	void Clear()
 	{
 		SQLOperationParamsArchive::ClearParams();
 		SQLOperationResultSet::ClearResultSet();
-		Statement = { nullptr };
+		Statement = { NULL };
 		OperationFlag = SQLOperationFlag::Neither;
 	}
 
@@ -56,6 +65,10 @@ public:
 	void SetConnection(SQLConnection* Connection);
 	SQLOperation& SetStatement(MYSQL_STMT* Statement);
 	SQLOperation& SetStatement(char* StatementString);
+	SQLOperation& SetStatement(uint32 StatementIndex)
+	{
+
+	}
 	void SetOperationFlag(SQLOperationFlag flag);
 	void Execute();
 	void Call();

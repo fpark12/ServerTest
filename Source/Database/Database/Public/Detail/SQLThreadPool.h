@@ -12,7 +12,7 @@ private:
 public:
 	void SpawnThreads();
 	void SetThreadCount(int ThreadCount) { this->SharedThreadCount = ThreadCount; }
-	void SetDefaultMaxThread()
+	void SetDefaultThreadCount()
 	{
 		SharedThreadCount = std::thread::hardware_concurrency();
 	}

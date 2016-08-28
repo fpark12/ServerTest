@@ -2,8 +2,18 @@
 #include "SQLConnection.h"
 
 SQLOperation::SQLOperation(SQLConnection* Connection) :
-	Connection(Connection),
-	Statement{ nullptr },
+	Connection{ 0 },
+	Statement{ 0 },
+	OperationFlag(SQLOperationFlag::Neither),
+	SQLOperationParamsArchive(),
+	SQLOperationResultSet()
+{
+}
+
+SQLOperation::SQLOperation(uint32 SchemaIndex) :
+	SchemaIndex(SchemaIndex),
+	Connection{ 0 },
+	Statement{ 0 },
 	OperationFlag(SQLOperationFlag::Neither),
 	SQLOperationParamsArchive(),
 	SQLOperationResultSet()
@@ -20,8 +30,8 @@ SQLOperation::~SQLOperation()
 
 void SQLOperation::SetConnection(SQLConnection* conn)
 {
-	Connection = conn;
-	Connection->IsFree = false;
+	Connection.Connection = conn;
+	Connection.Connection->IsFree = false;
 }
 
 SQLOperation& SQLOperation::SetStatement(MYSQL_STMT* Statement)

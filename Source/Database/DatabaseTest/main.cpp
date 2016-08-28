@@ -29,31 +29,43 @@ int main()
 		Res |= GConfig.GetUInt("DatabaseTest.LoginDatabase.ConnectionCount", SchemaInfo.ConnectionCount);
 		Res |= GConfig.GetUInt("DatabaseTest.LoginDatabase.ThreadingMode", SchemaInfo.ThreadingMode);
 
-		enum SchemaIndices
+		enum ESchemas
 		{
 			ServerTest = 0
+		};
+
+		enum EServerTestPreparedStatements
+		{
+			UsernameQuery = 0,
+			PersonalInfoQuery = 1
 		};
 
 		GDatabase.AddSchema(ServerTest, SchemaInfo);
 		ASSERT(GDatabase.SpawnSQLConnections() == RC_SUCCESS);
 
-		SQLOperation operation(GDatabase.GetFreeSQLConnection(ServerTest));
+		SQLOperation operation(ServerTest);
+		operation.SetStatement(ServerTest, UsernameQuery);
 		operation.SetStatement("DROP TABLE IF EXISTS debug");
 		operation.Execute();
 		operation.SetStatement("CREATE TABLE debug (id int not null, my_name varchar(50), PRIMARY KEY(id))");
 		operation.Execute();
 
 		operation.SetStatement("DROP TABLE IF EXISTS debug");
-		GDatabase.AddTask(&operation);
 
-		GSQLThreadPool.SetThreadCount(1);
+		for (int i = 0; i < 10; i++)
+		{
+			GDatabase.AddTask(&operation);
+		}
+
+		GSQLThreadPool.SetDefaultThreadCount();
 		GSQLThreadPool.SpawnThreads();
 
+		GConsole.Message("{}: Time: {}", __FUNCTION__, getMSTime());
 		while (!operation.Completed())
 		{
 			int i = 0;
 		}
-
+		GConsole.Message("{}: Time: {}", __FUNCTION__, getMSTime());
 		//operation.SetStatement("SELECT `sex`, `age`, `name` FROM `user` WHERE `id` = ?");
 		//operation.SetParamInt32(0, 1);
 		for (int i = 0; i < 1000; i++)
