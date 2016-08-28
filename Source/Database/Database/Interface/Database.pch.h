@@ -17,3 +17,7 @@
 #ifdef CONST
 #undef CONST
 #endif
+
+#ifdef THIS
+#undef THIS
+#endif

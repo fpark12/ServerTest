@@ -37,8 +37,9 @@ void SQLOperation::SetConnection(SQLConnection* conn)
 	Connection->IsFree = false;
 }
 
-void SQLOperation::SetStatement(MYSQL_STMT* Statement)
+void SQLOperation::SetStatement1(MYSQL_STMT* Statement)
 {
+	this->OperationFlag = SQLOperationFlag::Prepared;
 	this->Statement = Statement;
 	ParamCount = mysql_stmt_param_count(Statement);
 	ParamBinds = new MYSQL_BIND[ParamCount];
@@ -54,8 +55,10 @@ void SQLOperation::SetStatement(MYSQL_STMT* Statement)
 }
 
 // Prerequisite: this operation already have a connection
-void SQLOperation::SetStatement(char* StatementString)
+void SQLOperation::SetStatement2(char* StatementString)
 {
+	this->OperationFlag = SQLOperationFlag::Prepared;
+
 	if (!Connection)
 	{
 		//TODO Error handling
@@ -70,7 +73,13 @@ void SQLOperation::SetStatement(char* StatementString)
 		exit(EXIT_FAILURE);
 	}
 
-	SetStatement(TempStatement);
+	SetStatement1(TempStatement);
+}
+
+void SQLOperation::SetStatement3(char* StatementString)
+{
+	this->OperationFlag = SQLOperationFlag::RawString;
+
 }
 
 void SQLOperation::SetOperationFlag(SQLOperationFlag flag)
@@ -172,13 +181,13 @@ void SQLOperation::Execute()
 void SQLOperation::Call()
 {
 	Execute();
-	SQLOperationStatus = SQLOperationStatus::Success;
+	OperationStatus = SQLOperationStatus::Success;
 	ReleaseConnection();
 }
 
 bool SQLOperation::Completed()
 {
-	return SQLOperationStatus == SQLOperationStatus::Success;
+	return OperationStatus == SQLOperationStatus::Success;
 }
 
 uint32 SQLOperation::SizeForType(MYSQL_FIELD* field)

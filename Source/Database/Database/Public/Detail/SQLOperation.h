@@ -7,9 +7,8 @@ class SQLConnection;
 
 enum class SQLOperationFlag
 {
-	Sync,
-	Async,
-	Both,
+	Prepared,
+	RawString,
 	Neither
 };
 
@@ -39,7 +38,7 @@ private:
 	SQLConnection* Connection;
 	MYSQL_STMT* Statement;
 	SQLOperationFlag OperationFlag;
-	std::atomic<SQLOperationStatus> SQLOperationStatus = SQLOperationStatus::None;
+	std::atomic<SQLOperationStatus> OperationStatus = SQLOperationStatus::None;
 
 public:
 
@@ -56,8 +55,9 @@ public:
 
 	// init params
 	void SetConnection(SQLConnection* Connection);
-	void SetStatement(MYSQL_STMT* Statement);
-	void SetStatement(char* StatementString);
+	void SetStatement1(MYSQL_STMT* Statement);
+	void SetStatement2(char* StatementString);
+	void SetStatement3(char* StatementString);
 	void SetOperationFlag(SQLOperationFlag flag);
 	void Execute();
 	void Call();
