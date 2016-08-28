@@ -4,7 +4,7 @@
 SQLOperation::SQLOperation(SQLConnection* Connection) :
 	Connection(Connection),
 	Statement(nullptr),
-	OperationFlag(SqlOperationFlag::Neither),
+	OperationFlag(SQLOperationFlag::Neither),
 	SQLOperationParamsArchive(),
 	SQLOperationResultSet()
 	//ParamCount(0),
@@ -73,7 +73,7 @@ void SQLOperation::SetStatement(char* StatementString)
 	SetStatement(TempStatement);
 }
 
-void SQLOperation::SetOperationFlag(SqlOperationFlag flag)
+void SQLOperation::SetOperationFlag(SQLOperationFlag flag)
 {
 	OperationFlag = flag;
 }
