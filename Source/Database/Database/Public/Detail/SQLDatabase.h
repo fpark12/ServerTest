@@ -42,12 +42,12 @@ public:
 	{
 		for (auto& pool: ConnectionPool)
 		{
-			if (pool.InitConnection())
+			if (pool.SpawnConnections())
 			{
 				//TODO Error Handling
 			}
 		}
-		return 0;
+		return RC_SUCCESS;
 	}
 
 	uint32 AddTask(SQLOperation* operation)
@@ -55,9 +55,9 @@ public:
 		if (!TaskQueue.try_enqueue(operation))
 		{
 			//TODO Error handling
-			return 1;
+			return RC_FAILED;
 		}
-		return 0;
+		return RC_SUCCESS;
 	}
 
 	uint32 BulkAddTasks(std::vector<SQLOperation*>& operations)
@@ -68,9 +68,9 @@ public:
 			)
 		{
 			//TODO Error handling
-			return 1;
+			return RC_FAILED;
 		}
-		return 0;
+		return RC_SUCCESS;
 	}
 
 	SQLOperation* NextTask()

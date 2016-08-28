@@ -27,7 +27,7 @@ uint32 SQLConnection::Connect()
 	if (!initMysql)
 	{
 		// TODO Error Log: not enough memory to spawn a new mysql connection handle
-		return 1;
+		return RC_FAILED;
 	}
 
 	mysql_options(initMysql, MYSQL_SET_CHARSET_NAME, "utf8");
@@ -55,7 +55,7 @@ uint32 SQLConnection::Connect()
 	mysql_autocommit(MySqlHandle, 1); //Turn on auto commit mode
 
 	mysql_set_character_set(MySqlHandle, "utf8");
-	return 0;
+	return RC_SUCCESS;
 }
 
 uint32 SQLConnection::InitPreparedStatements(std::vector<char*>& preparedStmtStrings)
@@ -67,7 +67,7 @@ uint32 SQLConnection::InitPreparedStatements(std::vector<char*>& preparedStmtStr
 			//TODO Error Handling
 		}
 	}
-	return 0;
+	return RC_SUCCESS;
 }
 
 uint32 SQLConnection::PrepareStatement(char* stmtString)
@@ -76,16 +76,16 @@ uint32 SQLConnection::PrepareStatement(char* stmtString)
 	if (!MySQLStatement)
 	{
 		//TODO Error handling
-		return 1;
+		return RC_FAILED;
 	}
 
 	if (mysql_stmt_prepare(MySQLStatement, stmtString, static_cast<unsigned long>(strlen(stmtString))))
 	{
 		//TODO Error handling
-		return 1;
+		return RC_FAILED;
 	}
 
 	PreparedStatements.push_back(MySQLStatement);
-	return 0;
+	return RC_SUCCESS;
 }
 

@@ -186,9 +186,9 @@ uint32 SQLOperation::SizeForType(MYSQL_FIELD* field)
 	switch (field->type)
 	{
 	case MYSQL_TYPE_NULL:
-		return 0;
+		return RC_SUCCESS;
 	case MYSQL_TYPE_TINY:
-		return 1;
+		return RC_FAILED;
 	case MYSQL_TYPE_YEAR:
 	case MYSQL_TYPE_SHORT:
 		return 2;
@@ -227,7 +227,7 @@ uint32 SQLOperation::SizeForType(MYSQL_FIELD* field)
 		*/
 	default:
 		//TODO error log
-		return 0;
+		return RC_SUCCESS;
 	}
 }
 

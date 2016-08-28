@@ -13,11 +13,11 @@ SQLConnectionPool::SQLConnectionPool(SQLConnectionPoolInfo& info) :
 
 }
 
-uint32 SQLConnectionPool::InitConnection()
+uint32 SQLConnectionPool::SpawnConnections()
 {
 	if (ConnectionPoolInfo.ConnectionCount <= 0)
 	{
-		return 0;
+		return RC_SUCCESS;
 	}
 	if (ActiveConnectionCount != ConnectionPoolInfo.ConnectionCount)
 	{
@@ -38,7 +38,7 @@ uint32 SQLConnectionPool::InitConnection()
 		ActiveConnectionCount = ConnectionPoolInfo.ConnectionCount;
 	}
 	
-	return 0;
+	return RC_SUCCESS;
 }
 
 SQLConnection* SQLConnectionPool::GetFreeSQLConnection()

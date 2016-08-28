@@ -35,7 +35,7 @@ int main()
 		};
 
 		GDatabase.AddSchema(ServerTest, SchemaInfo);
-		GDatabase.SpawnSQLConnections();
+		ASSERT(GDatabase.SpawnSQLConnections() == RC_SUCCESS);
 		GSQLThreadPool.SetThreadCount(1);
 		GSQLThreadPool.SpawnThreads();
 		SQLOperation operation(GDatabase.GetFreeSQLConnection(ServerTest));
