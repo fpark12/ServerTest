@@ -39,7 +39,7 @@ int main()
 		GSQLThreadPool.SetThreadCount(1);
 		GSQLThreadPool.SpawnThreads();
 		SQLOperation operation(GDatabase.GetFreeSQLConnection(ServerTest));
-		operation.SetStatement3("DROP TABLE IF EXISTS debug_example");
+		operation.SetStatement("DROP TABLE IF EXISTS debug_example");
 		//operation.SetStatement("CREATE TABLE debug_example (id int not null, my_name varchar(50), PRIMARY KEY(id))");
 		//operation.SetStatement("SELECT `sex`, `age`, `name` FROM `user` WHERE `id` = ?");
 		//operation.SetParamInt32(0, 1);
