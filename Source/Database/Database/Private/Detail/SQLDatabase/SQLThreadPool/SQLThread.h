@@ -9,6 +9,7 @@ class SQLThread
 	friend class SQLThreadPool;
 public:
 	SQLThread();
+	SQLThread(SQLThread&& Other);
 
 	SQLThread(std::function<void()> Function) :
 		WorkingThread(Function)
@@ -21,6 +22,6 @@ private:
 	void Main();
 	std::thread WorkingThread;
 
-	std::atomic_bool CancelationToken;
+	std::atomic<bool> CancelationToken;
 
 };

@@ -36,23 +36,32 @@ int main()
 
 		GDatabase.AddSchema(ServerTest, SchemaInfo);
 		ASSERT(GDatabase.SpawnSQLConnections() == RC_SUCCESS);
+
+		SQLOperation operation(GDatabase.GetFreeSQLConnection(ServerTest));
+		operation.SetStatement("DROP TABLE IF EXISTS debug");
+		operation.Execute();
+		operation.SetStatement("CREATE TABLE debug (id int not null, my_name varchar(50), PRIMARY KEY(id))");
+		operation.Execute();
+
+		operation.SetStatement("DROP TABLE IF EXISTS debug");
+		GDatabase.AddTask(&operation);
+
 		GSQLThreadPool.SetThreadCount(1);
 		GSQLThreadPool.SpawnThreads();
-		SQLOperation operation(GDatabase.GetFreeSQLConnection(ServerTest));
-		operation.SetStatement("DROP TABLE IF EXISTS debug_example");
-		//operation.SetStatement("CREATE TABLE debug_example (id int not null, my_name varchar(50), PRIMARY KEY(id))");
+
+		while (!operation.Completed())
+		{
+			int i = 0;
+		}
+
 		//operation.SetStatement("SELECT `sex`, `age`, `name` FROM `user` WHERE `id` = ?");
 		//operation.SetParamInt32(0, 1);
 		for (int i = 0; i < 1000; i++)
 		{
 			operation.Call();
 		}
-		//GDatabase.AddTask(&operation);
 
-		while (!operation.Completed())
-		{
-			int i = 0;
-		}
+
 
 
 		/*

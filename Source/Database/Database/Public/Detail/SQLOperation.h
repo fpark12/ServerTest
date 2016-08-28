@@ -9,6 +9,7 @@ enum class SQLOperationFlag
 {
 	Prepared,
 	RawString,
+	RawStringPrepared,
 	Neither
 };
 
@@ -53,8 +54,8 @@ public:
 
 	// init params
 	void SetConnection(SQLConnection* Connection);
-	void SetStatement(MYSQL_STMT* Statement);
-	void SetStatement(char* StatementString);
+	SQLOperation& SetStatement(MYSQL_STMT* Statement);
+	SQLOperation& SetStatement(char* StatementString);
 	void SetOperationFlag(SQLOperationFlag flag);
 	void Execute();
 	void Call();

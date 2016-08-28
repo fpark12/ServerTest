@@ -24,7 +24,7 @@ void SQLOperation::SetConnection(SQLConnection* conn)
 	Connection->IsFree = false;
 }
 
-void SQLOperation::SetStatement(MYSQL_STMT* Statement)
+SQLOperation& SQLOperation::SetStatement(MYSQL_STMT* Statement)
 {
 	this->OperationFlag = SQLOperationFlag::Prepared;
 	this->Statement.PreparedStatement = Statement;
@@ -37,14 +37,42 @@ void SQLOperation::SetStatement(MYSQL_STMT* Statement)
 	/// "If set to 1, causes mysql_stmt_store_result() to update the metadata MYSQL_FIELD->max_length value."
 	my_bool bool_tmp = 1;
 	mysql_stmt_attr_set(Statement, STMT_ATTR_UPDATE_MAX_LENGTH, &bool_tmp);
+	return *this;
 }
 
-void SQLOperation::SetStatement(char* StatementString)
+SQLOperation& SQLOperation::SetStatement(char* StatementString)
 {
-	this->OperationFlag = SQLOperationFlag::RawString;
+	if (strchr(StatementString, '?'))
+	{
+		this->OperationFlag = SQLOperationFlag::RawStringPrepared;
 
-	Statement.RawStringStatement = new char[strlen(StatementString) + 1];
-	memcpy(Statement.RawStringStatement, StatementString, strlen(StatementString) + 1);
+		if (!Connection)
+		{
+			GConsole.Message("{}: Connection is null.", __FUNCTION__);
+			return *this;
+		}
+		MYSQL_STMT* TempStatement = mysql_stmt_init(Connection->MySqlHandle);
+
+		if (mysql_stmt_prepare(TempStatement, StatementString, uint32(strlen(StatementString))))
+		{
+			const char* err = mysql_stmt_error(TempStatement);
+			GConsole.Message("{}: Error parsing prepared statement: {}.", __FUNCTION__, err);
+			mysql_print_error(Connection->MySqlHandle);
+			OperationStatus = SQLOperationStatus::Failed;
+			return *this;
+		}
+
+		SetStatement(TempStatement);
+	}
+	else
+	{
+		this->OperationFlag = SQLOperationFlag::RawString;
+
+		Statement.RawStringStatement = new char[strlen(StatementString) + 1];
+		memcpy(Statement.RawStringStatement, StatementString, strlen(StatementString) + 1);
+	}
+
+	return *this;
 }
 
 void SQLOperation::SetOperationFlag(SQLOperationFlag flag)
@@ -171,6 +199,12 @@ void SQLOperation::Execute()
 			++rowIndex;
 		}
 		mysql_stmt_free_result(Statement.PreparedStatement);
+	}
+
+	if (OperationFlag == SQLOperationFlag::RawStringPrepared)
+	{
+		delete Statement.PreparedStatement;
+		Statement = { nullptr };
 	}
 }
 
