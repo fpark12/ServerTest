@@ -12,7 +12,7 @@ enum class SQLOperationFlag
 	Neither
 };
 
-enum class SQLOperationResult
+enum class SQLOperationStatus
 {
 	Success,
 	Failed,
@@ -20,12 +20,10 @@ enum class SQLOperationResult
 	Count
 };
 
-enum class SQLOperationStatus
+union SQLOperationStatement
 {
-	Success,
-	Failed,
-	None,
-	Count
+	MYSQL_STMT* PreparedStatement;
+	char* RawStringStatement;
 };
 
 class SQLOperation : public SQLOperationParamsArchive, public SQLOperationResultSet
@@ -36,7 +34,7 @@ private:
 
 	// General
 	SQLConnection* Connection;
-	MYSQL_STMT* Statement;
+	SQLOperationStatement Statement;
 	SQLOperationFlag OperationFlag;
 	std::atomic<SQLOperationStatus> OperationStatus = SQLOperationStatus::None;
 
@@ -49,15 +47,14 @@ public:
 	{
 		SQLOperationParamsArchive::ClearParams();
 		SQLOperationResultSet::ClearResultSet();
-		Statement = nullptr;
+		Statement = { nullptr };
 		OperationFlag = SQLOperationFlag::Neither;
 	}
 
 	// init params
 	void SetConnection(SQLConnection* Connection);
-	void SetStatement1(MYSQL_STMT* Statement);
-	void SetStatement2(char* StatementString);
-	void SetStatement3(char* StatementString);
+	void SetStatement(MYSQL_STMT* Statement);
+	void SetStatement(char* StatementString);
 	void SetOperationFlag(SQLOperationFlag flag);
 	void Execute();
 	void Call();

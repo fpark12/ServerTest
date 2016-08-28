@@ -3,23 +3,10 @@
 
 SQLOperation::SQLOperation(SQLConnection* Connection) :
 	Connection(Connection),
-	Statement(nullptr),
+	Statement{ nullptr },
 	OperationFlag(SQLOperationFlag::Neither),
 	SQLOperationParamsArchive(),
 	SQLOperationResultSet()
-	//ParamCount(0),
-	//ParamSetBitMask(0x00000000),
-	//ParamBinds(nullptr),
-	//ParamData(nullptr),
-	//Storage(StatementStorage::None),
-
-	//FieldBinds(nullptr),
-// 	RowCount(0),
-// 	FieldCount(0),
-// 	CurrentRowCursor(0),
-// 	RowData(nullptr),
-// 	ResultSetData(nullptr),
-// 	SQLOperationResult(SQLOperationResult::None)
 {
 }
 
@@ -37,49 +24,27 @@ void SQLOperation::SetConnection(SQLConnection* conn)
 	Connection->IsFree = false;
 }
 
-void SQLOperation::SetStatement1(MYSQL_STMT* Statement)
+void SQLOperation::SetStatement(MYSQL_STMT* Statement)
 {
 	this->OperationFlag = SQLOperationFlag::Prepared;
-	this->Statement = Statement;
+	this->Statement.PreparedStatement = Statement;
 	ParamCount = mysql_stmt_param_count(Statement);
 	ParamBinds = new MYSQL_BIND[ParamCount];
 	memset(ParamBinds, 0, sizeof(MYSQL_BIND)*ParamCount);
 	ParamData = new uint64[ParamCount];
 	memset(ParamData, 0, sizeof(uint64)*ParamCount);
 
-	FieldCount = mysql_stmt_field_count(Statement);
-
 	/// "If set to 1, causes mysql_stmt_store_result() to update the metadata MYSQL_FIELD->max_length value."
 	my_bool bool_tmp = 1;
 	mysql_stmt_attr_set(Statement, STMT_ATTR_UPDATE_MAX_LENGTH, &bool_tmp);
 }
 
-// Prerequisite: this operation already have a connection
-void SQLOperation::SetStatement2(char* StatementString)
-{
-	this->OperationFlag = SQLOperationFlag::Prepared;
-
-	if (!Connection)
-	{
-		//TODO Error handling
-		exit(EXIT_FAILURE);
-	}
-	MYSQL_STMT* TempStatement = mysql_stmt_init(Connection->MySqlHandle);
-
-	if (mysql_stmt_prepare(TempStatement, StatementString, uint32(strlen(StatementString))))
-	{
-		const char* err = mysql_stmt_error(Statement);
-		//TODO error log
-		exit(EXIT_FAILURE);
-	}
-
-	SetStatement1(TempStatement);
-}
-
-void SQLOperation::SetStatement3(char* StatementString)
+void SQLOperation::SetStatement(char* StatementString)
 {
 	this->OperationFlag = SQLOperationFlag::RawString;
 
+	Statement.RawStringStatement = new char[strlen(StatementString) + 1];
+	memcpy(Statement.RawStringStatement, StatementString, strlen(StatementString) + 1);
 }
 
 void SQLOperation::SetOperationFlag(SQLOperationFlag flag)
@@ -89,18 +54,59 @@ void SQLOperation::SetOperationFlag(SQLOperationFlag flag)
 
 void SQLOperation::Execute()
 {
-	if (ParamCount)
+	if (!Connection)
 	{
-		mysql_stmt_bind_param(Statement, ParamBinds);
+		GConsole.Message("{}: Connection is null.", __FUNCTION__);
+		return;
 	}
 
-	if (mysql_stmt_execute(Statement))
+	MYSQL_RES* resultMetaData;
+	if (OperationFlag == SQLOperationFlag::Prepared)
 	{
-		//TODO error log
-		fprintf(stderr, " mysql_stmt_execute(), failed\n");
-		fprintf(stderr, " %s\n", mysql_stmt_error(Statement));
-		exit(EXIT_FAILURE);
+		if (ParamCount)
+		{
+			mysql_stmt_bind_param(Statement.PreparedStatement, ParamBinds);
+		}
+
+		if (mysql_stmt_execute(Statement.PreparedStatement))
+		{
+			mysql_print_error(Connection->MySqlHandle);
+			OperationStatus = SQLOperationStatus::Failed;
+			return;
+		}
+
+		if (mysql_stmt_store_result(Statement.PreparedStatement))
+		{
+			mysql_print_error(Connection->MySqlHandle);
+			OperationStatus = SQLOperationStatus::Failed;
+			return;
+		}
+
+		resultMetaData = mysql_stmt_result_metadata(Statement.PreparedStatement);
 	}
+	else if (OperationFlag == SQLOperationFlag::RawString)
+	{
+		if (mysql_real_query(Connection->MySqlHandle, Statement.RawStringStatement, strlen(Statement.RawStringStatement)))
+		{
+			mysql_print_error(Connection->MySqlHandle);
+			OperationStatus = SQLOperationStatus::Failed;
+			return;
+		}
+		
+		resultMetaData = mysql_store_result(Connection->MySqlHandle);
+	}
+
+	if (!resultMetaData)
+	{
+		if (mysql_field_count(Connection->MySqlHandle) != 0)
+		{
+			mysql_print_error(Connection->MySqlHandle);
+		}
+		return;
+	}
+
+	FieldCount = mysql_num_fields(resultMetaData);
+	RowCount = mysql_num_rows(resultMetaData);
 
 	if (FieldCount)
 	{
@@ -110,24 +116,14 @@ void SQLOperation::Execute()
 		RowData = new uint64[FieldCount];
 		memset(RowData, 0, sizeof(uint64)*FieldCount);
 
-		if (mysql_stmt_store_result(Statement))
-		{
-			//TODO error log
-			fprintf(stderr, " mysql_stmt_execute(), failed\n");
-			fprintf(stderr, " %s\n", mysql_stmt_error(Statement));
-			exit(EXIT_FAILURE);
-		}
-
 		// get metadata
-		MYSQL_RES* resultMetaData = mysql_stmt_result_metadata(Statement);
 		MYSQL_FIELD* resultDataFields = mysql_fetch_fields(resultMetaData);
-		RowCount = (uint64)mysql_stmt_num_rows(Statement);
 
 		// bind result for fetching
-		if (Statement->bind_result_done)
+		if (Statement.PreparedStatement->bind_result_done)
 		{
-			delete[] Statement->bind->length;
-			delete[] Statement->bind->is_null;
+			delete[] Statement.PreparedStatement->bind->length;
+			delete[] Statement.PreparedStatement->bind->is_null;
 		}
 
 		for (uint32 i = 0; i < FieldCount; ++i)
@@ -150,7 +146,7 @@ void SQLOperation::Execute()
 			}
 		}
 
-		mysql_stmt_bind_result(Statement, FieldBinds);
+		mysql_stmt_bind_result(Statement.PreparedStatement, FieldBinds);
 		ResultSetData = new uint64[RowCount*FieldCount];
 
 		uint32 rowIndex = 0;
@@ -174,7 +170,7 @@ void SQLOperation::Execute()
 			}
 			++rowIndex;
 		}
-		mysql_stmt_free_result(Statement);
+		mysql_stmt_free_result(Statement.PreparedStatement);
 	}
 }
 
@@ -242,7 +238,7 @@ uint32 SQLOperation::SizeForType(MYSQL_FIELD* field)
 
 bool SQLOperation::FetchNextRow()
 {
-	int retval = mysql_stmt_fetch(Statement);
+	int retval = mysql_stmt_fetch(Statement.PreparedStatement);
 	return retval == 0 || retval == MYSQL_DATA_TRUNCATED;
 }
 
@@ -250,7 +246,8 @@ void SQLOperation::ReleaseConnection()
 {
 	if (Connection)
 	{
-		Connection->IsFree = true;
+		bool Expected = false;
+		Connection->IsFree.compare_exchange_strong(Expected, true);
 		Connection = nullptr;
 	}
 }
