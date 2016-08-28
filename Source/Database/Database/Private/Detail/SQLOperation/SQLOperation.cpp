@@ -2,8 +2,8 @@
 #include "SQLConnection.h"
 
 SQLOperation::SQLOperation(SQLConnection* Connection) :
-	Connection{ 0 },
-	Statement{ 0 },
+	Connection(Connection),
+	PreparedStatementIndex(0),
 	OperationFlag(SQLOperationFlag::Neither),
 	SQLOperationParamsArchive(),
 	SQLOperationResultSet()
@@ -12,8 +12,7 @@ SQLOperation::SQLOperation(SQLConnection* Connection) :
 
 SQLOperation::SQLOperation(uint32 SchemaIndex) :
 	SchemaIndex(SchemaIndex),
-	Connection{ 0 },
-	Statement{ 0 },
+	PreparedStatementIndex(0),
 	OperationFlag(SQLOperationFlag::Neither),
 	SQLOperationParamsArchive(),
 	SQLOperationResultSet()
@@ -30,14 +29,14 @@ SQLOperation::~SQLOperation()
 
 void SQLOperation::SetConnection(SQLConnection* conn)
 {
-	Connection.Connection = conn;
-	Connection.Connection->IsFree = false;
+	Connection = conn;
+	Connection->IsFree = false;
 }
 
 SQLOperation& SQLOperation::SetStatement(MYSQL_STMT* Statement)
 {
 	this->OperationFlag = SQLOperationFlag::Prepared;
-	this->Statement.PreparedStatement = Statement;
+	this->MYSQLStatement = Statement;
 	ParamCount = mysql_stmt_param_count(Statement);
 	ParamBinds = new MYSQL_BIND[ParamCount];
 	memset(ParamBinds, 0, sizeof(MYSQL_BIND)*ParamCount);
@@ -78,8 +77,8 @@ SQLOperation& SQLOperation::SetStatement(char* StatementString)
 	{
 		this->OperationFlag = SQLOperationFlag::RawString;
 
-		Statement.RawStringStatement = new char[strlen(StatementString) + 1];
-		memcpy(Statement.RawStringStatement, StatementString, strlen(StatementString) + 1);
+		RawStringStatement = new char[strlen(StatementString) + 1];
+		memcpy(RawStringStatement, StatementString, strlen(StatementString) + 1);
 	}
 
 	return *this;
@@ -103,28 +102,28 @@ void SQLOperation::Execute()
 	{
 		if (ParamCount)
 		{
-			mysql_stmt_bind_param(Statement.PreparedStatement, ParamBinds);
+			mysql_stmt_bind_param(MYSQLStatement, ParamBinds);
 		}
 
-		if (mysql_stmt_execute(Statement.PreparedStatement))
+		if (mysql_stmt_execute(MYSQLStatement))
 		{
 			mysql_print_error(Connection->MySqlHandle);
 			OperationStatus = SQLOperationStatus::Failed;
 			return;
 		}
 
-		if (mysql_stmt_store_result(Statement.PreparedStatement))
+		if (mysql_stmt_store_result(MYSQLStatement))
 		{
 			mysql_print_error(Connection->MySqlHandle);
 			OperationStatus = SQLOperationStatus::Failed;
 			return;
 		}
 
-		resultMetaData = mysql_stmt_result_metadata(Statement.PreparedStatement);
+		resultMetaData = mysql_stmt_result_metadata(MYSQLStatement);
 	}
 	else if (OperationFlag == SQLOperationFlag::RawString)
 	{
-		if (mysql_real_query(Connection->MySqlHandle, Statement.RawStringStatement, strlen(Statement.RawStringStatement)))
+		if (mysql_real_query(Connection->MySqlHandle, RawStringStatement, strlen(RawStringStatement)))
 		{
 			mysql_print_error(Connection->MySqlHandle);
 			OperationStatus = SQLOperationStatus::Failed;
@@ -158,10 +157,10 @@ void SQLOperation::Execute()
 		MYSQL_FIELD* resultDataFields = mysql_fetch_fields(resultMetaData);
 
 		// bind result for fetching
-		if (Statement.PreparedStatement->bind_result_done)
+		if (MYSQLStatement->bind_result_done)
 		{
-			delete[] Statement.PreparedStatement->bind->length;
-			delete[] Statement.PreparedStatement->bind->is_null;
+			delete[] MYSQLStatement->bind->length;
+			delete[] MYSQLStatement->bind->is_null;
 		}
 
 		for (uint32 i = 0; i < FieldCount; ++i)
@@ -184,7 +183,7 @@ void SQLOperation::Execute()
 			}
 		}
 
-		mysql_stmt_bind_result(Statement.PreparedStatement, FieldBinds);
+		mysql_stmt_bind_result(MYSQLStatement, FieldBinds);
 		ResultSetData = new uint64[RowCount*FieldCount];
 
 		uint32 rowIndex = 0;
@@ -208,13 +207,13 @@ void SQLOperation::Execute()
 			}
 			++rowIndex;
 		}
-		mysql_stmt_free_result(Statement.PreparedStatement);
+		mysql_stmt_free_result(MYSQLStatement);
 	}
 
 	if (OperationFlag == SQLOperationFlag::RawStringPrepared)
 	{
-		delete Statement.PreparedStatement;
-		Statement = { nullptr };
+		delete MYSQLStatement;
+		this->MYSQLStatement = nullptr;
 	}
 }
 
@@ -282,7 +281,7 @@ uint32 SQLOperation::SizeForType(MYSQL_FIELD* field)
 
 bool SQLOperation::FetchNextRow()
 {
-	int retval = mysql_stmt_fetch(Statement.PreparedStatement);
+	int retval = mysql_stmt_fetch(MYSQLStatement);
 	return retval == 0 || retval == MYSQL_DATA_TRUNCATED;
 }
 

@@ -29,22 +29,22 @@ int main()
 		Res |= GConfig.GetUInt("DatabaseTest.LoginDatabase.ConnectionCount", SchemaInfo.ConnectionCount);
 		Res |= GConfig.GetUInt("DatabaseTest.LoginDatabase.ThreadingMode", SchemaInfo.ThreadingMode);
 
-		enum ESchemas
+		enum ESchema
 		{
-			ServerTest = 0
+			Login = 0
 		};
 
-		enum EServerTestPreparedStatements
+		enum ELoginPreparedStatement
 		{
 			UsernameQuery = 0,
 			PersonalInfoQuery = 1
 		};
 
-		GDatabase.AddSchema(ServerTest, SchemaInfo);
+		GDatabase.AddSchema(ESchema::Login, SchemaInfo);
 		ASSERT(GDatabase.SpawnSQLConnections() == RC_SUCCESS);
 
-		SQLOperation operation(ServerTest);
-		operation.SetStatement(ServerTest, UsernameQuery);
+		SQLOperation operation(ESchema::Login, ELoginPreparedStatement::UsernameQuery);
+		operation(ESchema::Login, ELoginPreparedStatement::UsernameQuery);
 		operation.SetStatement("DROP TABLE IF EXISTS debug");
 		operation.Execute();
 		operation.SetStatement("CREATE TABLE debug (id int not null, my_name varchar(50), PRIMARY KEY(id))");
