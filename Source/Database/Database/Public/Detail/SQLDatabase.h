@@ -2,6 +2,17 @@
 #include "Private/Detail/SQLDatabase/SQLConnectionPool/SQLConnectionPool.h"
 #include "Public/Detail/SQLOperation.h"
 
+
+enum SQLThreadingMode
+{
+	Shared = 0,
+	Dedicated = 1
+};
+struct SQLSchemaInfo : SQLConnectionPoolInfo
+{
+	uint32 ThreadingMode;
+};
+
 class SQLDatabase
 {
 	DECLARE_SINGLETON(SQLDatabase);
@@ -13,21 +24,21 @@ private:
 
 public:
 
-	void AddSchema(uint32 index, SQLConnectionPoolInfo& poolInfo)
+	void AddSchema(uint32 index, SQLSchemaInfo& poolInfo)
 	{
 		if (ConnectionPool.size() <= index)
 		{
 			ConnectionPool.resize(index + 1);
-			ConnectionPool[index] = SQLConnectionPool(poolInfo);
+			ConnectionPool[index] = std::move(SQLConnectionPool(poolInfo));
 		}
 	}
 
-	SQLConnection* GetFreeConnectionByType(uint32 index)
+	SQLConnection* GetFreeSQLConnection(uint32 index)
 	{
-		return ConnectionPool[index].GetFreeConnection();
+		return ConnectionPool[index].GetFreeSQLConnection();
 	}
 
-	uint32 InitConnection()
+	uint32 SpawnSQLConnections()
 	{
 		for (auto& pool: ConnectionPool)
 		{

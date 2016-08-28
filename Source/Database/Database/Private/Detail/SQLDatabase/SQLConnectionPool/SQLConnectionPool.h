@@ -18,6 +18,7 @@ class SQLConnectionPool
 private:
 
 	SQLConnectionPoolInfo ConnectionPoolInfo;
+	uint32 ActiveConnectionCount;
 	std::vector<SQLConnection> Connections;
 	// won't compile std::vector<std::atomic<bool>> IsConectionInUse;
 	std::vector<char*> PreparedStatementStrings;
@@ -33,5 +34,5 @@ public:
 
 	uint32 InitConnection();
 
-	SQLConnection* GetFreeConnection();
+	SQLConnection* GetFreeSQLConnection();
 };

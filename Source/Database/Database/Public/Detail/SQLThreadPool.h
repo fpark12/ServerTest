@@ -6,16 +6,16 @@ class SQLThreadPool
 	DECLARE_SINGLETON(SQLThreadPool);
 
 private:
-	int MaxThreadCount;
-	std::vector<SQLThread*> Threads;
-
+	int SharedThreadCount;
+	std::vector<std::unique_ptr<SQLThread>> SharedThreads;
+	std::vector<std::vector<std::unique_ptr<SQLThread>>> DedicatedThreads;
 public:
-	void SpawnThread();
-	void SetMaxThread(int maxThread) { MaxThreadCount = maxThread; }
+	void SpawnThreads();
+	void SetThreadCount(int ThreadCount) { this->SharedThreadCount = ThreadCount; }
 	void SetDefaultMaxThread()
 	{
-		MaxThreadCount = std::thread::hardware_concurrency();
+		SharedThreadCount = std::thread::hardware_concurrency();
 	}
 };
 
-static SQLThreadPool& GThreadPool = Singleton<SQLThreadPool>().Instance();
+static SQLThreadPool& GSQLThreadPool = Singleton<SQLThreadPool>().Instance();

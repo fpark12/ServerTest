@@ -1,4 +1,5 @@
 #include "Public/Detail/SQLDatabase.h"
+#include "Public/Detail/SQLThreadPool.h"
 #include "Public/Detail/SQLOperation.h"
 
 #if PLATFORM_WINDOWS
@@ -19,22 +20,25 @@ int main()
 	{
 		GConfig.Load("DatabaseTest.ini");
 		bool Res;
-		SQLConnectionPoolInfo dbInfo;
-		Res |= GConfig.GetString("DatabaseTest.LoginDatabase.Hostname", dbInfo.Hostname);
-		Res |= GConfig.GetString("DatabaseTest.LoginDatabase.Username", dbInfo.Username);
-		Res |= GConfig.GetString("DatabaseTest.LoginDatabase.Password", dbInfo.Password);
-		Res |= GConfig.GetString("DatabaseTest.LoginDatabase.Schema", dbInfo.Schema);
-		Res |= GConfig.GetUInt("DatabaseTest.LoginDatabase.Port", dbInfo.Port);
-		Res |= GConfig.GetUInt("DatabaseTest.LoginDatabase.ConnectionCount", dbInfo.ConnectionCount);
+		SQLSchemaInfo SchemaInfo;
+		Res |= GConfig.GetString("DatabaseTest.LoginDatabase.Hostname", SchemaInfo.Hostname);
+		Res |= GConfig.GetString("DatabaseTest.LoginDatabase.Username", SchemaInfo.Username);
+		Res |= GConfig.GetString("DatabaseTest.LoginDatabase.Password", SchemaInfo.Password);
+		Res |= GConfig.GetString("DatabaseTest.LoginDatabase.Schema", SchemaInfo.Schema);
+		Res |= GConfig.GetUInt("DatabaseTest.LoginDatabase.Port", SchemaInfo.Port);
+		Res |= GConfig.GetUInt("DatabaseTest.LoginDatabase.ConnectionCount", SchemaInfo.ConnectionCount);
+		Res |= GConfig.GetUInt("DatabaseTest.LoginDatabase.ThreadingMode", SchemaInfo.ThreadingMode);
 
-		enum Schemas
+		enum SchemaIndices
 		{
-			ServerTest
+			ServerTest = 0
 		};
 
-		GDatabase.AddSchema(ServerTest, dbInfo);
-		GDatabase.InitConnection();
-		SQLOperation operation(GDatabase.GetFreeConnectionByType(ServerTest));
+		GDatabase.AddSchema(ServerTest, SchemaInfo);
+		GDatabase.SpawnSQLConnections();
+		GSQLThreadPool.SetThreadCount(1);
+		GSQLThreadPool.SpawnThreads();
+		SQLOperation operation(GDatabase.GetFreeSQLConnection(ServerTest));
 		operation.SetStatement("DROP TABLE IF EXISTS debug_example");
 		//operation.SetStatement("CREATE TABLE debug_example (id int not null, my_name varchar(50), PRIMARY KEY(id))");
 		//operation.SetStatement("SELECT `sex`, `age`, `name` FROM `user` WHERE `id` = ?");

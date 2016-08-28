@@ -1,23 +1,30 @@
 #include "SQLConnectionPool.h"
 
-SQLConnectionPool::SQLConnectionPool()
+SQLConnectionPool::SQLConnectionPool() :
+ActiveConnectionCount(0)
 {
 	ConnectionPoolInfo.ConnectionCount = SQLConnectionPoolInfo::InvalidConnectionPool;
 }
 
-SQLConnectionPool::SQLConnectionPool(SQLConnectionPoolInfo& info) : ConnectionPoolInfo(info)
+SQLConnectionPool::SQLConnectionPool(SQLConnectionPoolInfo& info) :
+	ActiveConnectionCount(0),
+	ConnectionPoolInfo(info)
 {
 
 }
 
 uint32 SQLConnectionPool::InitConnection()
 {
-	if (ConnectionPoolInfo.ConnectionCount > 0)
+	if (ConnectionPoolInfo.ConnectionCount <= 0)
 	{
-		Connections.resize(ConnectionPoolInfo.ConnectionCount);
-		for (int i = 0; i < ConnectionPoolInfo.ConnectionCount; ++i)
+		return 0;
+	}
+	if (ActiveConnectionCount != ConnectionPoolInfo.ConnectionCount)
+	{
+		Connections.reserve(ConnectionPoolInfo.ConnectionCount);
+		for (int i = ActiveConnectionCount; i < ConnectionPoolInfo.ConnectionCount; ++i)
 		{
-			Connections[i] = ((SQLConnection &&) std::move(SQLConnection(ConnectionPoolInfo)));
+			Connections.emplace_back(SQLConnection(ConnectionPoolInfo));
 			if (Connections[i].Connect())
 			{
 				//TODO Error handling
@@ -28,12 +35,13 @@ uint32 SQLConnectionPool::InitConnection()
 				//TODO Error handling
 			}
 		}
+		ActiveConnectionCount = ConnectionPoolInfo.ConnectionCount;
 	}
 	
 	return 0;
 }
 
-SQLConnection* SQLConnectionPool::GetFreeConnection()
+SQLConnection* SQLConnectionPool::GetFreeSQLConnection()
 {
 	for (auto& conn : Connections)
 	{

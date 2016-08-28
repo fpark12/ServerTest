@@ -4,7 +4,7 @@
 
 SQLThread::SQLThread() :
 	CancelationToken(false),
-	WorkingThread(&SQLThread::WorkerThread, this)
+	WorkingThread(&SQLThread::Main, this)
 {
 }
 
@@ -14,7 +14,7 @@ SQLThread::~SQLThread()
 	WorkingThread.join();
 }
 
-void SQLThread::WorkerThread()
+void SQLThread::Main()
 {
 	while (!CancelationToken)
 	{
