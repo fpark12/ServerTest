@@ -5,7 +5,7 @@
 class SQLConnection;
 
 
-enum class SqlOperationFlag
+enum class SQLOperationFlag
 {
 	Sync,
 	Async,
@@ -38,7 +38,7 @@ private:
 	// General
 	SQLConnection* Connection;
 	MYSQL_STMT* Statement;
-	SqlOperationFlag OperationFlag;
+	SQLOperationFlag OperationFlag;
 	std::atomic<SQLOperationStatus> SQLOperationStatus = SQLOperationStatus::None;
 
 public:
@@ -51,22 +51,14 @@ public:
 		SQLOperationParamsArchive::ClearParams();
 		SQLOperationResultSet::ClearResultSet();
 		Statement = nullptr;
-		OperationFlag = SqlOperationFlag::Neither;
-		//ParamCount = 0;
-		//ParamSetBitMask = 0x00000000;
-		//ParamData = nullptr;
-		//Storage = StatementStorage::None;
-		//RowCount = 0;
-		//FieldCount = 0;
-		//CurrentRowCursor = 0;
-		//SQLOperationResult = SQLOperationResult::None;
+		OperationFlag = SQLOperationFlag::Neither;
 	}
 
 	// init params
 	void SetConnection(SQLConnection* Connection);
 	void SetStatement(MYSQL_STMT* Statement);
 	void SetStatement(char* StatementString);
-	void SetOperationFlag(SqlOperationFlag flag);
+	void SetOperationFlag(SQLOperationFlag flag);
 	void Execute();
 	void Call();
 	bool Completed();

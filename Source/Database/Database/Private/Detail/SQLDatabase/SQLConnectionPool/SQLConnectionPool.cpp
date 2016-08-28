@@ -43,9 +43,11 @@ uint32 SQLConnectionPool::SpawnConnections()
 
 SQLConnection* SQLConnectionPool::GetFreeSQLConnection()
 {
+	bool Expected = true;
 	for (auto& conn : Connections)
 	{
-		if (conn.IsFree)
+		Expected = true;
+		if (conn.IsFree.compare_exchange_strong(Expected, false))
 		{
 			return &conn;
 		}

@@ -42,7 +42,7 @@ int main()
 		operation.SetStatement("DROP TABLE IF EXISTS debug_example");
 		//operation.SetStatement("CREATE TABLE debug_example (id int not null, my_name varchar(50), PRIMARY KEY(id))");
 		//operation.SetStatement("SELECT `sex`, `age`, `name` FROM `user` WHERE `id` = ?");
-		operation.SetParamInt32(0, 1);
+		//operation.SetParamInt32(0, 1);
 		for (int i = 0; i < 1000; i++)
 		{
 			operation.Call();
