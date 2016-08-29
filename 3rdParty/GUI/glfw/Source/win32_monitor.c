@@ -205,14 +205,14 @@ _GLFWmonitor** _glfwPlatformGetMonitors(int* count)
                     break;
 
                 found++;
-                monitors = realloc(monitors, sizeof(_GLFWmonitor*) * found);
+                monitors = (_GLFWmonitor**)realloc(monitors, sizeof(_GLFWmonitor*) * found);
                 monitors[found - 1] = createMonitor(&adapter, &display);
             }
         }
         else
         {
             found++;
-            monitors = realloc(monitors, sizeof(_GLFWmonitor*) * found);
+            monitors = (_GLFWmonitor**)realloc(monitors, sizeof(_GLFWmonitor*) * found);
             monitors[found - 1] = createMonitor(&adapter, NULL);
         }
     }
@@ -317,7 +317,7 @@ GLFWvidmode* _glfwPlatformGetVideoModes(_GLFWmonitor* monitor, int* count)
     if (!*count)
     {
         // HACK: Report the current mode if no valid modes were found
-        result = calloc(1, sizeof(GLFWvidmode));
+        result = (GLFWvidmode*)calloc(1, sizeof(GLFWvidmode));
         _glfwPlatformGetVideoMode(monitor, result);
         *count = 1;
     }

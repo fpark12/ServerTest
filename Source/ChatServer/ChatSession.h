@@ -1,5 +1,5 @@
 #pragma once
-#include "Core/Public/ChatMessage.h"
+#include "Core/Public/Detail/ChatMessage.h"
 #include "ChatParticipant.h"
 #include "ChatRoom.h"
 #include "asio.hpp"

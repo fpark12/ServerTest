@@ -101,10 +101,10 @@ static GLFWbool chooseEGLConfig(const _GLFWctxconfig* ctxconfig,
         return GLFW_FALSE;
     }
 
-    nativeConfigs = calloc(nativeCount, sizeof(EGLConfig));
+    nativeConfigs = (EGLConfig*)calloc(nativeCount, sizeof(EGLConfig));
     eglGetConfigs(_glfw.egl.display, nativeConfigs, nativeCount, &nativeCount);
 
-    usableConfigs = calloc(nativeCount, sizeof(_GLFWfbconfig));
+    usableConfigs = (_GLFWfbconfig*)calloc(nativeCount, sizeof(_GLFWfbconfig));
     usableCount = 0;
 
     for (i = 0;  i < nativeCount;  i++)

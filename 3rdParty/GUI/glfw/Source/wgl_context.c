@@ -75,7 +75,7 @@ static int choosePixelFormat(_GLFWwindow* window, const _GLFWfbconfig* desired)
                                           NULL);
     }
 
-    usableConfigs = calloc(nativeCount, sizeof(_GLFWfbconfig));
+    usableConfigs = (_GLFWfbconfig*)calloc(nativeCount, sizeof(_GLFWfbconfig));
     usableCount = 0;
 
     for (i = 0;  i < nativeCount;  i++)

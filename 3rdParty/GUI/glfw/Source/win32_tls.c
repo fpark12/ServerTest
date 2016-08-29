@@ -64,6 +64,6 @@ void _glfwPlatformSetCurrentContext(_GLFWwindow* context)
 
 _GLFWwindow* _glfwPlatformGetCurrentContext(void)
 {
-    return TlsGetValue(_glfw.win32_tls.context);
+    return (_GLFWwindow*)TlsGetValue(_glfw.win32_tls.context);
 }
 

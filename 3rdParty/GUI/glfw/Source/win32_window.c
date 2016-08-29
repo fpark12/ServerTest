@@ -425,7 +425,7 @@ static void releaseMonitor(_GLFWwindow* window)
 static LRESULT CALLBACK windowProc(HWND hWnd, UINT uMsg,
                                    WPARAM wParam, LPARAM lParam)
 {
-    _GLFWwindow* window = GetPropW(hWnd, L"GLFW");
+    _GLFWwindow* window = (_GLFWwindow*)GetPropW(hWnd, L"GLFW");
     if (!window)
     {
         // This is the message handling for the hidden helper window
@@ -819,7 +819,7 @@ static LRESULT CALLBACK windowProc(HWND hWnd, UINT uMsg,
             int i;
 
             const int count = DragQueryFileW(drop, 0xffffffff, NULL, 0);
-            char** paths = calloc(count, sizeof(char*));
+            char** paths = (char**)calloc(count, sizeof(char*));
 
             // Move the mouse to the position of the drop
             DragQueryPoint(drop, &pt);
@@ -828,7 +828,7 @@ static LRESULT CALLBACK windowProc(HWND hWnd, UINT uMsg,
             for (i = 0;  i < count;  i++)
             {
                 const UINT length = DragQueryFileW(drop, i, NULL, 0);
-                WCHAR* buffer = calloc(length + 1, sizeof(WCHAR));
+                WCHAR* buffer = (WCHAR*)calloc(length + 1, sizeof(WCHAR));
 
                 DragQueryFileW(drop, i, buffer, length + 1);
                 paths[i] = _glfwCreateUTF8FromWideStringWin32(buffer);
@@ -949,13 +949,13 @@ GLFWbool _glfwRegisterWindowClassWin32(void)
     wc.lpszClassName = _GLFW_WNDCLASSNAME;
 
     // Load user-provided icon if available
-    wc.hIcon = LoadImageW(GetModuleHandleW(NULL),
+    wc.hIcon = (HICON)LoadImageW(GetModuleHandleW(NULL),
                           L"GLFW_ICON", IMAGE_ICON,
                           0, 0, LR_DEFAULTSIZE | LR_SHARED);
     if (!wc.hIcon)
     {
         // No user-provided icon found, load default icon
-        wc.hIcon = LoadImageW(NULL,
+        wc.hIcon = (HICON)LoadImageW(NULL,
                               IDI_APPLICATION, IMAGE_ICON,
                               0, 0, LR_DEFAULTSIZE | LR_SHARED);
     }
@@ -1381,7 +1381,7 @@ void _glfwPlatformPollEvents(void)
         // LSHIFT/RSHIFT fixup (keys tend to "stick" without this fix)
         // This is the only async event handling in GLFW, but it solves some
         // nasty problems
-        window = GetPropW(handle, L"GLFW");
+        window = (_GLFWwindow*)GetPropW(handle, L"GLFW");
         if (window)
         {
             const int mods = getAsyncKeyMods();
@@ -1570,7 +1570,7 @@ void _glfwPlatformSetClipboardString(_GLFWwindow* window, const char* string)
         return;
     }
 
-    buffer = GlobalLock(object);
+    buffer = (WCHAR*)GlobalLock(object);
     if (!buffer)
     {
         GlobalFree(object);
@@ -1616,7 +1616,7 @@ const char* _glfwPlatformGetClipboardString(_GLFWwindow* window)
         return NULL;
     }
 
-    buffer = GlobalLock(object);
+    buffer = (WCHAR*)GlobalLock(object);
     if (!buffer)
     {
         CloseClipboard();
@@ -1651,7 +1651,7 @@ char** _glfwPlatformGetRequiredInstanceExtensions(uint32_t* count)
     if (!_glfw.vk.KHR_win32_surface)
         return NULL;
 
-    extensions = calloc(2, sizeof(char*));
+    extensions = (char**)calloc(2, sizeof(char*));
     extensions[0] = strdup("VK_KHR_surface");
     extensions[1] = strdup("VK_KHR_win32_surface");
 
@@ -1714,11 +1714,17 @@ VkResult _glfwPlatformCreateWindowSurface(VkInstance instance,
 //////////////////////////////////////////////////////////////////////////
 //////                        GLFW native API                       //////
 //////////////////////////////////////////////////////////////////////////
+#ifdef __cplusplus // why is this required? without this msvc gives me a unresolved external symbol error.
+extern "C" {
+#endif
 
-GLFWAPI HWND glfwGetWin32Window(GLFWwindow* handle)
-{
-    _GLFWwindow* window = (_GLFWwindow*) handle;
-    _GLFW_REQUIRE_INIT_OR_RETURN(NULL);
-    return window->win32.handle;
+	GLFWAPI HWND glfwGetWin32Window(GLFWwindow* handle)
+	{
+		_GLFWwindow* window = (_GLFWwindow*)handle;
+		_GLFW_REQUIRE_INIT_OR_RETURN(NULL);
+		return window->win32.handle;
+	}
+
+#ifdef __cplusplus
 }
-
+#endif

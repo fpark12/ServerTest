@@ -39,8 +39,8 @@
 //
 static int compareVideoModes(const void* fp, const void* sp)
 {
-    const GLFWvidmode* fm = fp;
-    const GLFWvidmode* sm = sp;
+    const GLFWvidmode* fm = (const GLFWvidmode*)fp;
+    const GLFWvidmode* sm = (const GLFWvidmode*)sp;
     const int fbpp = fm->redBits + fm->greenBits + fm->blueBits;
     const int sbpp = sm->redBits + sm->greenBits + sm->blueBits;
     const int farea = fm->width * fm->height;
@@ -174,7 +174,7 @@ void _glfwInputMonitorWindowChange(_GLFWmonitor* monitor, _GLFWwindow* window)
 
 _GLFWmonitor* _glfwAllocMonitor(const char* name, int widthMM, int heightMM)
 {
-    _GLFWmonitor* monitor = calloc(1, sizeof(_GLFWmonitor));
+    _GLFWmonitor* monitor = (_GLFWmonitor*)calloc(1, sizeof(_GLFWmonitor));
     monitor->name = strdup(name);
     monitor->widthMM = widthMM;
     monitor->heightMM = heightMM;
@@ -197,9 +197,9 @@ void _glfwFreeMonitor(_GLFWmonitor* monitor)
 
 void _glfwAllocGammaArrays(GLFWgammaramp* ramp, unsigned int size)
 {
-    ramp->red = calloc(size, sizeof(unsigned short));
-    ramp->green = calloc(size, sizeof(unsigned short));
-    ramp->blue = calloc(size, sizeof(unsigned short));
+    ramp->red = (unsigned short*)calloc(size, sizeof(unsigned short));
+    ramp->green = (unsigned short*)calloc(size, sizeof(unsigned short));
+    ramp->blue = (unsigned short*)calloc(size, sizeof(unsigned short));
     ramp->size = size;
 }
 

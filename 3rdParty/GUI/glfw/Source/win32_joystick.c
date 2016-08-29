@@ -162,8 +162,8 @@ static const char* getDeviceDescription(const XINPUT_CAPABILITIES* xic)
 //
 static int compareJoystickObjects(const void* first, const void* second)
 {
-    const _GLFWjoyobjectWin32* fo = first;
-    const _GLFWjoyobjectWin32* so = second;
+    const _GLFWjoyobjectWin32* fo = (const _GLFWjoyobjectWin32*) first;
+    const _GLFWjoyobjectWin32* so = (const _GLFWjoyobjectWin32*) second;
 
     if (fo->type != so->type)
         return fo->type - so->type;
@@ -183,7 +183,7 @@ static GLFWbool supportsXInput(const GUID* guid)
     if (GetRawInputDeviceList(NULL, &count, sizeof(RAWINPUTDEVICELIST)) != 0)
         return GLFW_FALSE;
 
-    ridl = calloc(count, sizeof(RAWINPUTDEVICELIST));
+    ridl = (RAWINPUTDEVICELIST*)calloc(count, sizeof(RAWINPUTDEVICELIST));
 
     if (GetRawInputDeviceList(ridl, &count, sizeof(RAWINPUTDEVICELIST)) == (UINT) -1)
     {
@@ -261,7 +261,7 @@ static void closeJoystick(_GLFWjoystickWin32* js)
 static BOOL CALLBACK deviceObjectCallback(const DIDEVICEOBJECTINSTANCEW* doi,
                                           void* user)
 {
-    _GLFWobjenumWin32* data = user;
+    _GLFWobjenumWin32* data = (_GLFWobjenumWin32*)user;
     _GLFWjoyobjectWin32* object = data->objects + data->objectCount;
 
     if (DIDFT_GETTYPE(doi->dwType) & DIDFT_AXIS)
@@ -358,7 +358,7 @@ static BOOL CALLBACK deviceCallback(const DIDEVICEINSTANCE* di, void* user)
         return DIENUM_CONTINUE;
 
     if (FAILED(IDirectInput8_CreateDevice(_glfw.win32.dinput8.api,
-                                          &di->guidInstance,
+                                          di->guidInstance,
                                           &device,
                                           NULL)))
     {
@@ -406,7 +406,7 @@ static BOOL CALLBACK deviceCallback(const DIDEVICEINSTANCE* di, void* user)
 
     memset(&data, 0, sizeof(data));
     data.device = device;
-    data.objects = calloc(dc.dwAxes + dc.dwButtons + dc.dwPOVs,
+    data.objects = (_GLFWjoyobjectWin32*)calloc(dc.dwAxes + dc.dwButtons + dc.dwPOVs,
                           sizeof(_GLFWjoyobjectWin32));
 
     if (FAILED(IDirectInputDevice8_EnumObjects(device,
@@ -430,9 +430,9 @@ static BOOL CALLBACK deviceCallback(const DIDEVICEINSTANCE* di, void* user)
     js->device = device;
     js->guid = di->guidInstance;
     js->axisCount = data.axisCount + data.sliderCount;
-    js->axes = calloc(js->axisCount, sizeof(float));
+    js->axes = (float*)calloc(js->axisCount, sizeof(float));
     js->buttonCount += data.buttonCount + data.povCount * 4;
-    js->buttons = calloc(js->buttonCount, 1);
+    js->buttons = (unsigned char*)calloc(js->buttonCount, 1);
     js->objects = data.objects;
     js->objectCount = data.objectCount;
     js->name = _glfwCreateUTF8FromWideStringWin32(di->tszInstanceName);
@@ -475,9 +475,9 @@ static GLFWbool openXinputDevice(DWORD index)
 
     js = _glfw.win32_js + joy;
     js->axisCount = 6;
-    js->axes = calloc(js->axisCount, sizeof(float));
+    js->axes = (float*)calloc(js->axisCount, sizeof(float));
     js->buttonCount = 14;
-    js->buttons = calloc(js->buttonCount, 1);
+    js->buttons = (unsigned char*)calloc(js->buttonCount, 1);
     js->present = GLFW_TRUE;
     js->name = strdup(getDeviceDescription(&xic));
     js->index = index;
@@ -659,7 +659,7 @@ void _glfwInitJoysticksWin32(void)
     {
         if (FAILED(_glfw_DirectInput8Create(GetModuleHandle(NULL),
                                             DIRECTINPUT_VERSION,
-                                            &IID_IDirectInput8W,
+                                            IID_IDirectInput8W,
                                             (void**) &_glfw.win32.dinput8.api,
                                             NULL)))
         {

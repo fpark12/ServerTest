@@ -1,6 +1,6 @@
 #pragma once
 #include <memory>
-#include "Core/Public/ChatMessage.h"
+#include "Core/Public/Detail/ChatMessage.h"
 
 
 class ChatParticiant
