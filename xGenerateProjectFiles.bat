@@ -28,25 +28,25 @@ if not defined CMakePath (
 		echo.
 		if not exist CMake (mkdir CMake)
 		Attrib +h +s +r CMake
-		"%Git%" clone https://github.com/piaoasd123/PortableCMake-Win32.git CMake
+		"%Git%" clone https://github.com/fpark12/PortableCMake-Win32.git CMake
 		echo.
 	)
 	set CMakePath="%~dp0\CMake\bin\cmake.exe"
 )
 
 rem ## Find Purify or clone from Git
-IF NOT EXIST %~dp0\Purify (
+IF NOT EXIST %~dp0\Purify\Purify.cmake (
 		mkdir Purify
 		Attrib +h +s +r Purify
 		echo Purify is cloning itself from GitHub...
 		echo.
-		"%Git%" clone https://github.com/piaoasd123/Purify.git
+		"%Git%" clone https://github.com/fpark12/PurifyCore.git Purify
 		echo.
 ) else (
 		echo Purify is updating...
 		echo.
 		pushd %~dp0\Purify\
-		1>NUL "%Git%" pull https://github.com/piaoasd123/Purify.git
+		1>NUL "%Git%" pull https://github.com/fpark12/PurifyCore.git
 		popd
 		echo.
 )
@@ -57,7 +57,7 @@ pushd %~dp0\Purify\BatchFiles
 call GetVSComnToolsPath 14
 popd
 if "%VsComnToolsPath%" == "" goto FindVS2013
-set CMakeArg="Visual Studio 14 2015 Win64"
+set CMakeArg="Visual Studio 14 2015"
 goto ReadyToBuild
 :FindVS2013
 pushd %~dp0\Purify\BatchFiles
@@ -84,7 +84,7 @@ goto ReadyToBuild
 call "%VsComnToolsPath%/../../VC/bin/x86_amd64/vcvarsx86_amd64.bat" >NUL
 :ReadyToBuild
 echo Purify is setting up project files...
-if NOT EXIST %~dp0\Build\CMakeCache.txt (
+if NOT EXIST %~dp0\Build (
 	goto InitialBuild
 ) else (
 	goto Rebuild
@@ -98,17 +98,12 @@ rem ## build twice here because first build generates cache
 1>NUL 2>NUL "%CMakePath%" -G %CMakeArg% %~dp0
 1>NUL 2>NUL "%CMakePath%" -G %CMakeArg% %~dp0
 popd
-pushd %~dp0
-1>NUL 2>NUL "%CMakePath%" -P "%~dp0/Purify/Core/RemoveAllBuild.cmake"
-popd
 goto GenerateSolutionIcon
 
 :Rebuild
 pushd %~dp0\Build
 1>NUL 2>NUL "%CMakePath%" -G %CMakeArg% %~dp0
-popd
-pushd %~dp0
-1>NUL 2>NUL "%CMakePath%" -P "%~dp0/Purify/Core/RemoveAllBuild.cmake"
+1>NUL 2>NUL "%CMakePath%" -G %CMakeArg% %~dp0
 popd
 goto GenerateSolutionIcon
 
