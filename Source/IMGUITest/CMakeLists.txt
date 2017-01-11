@@ -1,9 +1,11 @@
 SET( DEFINE
 )
 SET( INCLUDE
+Core
 GUI
 )
 SET( LINK
+Core
 GUI
 )
 create_project(CONSOLE "${DEFINE}" "${INCLUDE}" "${LINK}")

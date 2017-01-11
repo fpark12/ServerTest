@@ -12,9 +12,12 @@ class Core
 public:
 	Config& ConfigInstance = Singleton<Config>().Instance();
 	Console& ConsoleInstance = Singleton<Console>().Instance();
+	GUI& GUIInstance = Singleton<GUI>().Instance();
 	Logger& LoggerInstance = Singleton<Logger>().Instance();
+
 	#define GConfig GCore.ConfigInstance
 	#define GConsole GCore.ConsoleInstance
+	#define GGUI GCore.GUIInstance
 	#define GLog GCore.LoggerInstance
 
 	//SslContext& GSslContextInst = Singleton<SslContext>().Instance();
@@ -26,6 +29,7 @@ public:
 		// Initialize Core components
 		ConsoleInstance.Init();
 		LoggerInstance.Init();
+		GUIInstance.Init();
 
 		return 0;
 	}
