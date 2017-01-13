@@ -55,20 +55,20 @@ bool LoginService::Start(asio::io_service& ioService)
 
 	// set up form inputs
 	Battlenet::JSON::Login::FormInput* input;
-	_formInputs.set_type(Battlenet::JSON::Login::LOGIN_FORM);
-	input = _formInputs.add_inputs();
+	LoginFormInputs.set_type(Battlenet::JSON::Login::LOGIN_FORM);
+	input = LoginFormInputs.add_inputs();
 	input->set_input_id("account_name");
 	input->set_type("text");
 	input->set_label("E-mail");
 	input->set_max_length(320);
 
-	input = _formInputs.add_inputs();
+	input = LoginFormInputs.add_inputs();
 	input->set_input_id("password");
 	input->set_type("password");
 	input->set_label("Password");
 	input->set_max_length(16);
 
-	input = _formInputs.add_inputs();
+	input = LoginFormInputs.add_inputs();
 	input->set_input_id("log_in_submit");
 	input->set_type("submit");
 	input->set_label("Log In");
@@ -100,6 +100,16 @@ bool LoginService::Start(asio::io_service& ioService)
 	return true;
 }
 
+int32 handle_get_plugin(soap* soapClient)
+{
+	return GLoginService.HandleGet(soapClient);
+}
+
+int32 handle_post_plugin(soap* soapClient)
+{
+	return GLoginService.HandlePost(soapClient);
+}
+
 void LoginService::Run()
 {
 	soap SoapInstance(SOAP_C_UTFSTRING, SOAP_C_UTFSTRING);
@@ -110,21 +120,22 @@ void LoginService::Run()
 	SoapInstance.send_timeout = 5;
 	if (!soap_valid_socket(soap_bind(&SoapInstance, BindIP.c_str(), Port, 100)))
 	{
-		//TC_LOG_ERROR("server.rest", "Couldn't bind to %s:%d", _bindIP.c_str(), _port);
+		GLog.Critical("Couldn't bind to {0}:{1}", BindIP.c_str(), Port);
 		return;
 	}
 
+	GLog.Critical("Login service bound to http://{0}:{1}", BindIP.c_str(), Port);
 	//TC_LOG_INFO("server.rest", "Login service bound to http://%s:%d", _bindIP.c_str(), _port);
 
-	auto handle_get_plugin = [](soap* soapClient)
-	{
-		return GLoginService.HandleGet(soapClient);
-	};
+	//auto handle_get_plugin2 = [](soap* soapClient)
+	//{
+	//	return GLoginService.HandleGet(soapClient);
+	//};
 
-	auto handle_post_plugin = [](soap* soapClient)
-	{
-		return GLoginService.HandlePost(soapClient);
-	};
+	//auto handle_post_plugin2 = [](soap* soapClient)
+	//{
+	//	return GLoginService.HandlePost(soapClient);
+	//};
 
 	http_post_handlers handlers[] =
 	{
@@ -133,14 +144,14 @@ void LoginService::Run()
 		{ nullptr, nullptr }
 	};
 
-	soap_register_plugin_arg(&SoapInstance, &http_get, (void*)&/*handle_get_plugin*/std::bind(&LoginService::HandleGet, &GLoginService));
+	soap_register_plugin_arg(&SoapInstance, &http_get, (void*)&handle_get_plugin/*std::bind(&LoginService::HandleGet, &GLoginService)*/);
 	soap_register_plugin_arg(&SoapInstance, &http_post, handlers);
 	//soap_register_plugin_arg(&soapServer, &ContentTypePlugin::Init, (void*)"application/json;charset=utf-8");
 
 	// Use our already ready ssl context
-	GSslContext.Initialize();
-	SoapInstance.ctx = GSslContext.Context.native_handle();
-	SoapInstance.ssl_flags = SOAP_SSL_RSA;
+	//GSslContext.Initialize();
+	//SoapInstance.ctx = GSslContext.Context.native_handle();
+	//sSoapInstance.ssl_flags = SOAP_SSL_NO_AUTHENTICATION;// SOAP_SSL_RSA;
 
 	while (!Stopped)
 	{
@@ -148,12 +159,13 @@ void LoginService::Run()
 			continue;   // ran into an accept timeout
 
 		asio::ip::address_v4 address(SoapInstance.ip);
-		if (soap_ssl_accept(&SoapInstance) != SOAP_OK)
-		{
+		//if (soap_ssl_accept(&SoapInstance) != SOAP_OK)
+		//{
 			//TC_LOG_DEBUG("server.rest", "Failed SSL handshake from IP=%s", address.to_string().c_str());
-			continue;
-		}
+		//	continue;
+		//}
 
+		GLog.Critical("Accepted connetion from IP={0}.", address.to_string().c_str());
 		//TC_LOG_DEBUG("server.rest", "Accepted connection from IP=%s", address.to_string().c_str());
 
 		auto SoapMain = [&SoapInstance]
@@ -184,10 +196,21 @@ void LoginService::Stop()
 
 }
 
+int32 LoginService::SendResponse(soap* soapClient, google::protobuf::Message const& response)
+{
+	std::string jsonResponse = JSON::Serialize(response);
+
+	soap_response(soapClient, SOAP_FILE);
+	soap_send_raw(soapClient, jsonResponse.c_str(), jsonResponse.length());
+	return soap_end_send(soapClient);
+}
+
 int32 LoginService::HandleGet(soap* soapClient)
 {
 	asio::ip::address_v4 address(soapClient->ip);
 	std::string ip_address = address.to_string();
+
+	GLog.Critical("[{0}:{1}] Handling GET request path=\"{2}\"", ip_address.c_str(), soapClient->port, soapClient->path);
 
 	//TC_LOG_DEBUG("server.rest", "[%s:%d] Handling GET request path=\"%s\"", ip_address.c_str(), soapClient->port, soapClient->path);
 
@@ -195,7 +218,9 @@ int32 LoginService::HandleGet(soap* soapClient)
 	if (strstr(soapClient->path, expectedPath.c_str()) != &soapClient->path[0])
 		return 404;
 
-	return 0;// SendResponse(soapClient, _formInputs);
+	SendResponse(soapClient, LoginFormInputs);
+
+	return 0;
 }
 
 int32 LoginService::HandlePost(soap* soapClient)

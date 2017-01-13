@@ -24,13 +24,15 @@ private:
 	asio::steady_timer* LoginTicketCleanupTimer;
 	bool Stopped;
 
-	Battlenet::JSON::Login::FormInputs _formInputs;
+	Battlenet::JSON::Login::FormInputs LoginFormInputs;
 public:
 	bool Start(asio::io_service& ioService);
 
 	void Run();
 
 	void Stop();
+
+	int32 SendResponse(soap* soapClient, google::protobuf::Message const& response);
 
 	//friend int32 handle_get_plugin(soap* soapClient);
 	int32 HandleGet(soap* soapClient);
@@ -39,14 +41,7 @@ public:
 	int32 HandlePost(soap* soapClient);
 
 	/*
-	int32 LoginRESTService::SendResponse(soap* soapClient, google::protobuf::Message const& response)
-	{
-		std::string jsonResponse = JSON::Serialize(response);
 
-		soap_response(soapClient, SOAP_FILE);
-		soap_send_raw(soapClient, jsonResponse.c_str(), jsonResponse.length());
-		return soap_end_send(soapClient);
-	}
 	*/
 
 	void CleanupLoginTickets(const asio::error_code& error);
