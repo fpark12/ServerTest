@@ -110,6 +110,40 @@ int32 handle_post_plugin(soap* soapClient)
 	return GLoginService.HandlePost(soapClient);
 }
 
+#ifdef _WIN32
+#include <windows.h>
+const DWORD MS_VC_EXCEPTION = 0x406D1388;
+
+#pragma pack(push,8)
+typedef struct tagTHREADNAME_INFO
+{
+	DWORD dwType; // Must be 0x1000.
+	LPCSTR szName; // Pointer to name (in user addr space).
+	DWORD dwThreadID; // Thread ID (-1=caller thread).
+	DWORD dwFlags; // Reserved for future use, must be zero.
+} THREADNAME_INFO;
+#pragma pack(pop)
+void SetThreadName(uint32_t dwThreadID, const char* threadName)
+{
+
+	// DWORD dwThreadID = ::GetThreadId( static_cast<HANDLE>( t.native_handle() ) );
+
+	THREADNAME_INFO info;
+	info.dwType = 0x1000;
+	info.szName = threadName;
+	info.dwThreadID = dwThreadID;
+	info.dwFlags = 0;
+
+	__try
+	{
+		RaiseException(MS_VC_EXCEPTION, 0, sizeof(info) / sizeof(ULONG_PTR), (ULONG_PTR*)&info);
+	}
+	__except (EXCEPTION_EXECUTE_HANDLER)
+	{
+	}
+}
+#endif
+
 void LoginService::Run()
 {
 	soap SoapInstance(SOAP_C_UTFSTRING, SOAP_C_UTFSTRING);
@@ -125,6 +159,7 @@ void LoginService::Run()
 	}
 
 	GLog.Critical("Login service bound to http://{0}:{1}", BindIP.c_str(), Port);
+	GLog.Test();
 	//TC_LOG_INFO("server.rest", "Login service bound to http://%s:%d", _bindIP.c_str(), _port);
 
 	//auto handle_get_plugin2 = [](soap* soapClient)
@@ -158,22 +193,29 @@ void LoginService::Run()
 		if (!soap_valid_socket(soap_accept(&SoapInstance)))
 			continue;   // ran into an accept timeout
 
-		asio::ip::address_v4 address(SoapInstance.ip);
 		//if (soap_ssl_accept(&SoapInstance) != SOAP_OK)
 		//{
-			//TC_LOG_DEBUG("server.rest", "Failed SSL handshake from IP=%s", address.to_string().c_str());
+			//TC_LOG_DEBUG("server.rest", "Failed SSL handshake from IP=%s", IPAddress.to_string().c_str());
 		//	continue;
 		//}
 
-		GLog.Critical("Accepted connetion from IP={0}.", address.to_string().c_str());
-		//TC_LOG_DEBUG("server.rest", "Accepted connection from IP=%s", address.to_string().c_str());
+		//TC_LOG_DEBUG("server.rest", "Accepted connection from IP=%s", IPAddress.to_string().c_str());
+		
+		std::shared_ptr<soap> SoapInstanceCopy = std::make_shared<soap>(SoapInstance);
+		asio::ip::address_v4 IPAddress(SoapInstanceCopy->ip);
+		GLog.Critical("Accepted connetion from IP={0}.\n", IPAddress.to_string().c_str());
 
-		auto SoapMain = [&SoapInstance]
+		auto SoapMain = [SoapInstanceCopy]
 		{
-			soap_serve(&SoapInstance);
+			soap_serve(SoapInstanceCopy.get());
+			//GLog.Critical("Thread Ended.\n");
 		};
 
-		std::thread(SoapMain).detach();
+		std::thread Thread = std::thread(SoapMain);
+		DWORD threadId = ::GetThreadId(static_cast<HANDLE>(Thread.native_handle()));
+		SetThreadName(threadId, "SoapThread");
+		Thread.detach();
+
 	}
 
 	// and release the context handle here - soap does not own it so it should not free it on exit
@@ -231,6 +273,6 @@ int32 LoginService::HandlePost(soap* soapClient)
 void LoginService::CleanupLoginTickets(const asio::error_code& error)
 {
 	printf("Cleaning up...\n");
-	LoginTicketCleanupTimer->expires_from_now(std::chrono::seconds(3));
+	LoginTicketCleanupTimer->expires_from_now(std::chrono::seconds(10));
 	LoginTicketCleanupTimer->async_wait(std::bind(&LoginService::CleanupLoginTickets, this, std::placeholders::_1));
 }
