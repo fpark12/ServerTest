@@ -3,11 +3,15 @@ SET( DEFINE
 SET( INCLUDE
 fmtlib
 spdlog
+rapidjson
+libprotobuf
 GUI
 )
 SET( LINK
 fmtlib
 spdlog
+rapidjson
+libprotobuf
 GUI
 )
 

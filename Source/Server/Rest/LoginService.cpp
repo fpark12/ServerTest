@@ -53,25 +53,6 @@ bool LoginService::Start(asio::io_service& ioService)
 	}
 	LocalAddress = endPoint->endpoint();
 
-	LoginTicketCleanupTimer = new asio::steady_timer(ioService);
-	LoginTicketCleanupTimer->expires_from_now(std::chrono::seconds(3));
-	LoginTicketCleanupTimer->async_wait(std::bind(&LoginService::CleanupLoginTickets, this, std::placeholders::_1));
-
-	Thread = std::thread(std::bind(&LoginService::Run, this));
-
-	ioService.run();
-	while (true)
-	{
-
-	}
-	/*
-
-
-
-
-
-
-
 	// set up form inputs
 	Battlenet::JSON::Login::FormInput* input;
 	_formInputs.set_type(Battlenet::JSON::Login::LOGIN_FORM);
@@ -91,6 +72,27 @@ bool LoginService::Start(asio::io_service& ioService)
 	input->set_input_id("log_in_submit");
 	input->set_type("submit");
 	input->set_label("Log In");
+
+	LoginTicketCleanupTimer = new asio::steady_timer(ioService);
+	LoginTicketCleanupTimer->expires_from_now(std::chrono::seconds(3));
+	LoginTicketCleanupTimer->async_wait(std::bind(&LoginService::CleanupLoginTickets, this, std::placeholders::_1));
+
+	Thread = std::thread(std::bind(&LoginService::Run, this));
+
+	ioService.run();
+	while (true)
+	{
+
+	}
+	/*
+
+
+
+
+
+
+
+
 
 
 	*/
@@ -131,7 +133,7 @@ void LoginService::Run()
 		{ nullptr, nullptr }
 	};
 
-	soap_register_plugin_arg(&SoapInstance, &http_get, (void*)&handle_get_plugin);
+	soap_register_plugin_arg(&SoapInstance, &http_get, (void*)&/*handle_get_plugin*/std::bind(&LoginService::HandleGet, &GLoginService));
 	soap_register_plugin_arg(&SoapInstance, &http_post, handlers);
 	//soap_register_plugin_arg(&soapServer, &ContentTypePlugin::Init, (void*)"application/json;charset=utf-8");
 

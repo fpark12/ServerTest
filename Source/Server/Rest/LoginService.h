@@ -7,6 +7,8 @@
 #include "httppost.h"
 #include "soapH.h"
 
+#include "Login.pb.h"
+
 int ns1__executeCommand(soap*, char*, char**);
 
 class LoginService
@@ -21,6 +23,8 @@ private:
 	asio::ip::tcp::endpoint LocalAddress;
 	asio::steady_timer* LoginTicketCleanupTimer;
 	bool Stopped;
+
+	Battlenet::JSON::Login::FormInputs _formInputs;
 public:
 	bool Start(asio::io_service& ioService);
 

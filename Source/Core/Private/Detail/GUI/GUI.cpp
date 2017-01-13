@@ -4,7 +4,7 @@
 // If you are new to ImGui, see examples/README.txt and documentation at the top of imgui.cpp.
 
 #include <imgui.h>
-#include "imgui_impl_glfw.h"
+#include "Private/Detail/GUI/glfw_impl/imgui_impl_glfw.h"
 #include <stdio.h>
 
 static void error_callback(int error, const char* description)
@@ -14,9 +14,8 @@ static void error_callback(int error, const char* description)
 
 int GUI::Init()
 {
-	GUIThread = std::thread(std::bind(&GUI::Main, &GGUI));
-
-	
+	//Uncomment to enable GUI
+	//GUIThread = std::thread(std::bind(&GUI::Main, &GGUI));
 
 	// Load Fonts
 	// (there is a default font, this is only if you want to change it. see extra_fonts/README.txt for more details)

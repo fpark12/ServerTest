@@ -11,6 +11,9 @@ private:
 	GLFWwindow* Window;
 public:
 	int Init();
+	virtual void Frame() {}
+	void Show();
+	void Hide();
 	void Main();
 	void Halt();
 };
