@@ -37,7 +37,7 @@ namespace JSON
 	};
 
 
-	class Deserializer : public rapidjson::BaseReaderHandler<rapidjson::UTF8<>, Deserializer>
+	class Core_API Deserializer : public rapidjson::BaseReaderHandler<rapidjson::UTF8<>, Deserializer>
 	{
 	public:
 		bool ReadMessage(std::string json, google::protobuf::Message* message);
