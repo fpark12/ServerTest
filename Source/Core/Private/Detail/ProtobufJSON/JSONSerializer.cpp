@@ -9,6 +9,13 @@
 
 namespace JSON
 {
+	std::string JSON::Serialize(google::protobuf::Message const& message)
+	{
+		Serializer serializer;
+		serializer.WriteMessage(message);
+		return serializer.GetString();
+	}
+
 	void Serializer::WriteMessage(google::protobuf::Message const& value)
 	{
 		google::protobuf::Reflection const* reflection = value.GetReflection();

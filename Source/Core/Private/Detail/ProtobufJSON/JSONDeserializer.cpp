@@ -225,13 +225,6 @@ namespace JSON
 
 #undef SET_FIELD
 
-	std::string JSON::Serialize(google::protobuf::Message const& message)
-	{
-		Serializer serializer;
-		serializer.WriteMessage(message);
-		return serializer.GetString();
-	}
-
 	bool JSON::Deserialize(std::string json, google::protobuf::Message* message)
 	{
 		Deserializer deserializer;

@@ -100,16 +100,6 @@ bool LoginService::Start(asio::io_service& ioService)
 	return true;
 }
 
-int32 handle_get_plugin(soap* soapClient)
-{
-	return GLoginService.HandleGet(soapClient);
-}
-
-int32 handle_post_plugin(soap* soapClient)
-{
-	return GLoginService.HandlePost(soapClient);
-}
-
 #ifdef _WIN32
 #include <windows.h>
 const DWORD MS_VC_EXCEPTION = 0x406D1388;
@@ -161,15 +151,15 @@ void LoginService::Run()
 	GConsole.Message("Login service bound to http://{0}:{1}", BindIP.c_str(), Port);
 	//TC_LOG_INFO("server.rest", "Login service bound to http://%s:%d", _bindIP.c_str(), _port);
 
-	//auto handle_get_plugin2 = [](soap* soapClient)
-	//{
-	//	return GLoginService.HandleGet(soapClient);
-	//};
+	int32 (*handle_get_plugin)(soap*) = [](soap* soapClient)
+	{
+		return GLoginService.HandleGet(soapClient);
+	};
 
-	//auto handle_post_plugin2 = [](soap* soapClient)
-	//{
-	//	return GLoginService.HandlePost(soapClient);
-	//};
+	int32 (*handle_post_plugin)(soap*) = [](soap* soapClient)
+	{
+		return GLoginService.HandlePost(soapClient);
+	};
 
 	http_post_handlers handlers[] =
 	{
@@ -178,7 +168,7 @@ void LoginService::Run()
 		{ nullptr, nullptr }
 	};
 
-	soap_register_plugin_arg(&SoapInstance, &http_get, (void*)&handle_get_plugin/*std::bind(&LoginService::HandleGet, &GLoginService)*/);
+	soap_register_plugin_arg(&SoapInstance, &http_get, (void*)handle_get_plugin/*std::bind(&LoginService::HandleGet, &GLoginService)*/);
 	soap_register_plugin_arg(&SoapInstance, &http_post, handlers);
 	//soap_register_plugin_arg(&soapServer, &ContentTypePlugin::Init, (void*)"application/json;charset=utf-8");
 
