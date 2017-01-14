@@ -10,10 +10,12 @@
 #include <ctime>
 #include <functional>
 #include <string>
+#include <chrono>
+#include <thread>
 #include <stdio.h>
 #include <string.h>
 #include <sys/stat.h>
-
+#include <sys/types.h>
 
 #ifdef _WIN32
 
@@ -25,24 +27,31 @@
 #define WIN32_LEAN_AND_MEAN
 #endif
 #include <windows.h>
+#include <process.h> //  _get_pid support
+#include <io.h> // _get_osfhandle support
 
 #ifdef __MINGW32__
 #include <share.h>
 #endif
 
-#include <sys/types.h>
+#else // unix
 
-#elif __linux__
-
-#include <sys/syscall.h> //Use gettid() syscall under linux to get thread id
 #include <unistd.h>
-#include <chrono>
+#include <fcntl.h>
 
-#else
+#ifdef __linux__
+#include <sys/syscall.h> //Use gettid() syscall under linux to get thread id
 
-#include <thread>
-
+#elif __FreeBSD__
+#include <sys/thr.h> //Use thr_self() syscall under FreeBSD to get thread id
 #endif
+
+#endif //unix
+
+#ifndef __has_feature       // Clang - feature checking macros.
+#define __has_feature(x) 0  // Compatibility with non-clang compilers.
+#endif
+
 
 namespace spdlog
 {
@@ -133,6 +142,18 @@ inline bool operator!=(const std::tm& tm1, const std::tm& tm2)
 SPDLOG_CONSTEXPR static const char* eol = SPDLOG_EOL;
 SPDLOG_CONSTEXPR static int eol_size = sizeof(SPDLOG_EOL) - 1;
 
+inline void prevent_child_fd(FILE *f)
+{
+#ifdef _WIN32
+    auto file_handle = (HANDLE)_get_osfhandle(_fileno(f));
+    if (!::SetHandleInformation(file_handle, HANDLE_FLAG_INHERIT, 0))
+        throw spdlog_ex("SetHandleInformation failed", errno);
+#else
+    auto fd = fileno(f);
+    if(fcntl(fd, F_SETFD, FD_CLOEXEC) == -1)
+        throw spdlog_ex("fcntl with FD_CLOEXEC failed", errno);
+#endif
+}
 
 
 //fopen_s on non windows for writing
@@ -144,12 +165,17 @@ inline int fopen_s(FILE** fp, const filename_t& filename, const filename_t& mode
 #else
     *fp = _fsopen((filename.c_str()), mode.c_str(), _SH_DENYWR);
 #endif
-    return *fp == nullptr;
-#else
+#else //unix
     *fp = fopen((filename.c_str()), mode.c_str());
-    return *fp == nullptr;
 #endif
+
+#ifdef SPDLOG_PREVENT_CHILD_FD
+    if(*fp != nullptr)
+        prevent_child_fd(*fp);
+#endif
+    return *fp == nullptr;
 }
+
 
 inline int remove(const filename_t &filename)
 {
@@ -196,15 +222,15 @@ inline size_t filesize(FILE *f)
         throw spdlog_ex("Failed getting file size. fd is null");
 #ifdef _WIN32
     int fd = _fileno(f);
-#if _WIN64 //64 bits        
+#if _WIN64 //64 bits
     struct _stat64 st;
     if (_fstat64(fd, &st) == 0)
         return st.st_size;
 
-#else //windows 32 bits     
-    struct _stat st;
-    if (_fstat(fd, &st) == 0)
-        return st.st_size;
+#else //windows 32 bits
+    long ret = _filelength(fd);
+    if (ret >= 0)
+        return static_cast<size_t>(ret);
 #endif
 
 #else // unix
@@ -213,11 +239,11 @@ inline size_t filesize(FILE *f)
 #if !defined(__FreeBSD__) && !defined(__APPLE__) && (defined(__x86_64__) || defined(__ppc64__))
     struct stat64 st;
     if (fstat64(fd, &st) == 0)
-        return st.st_size;
-#else // unix 32 bits or osx    
+        return static_cast<size_t>(st.st_size);
+#else // unix 32 bits or osx
     struct stat st;
     if (fstat(fd, &st) == 0)
-        return st.st_size;
+        return static_cast<size_t>(st.st_size);
 #endif
 #endif
     throw spdlog_ex("Failed getting file size from fd", errno);
@@ -248,13 +274,49 @@ inline int utc_minutes_offset(const std::tm& tm = details::os::localtime())
         offset -= tzinfo.StandardBias;
     return offset;
 #else
-    return static_cast<int>(tm.tm_gmtoff / 60);
+
+#if defined(sun) || defined(__sun)
+    // 'tm_gmtoff' field is BSD extension and it's missing on SunOS/Solaris
+    struct helper
+    {
+        static long int calculate_gmt_offset(const std::tm & localtm = details::os::localtime(), const std::tm & gmtm = details::os::gmtime())
+        {
+            int local_year = localtm.tm_year + (1900 - 1);
+            int gmt_year = gmtm.tm_year + (1900 - 1);
+
+            long int days = (
+                                // difference in day of year
+                                localtm.tm_yday - gmtm.tm_yday
+
+                                // + intervening leap days
+                                + ((local_year >> 2) - (gmt_year >> 2))
+                                - (local_year / 100 - gmt_year / 100)
+                                + ((local_year / 100 >> 2) - (gmt_year / 100 >> 2))
+
+                                // + difference in years * 365 */
+                                + (long int)(local_year - gmt_year) * 365
+                            );
+
+            long int hours = (24 * days) + (localtm.tm_hour - gmtm.tm_hour);
+            long int mins = (60 * hours) + (localtm.tm_min - gmtm.tm_min);
+            long int secs = (60 * mins) + (localtm.tm_sec - gmtm.tm_sec);
+
+            return secs;
+        }
+    };
+
+    long int offset_seconds = helper::calculate_gmt_offset(tm);
+#else
+    long int offset_seconds = tm.tm_gmtoff;
+#endif
+
+    return static_cast<int>(offset_seconds / 60);
 #endif
 }
 
 //Return current thread id as size_t
 //It exists because the std::this_thread::get_id() is much slower(espcially under VS 2013)
-inline size_t thread_id()
+inline size_t _thread_id()
 {
 #ifdef _WIN32
     return  static_cast<size_t>(::GetCurrentThreadId());
@@ -263,11 +325,27 @@ inline size_t thread_id()
 #  define SYS_gettid __NR_gettid
 # endif
     return  static_cast<size_t>(syscall(SYS_gettid));
+#elif __FreeBSD__
+    long tid;
+    thr_self(&tid);
+    return static_cast<size_t>(tid);
 #else //Default to standard C++11 (OSX and other Unix)
     return static_cast<size_t>(std::hash<std::thread::id>()(std::this_thread::get_id()));
 #endif
-
 }
+
+//Return current thread id as size_t (from thread local storage)
+inline size_t thread_id()
+{
+#if defined(_MSC_VER) && (_MSC_VER < 1900) || defined(__clang__) && !__has_feature(cxx_thread_local)
+    return _thread_id();
+#else
+    static thread_local const size_t tid = _thread_id();
+    return tid;
+#endif
+}
+
+
 
 
 // wchar support for windows file names (SPDLOG_WCHAR_FILENAMES must be defined)
@@ -299,7 +377,9 @@ inline std::string errno_str(int err_num)
     else
         return "Unkown error";
 
-#elif defined(__FreeBSD__) || defined(__APPLE__) || ((_POSIX_C_SOURCE >= 200112L) && ! _GNU_SOURCE) // posix version
+#elif defined(__FreeBSD__) || defined(__APPLE__) || defined(ANDROID) || defined(__SUNPRO_CC) || \
+      ((_POSIX_C_SOURCE >= 200112L) && ! defined(_GNU_SOURCE)) // posix version
+
     if (strerror_r(err_num, buf, buf_size) == 0)
         return std::string(buf);
     else
@@ -310,8 +390,17 @@ inline std::string errno_str(int err_num)
 #endif
 }
 
+inline int pid()
+{
+
+#ifdef _WIN32
+    return ::_getpid();
+#else
+    return static_cast<int>(::getpid());
+#endif
+
+}
+
 } //os
 } //details
 } //spdlog
-
-

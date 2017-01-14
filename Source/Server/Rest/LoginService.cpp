@@ -154,12 +154,11 @@ void LoginService::Run()
 	SoapInstance.send_timeout = 5;
 	if (!soap_valid_socket(soap_bind(&SoapInstance, BindIP.c_str(), Port, 100)))
 	{
-		GLog.Critical("Couldn't bind to {0}:{1}", BindIP.c_str(), Port);
+		GConsole.Message("Couldn't bind to {0}:{1}", BindIP.c_str(), Port);
 		return;
 	}
 
-	GLog.Critical("Login service bound to http://{0}:{1}", BindIP.c_str(), Port);
-	GLog.Test();
+	GConsole.Message("Login service bound to http://{0}:{1}", BindIP.c_str(), Port);
 	//TC_LOG_INFO("server.rest", "Login service bound to http://%s:%d", _bindIP.c_str(), _port);
 
 	//auto handle_get_plugin2 = [](soap* soapClient)
@@ -203,12 +202,12 @@ void LoginService::Run()
 		
 		std::shared_ptr<soap> SoapInstanceCopy = std::make_shared<soap>(SoapInstance);
 		asio::ip::address_v4 IPAddress(SoapInstanceCopy->ip);
-		GLog.Critical("Accepted connetion from IP={0}.\n", IPAddress.to_string().c_str());
+		GConsole.Message("Accepted connetion from IP={0}.\n", IPAddress.to_string().c_str());
 
 		auto SoapMain = [SoapInstanceCopy]
 		{
 			soap_serve(SoapInstanceCopy.get());
-			//GLog.Critical("Thread Ended.\n");
+			//GConsole.Message("Thread Ended.\n");
 		};
 
 		std::thread Thread = std::thread(SoapMain);
@@ -252,7 +251,7 @@ int32 LoginService::HandleGet(soap* soapClient)
 	asio::ip::address_v4 address(soapClient->ip);
 	std::string ip_address = address.to_string();
 
-	GLog.Critical("[{0}:{1}] Handling GET request path=\"{2}\"", ip_address.c_str(), soapClient->port, soapClient->path);
+	GConsole.Message("[{0}:{1}] Handling GET request path=\"{2}\"", ip_address.c_str(), soapClient->port, soapClient->path);
 
 	//TC_LOG_DEBUG("server.rest", "[%s:%d] Handling GET request path=\"%s\"", ip_address.c_str(), soapClient->port, soapClient->path);
 

@@ -6,7 +6,7 @@ class Core_API GUI
 {
 	DECLARE_SINGLETON(GUI);
 private:
-	//std::shared_ptr<spdlog::logger> Console;
+	//std::shared_ptr<spdlog::logger> LoggerImpl;
 	std::thread GUIThread;
 	GLFWwindow* Window;
 public:
