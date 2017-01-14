@@ -122,15 +122,15 @@ inline wchar_t wcharToUpper(wchar_t wchar)
 
 inline wchar_t wcharToUpperOnlyLatin(wchar_t wchar)
 {
-	return isBasicLatinCharacter(wchar) ? wcharToUpper(wchar) : wchar;
+	return 0;// isBasicLatinCharacter(wchar) ? wcharToUpper(wchar) : wchar;
 }
 
 
 bool Utf8ToUpperOnlyLatin(std::string& utf8String)
 {
 	std::wstring wstr;
-	if (!Utf8toWStr(utf8String, ,wstr))
-		return false;
+	//if (!Utf8toWStr(utf8String, ,wstr))
+	//	return false;
 
 	std::transform(wstr.begin(), wstr.end(), wstr.begin(), wcharToUpperOnlyLatin);
 
