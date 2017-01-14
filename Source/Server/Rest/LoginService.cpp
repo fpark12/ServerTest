@@ -221,7 +221,11 @@ void LoginService::Stop()
 
 int32 LoginService::SendResponse(soap* soapClient, google::protobuf::Message const& response)
 {
+	std::string JsonResponse;
+	protobuf::MessageToJson(response, JsonResponse);
 	std::string jsonResponse = JSON::Serialize(response);
+
+	int result = JsonResponse.compare(jsonResponse.c_str());
 
 	soap_response(soapClient, SOAP_FILE);
 	soap_send_raw(soapClient, jsonResponse.c_str(), jsonResponse.length());

@@ -1,8 +1,17 @@
 #pragma once
 #include <google/protobuf/message.h>
+#include <google/protobuf/util/json_util.h>
 #include <rapidjson/writer.h>
 #include <rapidjson/reader.h>
 #include <rapidjson/stringbuffer.h>
+
+namespace protobuf
+{
+	google::protobuf::util::Status MessageToJson(google::protobuf::Message const& Message, std::string& OutString)
+	{
+		return google::protobuf::util::MessageToJsonString(Message, &OutString);
+	}
+}
 
 namespace JSON
 {
