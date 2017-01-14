@@ -1,6 +1,5 @@
 #pragma once
-//#include "format.h"
-#include <string>
+#include "utf8.h"
 
 class String : public std::string
 {
@@ -32,3 +31,33 @@ public:
 	*/
 	//
 };
+
+bool Utf8toWStr(const std::string& utf8str, std::wstring& wstr)
+{
+	try
+	{
+		if (size_t len = utf8::distance(utf8str.c_str(), utf8str.c_str() + utf8str.size()))
+		{
+			wstr.resize(len);
+			utf8::utf8to16(utf8str.c_str(), utf8str.c_str() + utf8str.size(), &wstr[0]);
+		}
+	}
+	catch (std::exception)
+	{
+		wstr.clear();
+		return false;
+	}
+
+	return true;
+}
+
+bool Utf8ToUpperOnlyLatin(std::string& utf8String)
+{
+	std::wstring wstr;
+	if (!Utf8toWStr(utf8String, wstr))
+		return false;
+
+	std::transform(wstr.begin(), wstr.end(), wstr.begin(), wcharToUpperOnlyLatin);
+
+	return WStrToUtf8(wstr, utf8String);
+}

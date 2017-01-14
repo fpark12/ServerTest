@@ -151,12 +151,12 @@ void LoginService::Run()
 	GConsole.Message("Login service bound to http://{0}:{1}", BindIP.c_str(), Port);
 	//TC_LOG_INFO("server.rest", "Login service bound to http://%s:%d", _bindIP.c_str(), _port);
 
-	int32 (*handle_get_plugin)(soap*) = [](soap* soapClient)
+	int32(*handle_get_plugin)(soap*) = [](soap* soapClient)
 	{
 		return GLoginService.HandleGet(soapClient);
 	};
 
-	int32 (*handle_post_plugin)(soap*) = [](soap* soapClient)
+	int32(*handle_post_plugin)(soap*) = [](soap* soapClient)
 	{
 		return GLoginService.HandlePost(soapClient);
 	};
@@ -168,7 +168,7 @@ void LoginService::Run()
 		{ nullptr, nullptr }
 	};
 
-	soap_register_plugin_arg(&SoapInstance, &http_get, (void*)handle_get_plugin/*std::bind(&LoginService::HandleGet, &GLoginService)*/);
+	soap_register_plugin_arg(&SoapInstance, &http_get, (void*)handle_get_plugin);
 	soap_register_plugin_arg(&SoapInstance, &http_post, handlers);
 	//soap_register_plugin_arg(&soapServer, &ContentTypePlugin::Init, (void*)"application/json;charset=utf-8");
 
@@ -189,7 +189,7 @@ void LoginService::Run()
 		//}
 
 		//TC_LOG_DEBUG("server.rest", "Accepted connection from IP=%s", IPAddress.to_string().c_str());
-		
+
 		std::shared_ptr<soap> SoapInstanceCopy = std::make_shared<soap>(SoapInstance);
 		asio::ip::address_v4 IPAddress(SoapInstanceCopy->ip);
 		GConsole.Message("Accepted connetion from IP={0}.\n", IPAddress.to_string().c_str());
@@ -212,14 +212,6 @@ void LoginService::Run()
 
 	//TC_LOG_INFO("server.rest", "Login service exiting...");
 
-	/*
-
-
-
-
-
-
-	*/
 }
 
 void LoginService::Stop()
@@ -247,7 +239,9 @@ int32 LoginService::HandleGet(soap* soapClient)
 
 	static std::string const expectedPath = "/bnetserver/login/";
 	if (strstr(soapClient->path, expectedPath.c_str()) != &soapClient->path[0])
+	{
 		return 404;
+	}
 
 	SendResponse(soapClient, LoginFormInputs);
 
@@ -256,9 +250,182 @@ int32 LoginService::HandleGet(soap* soapClient)
 
 int32 LoginService::HandlePost(soap* soapClient)
 {
+
+	asio::ip::address_v4 address(soapClient->ip);
+	std::string ip_address = address.to_string();
+
+	GConsole.Message("[{0}:{1}] Handling POST request path=\"{2}\"", ip_address.c_str(), soapClient->port, soapClient->path);
+
+	static std::string const expectedPath = "/bnetserver/login/";
+	if (strstr(soapClient->path, expectedPath.c_str()) != &soapClient->path[0])
+	{
+		return 404;
+	}
+
+	char *Buffer;
+	size_t Length;
+	soap_http_body(soapClient, &Buffer, &Length);
+
+	Battlenet::JSON::Login::LoginForm LoginForm;
+	Battlenet::JSON::Login::LoginResult LoginResult;
+	if (!JSON::Deserialize(Buffer, &LoginForm))
+	{
+		if (soap_register_plugin_arg(soapClient, &ResponseCodePlugin::Init, nullptr) != SOAP_OK)
+			return 500;
+
+		ResponseCodePlugin* ResponseCode = reinterpret_cast<ResponseCodePlugin*>(soap_lookup_plugin(soapClient, ResponseCodePlugin::PluginId));
+		ASSERT(ResponseCode);
+
+		ResponseCode->ErrorCode = 400;
+
+		LoginResult.set_authentication_state(Battlenet::JSON::Login::LOGIN);
+		LoginResult.set_error_code("UNABLE_TO_DECODE");
+		LoginResult.set_error_message("There was an internal error while connecting to Battle.net. Please try again later.");
+		return SendResponse(soapClient, LoginResult);
+	}
+
+	std::string login;
+	std::string password;
+
+	for (int32 i = 0; i < LoginForm.inputs_size(); ++i)
+	{
+		if (LoginForm.inputs(i).input_id() == "account_name")
+			login = LoginForm.inputs(i).value();
+		else if (LoginForm.inputs(i).input_id() == "password")
+			password = LoginForm.inputs(i).value();
+	}
+
+	Utf8ToUpperOnlyLatin(login);
+	Utf8ToUpperOnlyLatin(password);
+	/*
+
+	PreparedStatement* stmt = LoginDatabase.GetPreparedStatement(LOGIN_SEL_BNET_ACCOUNT_INFO);
+	stmt->setString(0, login);
+
+	if (PreparedQueryResult result = LoginDatabase.Query(stmt))
+	{
+		std::string pass_hash = result->Fetch()[13].GetString();
+
+		std::unique_ptr<Battlenet::Session::AccountInfo> accountInfo = Trinity::make_unique<Battlenet::Session::AccountInfo>();
+		accountInfo->LoadResult(result);
+
+		if (CalculateShaPassHash(login, std::move(password)) == pass_hash)
+		{
+			stmt = LoginDatabase.GetPreparedStatement(LOGIN_SEL_BNET_CHARACTER_COUNTS_BY_BNET_ID);
+			stmt->setUInt32(0, accountInfo->Id);
+			if (PreparedQueryResult characterCountsResult = LoginDatabase.Query(stmt))
+			{
+				do
+				{
+					Field* fields = characterCountsResult->Fetch();
+					accountInfo->GameAccounts[fields[0].GetUInt32()]
+						.CharacterCounts[Battlenet::RealmHandle{ fields[3].GetUInt8(), fields[4].GetUInt8(), fields[2].GetUInt32() }.GetAddress()] = fields[1].GetUInt8();
+
+				} while (characterCountsResult->NextRow());
+			}
+
+			stmt = LoginDatabase.GetPreparedStatement(LOGIN_SEL_BNET_LAST_PLAYER_CHARACTERS);
+			stmt->setUInt32(0, accountInfo->Id);
+			if (PreparedQueryResult lastPlayerCharactersResult = LoginDatabase.Query(stmt))
+			{
+				Field* fields = lastPlayerCharactersResult->Fetch();
+				Battlenet::RealmHandle realmId{ fields[1].GetUInt8(), fields[2].GetUInt8(), fields[3].GetUInt32() };
+				Battlenet::Session::LastPlayedCharacterInfo& lastPlayedCharacter = accountInfo->GameAccounts[fields[0].GetUInt32()]
+					.LastPlayedCharacters[realmId.GetSubRegionAddress()];
+
+				lastPlayedCharacter.RealmId = realmId;
+				lastPlayedCharacter.CharacterName = fields[4].GetString();
+				lastPlayedCharacter.CharacterGUID = fields[5].GetUInt64();
+				lastPlayedCharacter.LastPlayedTime = fields[6].GetUInt32();
+			}
+
+			BigNumber ticket;
+			ticket.SetRand(20 * 8);
+
+			LoginResult.set_login_ticket("TC-" + ByteArrayToHexStr(ticket.AsByteArray(20).get(), 20));
+
+			AddLoginTicket(LoginResult.login_ticket(), std::move(accountInfo));
+		}
+		else if (!accountInfo->IsBanned)
+		{
+			uint32 maxWrongPassword = uint32(sConfigMgr->GetIntDefault("WrongPass.MaxCount", 0));
+
+			if (sConfigMgr->GetBoolDefault("WrongPass.Logging", false))
+				TC_LOG_DEBUG("server.rest", "[%s, Account %s, Id %u] Attempted to connect with wrong password!", ip_address.c_str(), login.c_str(), accountInfo->Id);
+
+			if (maxWrongPassword)
+			{
+				SQLTransaction trans = LoginDatabase.BeginTransaction();
+				stmt = LoginDatabase.GetPreparedStatement(LOGIN_UPD_BNET_FAILED_LOGINS);
+				stmt->setUInt32(0, accountInfo->Id);
+				trans->Append(stmt);
+
+				++accountInfo->FailedLogins;
+
+				TC_LOG_DEBUG("server.rest", "MaxWrongPass : %u, failed_login : %u", maxWrongPassword, accountInfo->Id);
+
+				if (accountInfo->FailedLogins >= maxWrongPassword)
+				{
+					BanMode banType = BanMode(sConfigMgr->GetIntDefault("WrongPass.BanType", uint16(BanMode::BAN_IP)));
+					int32 banTime = sConfigMgr->GetIntDefault("WrongPass.BanTime", 600);
+
+					if (banType == BanMode::BAN_ACCOUNT)
+					{
+						stmt = LoginDatabase.GetPreparedStatement(LOGIN_INS_BNET_ACCOUNT_AUTO_BANNED);
+						stmt->setUInt32(0, accountInfo->Id);
+					}
+					else
+					{
+						stmt = LoginDatabase.GetPreparedStatement(LOGIN_INS_IP_AUTO_BANNED);
+						stmt->setString(0, ip_address);
+					}
+
+					stmt->setUInt32(1, banTime);
+					trans->Append(stmt);
+
+					stmt = LoginDatabase.GetPreparedStatement(LOGIN_UPD_BNET_RESET_FAILED_LOGINS);
+					stmt->setUInt32(0, accountInfo->Id);
+					trans->Append(stmt);
+				}
+
+				LoginDatabase.CommitTransaction(trans);
+			}
+		}
+	}
+
+	LoginResult.set_authentication_state(Battlenet::JSON::Login::DONE);
+	return SendResponse(soapClient, LoginResult);
+	*/
 	return 0;
 }
 
+char const* const LoginService::ResponseCodePlugin::PluginId = "bnet-error-code";
+
+int32 LoginService::ResponseCodePlugin::Init(soap* s, soap_plugin* p, void* arg)
+{
+	ResponseCodePlugin* data = new ResponseCodePlugin();
+	data->fresponse = s->fresponse;
+
+	p->id = PluginId;
+	p->fdelete = &Destroy;
+	p->data = data;
+
+	s->fresponse = &ChangeResponse;
+	return SOAP_OK;
+}
+
+void LoginService::ResponseCodePlugin::Destroy(soap* s, soap_plugin* p)
+{
+	ResponseCodePlugin* data = reinterpret_cast<ResponseCodePlugin*>(p->data);
+	s->fresponse = data->fresponse;
+	delete data;
+}
+
+int32 LoginService::ResponseCodePlugin::ChangeResponse(soap* s, int32 originalResponse, size_t contentLength)
+{
+	ResponseCodePlugin* self = reinterpret_cast<ResponseCodePlugin*>(soap_lookup_plugin(s, PluginId));
+	return self->fresponse(s, self->ErrorCode && (originalResponse == SOAP_FILE) ? self->ErrorCode : originalResponse, contentLength);
+}
 void LoginService::CleanupLoginTickets(const asio::error_code& error)
 {
 	printf("Cleaning up...\n");

@@ -25,19 +25,24 @@ private:
 	bool Stopped;
 
 	Battlenet::JSON::Login::FormInputs LoginFormInputs;
+
+	struct ResponseCodePlugin
+	{
+		static char const* const PluginId;
+		static int32 Init(soap* s, soap_plugin*, void*);
+		static void Destroy(soap* s, soap_plugin* p);
+		static int32 ChangeResponse(soap* s, int32 originalResponse, size_t contentLength);
+
+		int32(*fresponse)(soap* s, int32 status, size_t length);
+		int32 ErrorCode;
+	};
 public:
 	bool Start(asio::io_service& ioService);
-
 	void Run();
-
 	void Stop();
 
 	int32 SendResponse(soap* soapClient, google::protobuf::Message const& response);
-
-	//friend int32 handle_get_plugin(soap* soapClient);
 	int32 HandleGet(soap* soapClient);
-
-	//friend int32 handle_post_plugin(soap* soapClient);
 	int32 HandlePost(soap* soapClient);
 
 	/*
