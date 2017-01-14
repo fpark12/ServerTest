@@ -7,10 +7,7 @@
 
 namespace protobuf
 {
-	google::protobuf::util::Status MessageToJson(google::protobuf::Message const& Message, std::string& OutString)
-	{
-		return google::protobuf::util::MessageToJsonString(Message, &OutString);
-	}
+	Core_API google::protobuf::util::Status MessageToJson(google::protobuf::Message const& Message, std::string& OutString);
 }
 
 namespace JSON

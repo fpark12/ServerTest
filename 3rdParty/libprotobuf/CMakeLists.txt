@@ -35,14 +35,20 @@ if(TARGET ${PROJECT_NAME})
 	endforeach()
 
 	#read old stamp
-	if(EXISTS "${${PROJECT_NAME}_BINARY_DIR}/proto.stamp")
-		file(READ "${${PROJECT_NAME}_BINARY_DIR}/proto.stamp" oldProtoStamp)
+	if(EXISTS "${${PROJECT_NAME}_BINARY_DIR}/proto.stamp2")
+		file(READ "${${PROJECT_NAME}_BINARY_DIR}/proto.stamp2" oldProtoStamp)
 	endif()
 
 	#message("oldProtoStamp: ${oldProtoStamp}")
 	#message("newProtoStamp: ${newProtoStamp}")
+	
+	if ("${oldProtoStamp}" STREQUAL "${newProtoStamp}")
+		message("SAME STAMPS!!!!!!!!!!!!!!")
+	endif()
 
 	if (NOT "${oldProtoStamp}" STREQUAL "${newProtoStamp}")
+
+		message("Recompiling proto files.")
 
 		foreach(PROTO_FILE ${protoFiles})
 			get_filename_component(PROTO_FILE_DIR ${PROTO_FILE} DIRECTORY)
@@ -56,7 +62,7 @@ if(TARGET ${PROJECT_NAME})
 			)
 		endforeach()
 		
-		file(WRITE ${${PROJECT_NAME}_BINARY_DIR}/proto.stamp "${newProtoStamp}")
+		file(WRITE ${${PROJECT_NAME}_BINARY_DIR}/proto.stamp2 "${newProtoStamp}")
 	endif()
 
 	set(newProtoSourceList "")

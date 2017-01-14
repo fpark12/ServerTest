@@ -7,6 +7,14 @@
 #include <rapidjson/stringbuffer.h>
 #include <stack>
 
+namespace protobuf
+{
+	google::protobuf::util::Status MessageToJson(google::protobuf::Message const& Message, std::string& OutString)
+	{
+		return google::protobuf::util::MessageToJsonString(Message, &OutString);
+	}
+}
+
 namespace JSON
 {
 	std::string JSON::Serialize(google::protobuf::Message const& message)
