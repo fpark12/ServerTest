@@ -148,9 +148,6 @@ void LoginService::Run()
 		return;
 	}
 
-	std::string a = "accc";
-	std::string b = Utf8ToUpperLatin(a);
-
 
 	GConsole.Message("Login service bound to http://{0}:{1}", BindIP.c_str(), Port);
 	//TC_LOG_INFO("server.rest", "Login service bound to http://%s:%d", _bindIP.c_str(), _port);
