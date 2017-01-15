@@ -1,5 +1,13 @@
 #include "StringUtils.h"
 
+std::string Utf8ToUpperLatin(std::string& Input)
+{
+	setlocale(LC_CTYPE, "en_US.UTF8");
+	std::locale loc;
+	auto& f = std::use_facet<std::ctype<char>>(loc);
+	return f.toupper(&Input[0], &Input[0] + Input.size());
+}
+
 bool Utf8toWStr(const std::string & utf8str, std::wstring & wstr)
 {
 	try

@@ -32,6 +32,8 @@ public:
 	//
 };
 
+Core_API std::string Utf8ToUpperLatin(std::string& Input);
+
 bool Utf8toWStr(const std::string& utf8str, std::wstring& wstr);
 
 bool WStrToUtf8(wchar_t* wstr, size_t size, std::string& utf8str);

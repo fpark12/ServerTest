@@ -148,6 +148,10 @@ void LoginService::Run()
 		return;
 	}
 
+	std::string a = "accc";
+	std::string b = Utf8ToUpperLatin(a);
+
+
 	GConsole.Message("Login service bound to http://{0}:{1}", BindIP.c_str(), Port);
 	//TC_LOG_INFO("server.rest", "Login service bound to http://%s:%d", _bindIP.c_str(), _port);
 
@@ -314,8 +318,8 @@ int32 LoginService::HandlePost(soap* soapClient)
 	// output the same number again
 	std::wcout << 1000.01 << '\n';
 	*/
-	Login = std::toupper(Login.c_str(), std::locale("en_US.utf8"));
-	Password = std::toupper(Password.c_str(), std::locale("en_US.utf8"));
+	Login = Utf8ToUpperLatin(Login);
+	Password = Utf8ToUpperLatin(Password);
 	//Utf8ToUpperOnlyLatin(Login);
 	//Utf8ToUpperOnlyLatin(Password);
 
