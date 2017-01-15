@@ -57,19 +57,19 @@ bool LoginService::Start(asio::io_service& ioService)
 	Battlenet::JSON::Login::FormInput* input;
 	LoginFormInputs.set_type(Battlenet::JSON::Login::LOGIN_FORM);
 	input = LoginFormInputs.add_inputs();
-	input->set_input_id("account_name");
+	input->set_inputid("account_name");
 	input->set_type("text");
 	input->set_label("E-mail");
-	input->set_max_length(320);
+	input->set_maxlength(320);
 
 	input = LoginFormInputs.add_inputs();
-	input->set_input_id("password");
+	input->set_inputid("password");
 	input->set_type("password");
 	input->set_label("Password");
-	input->set_max_length(16);
+	input->set_maxlength(16);
 
 	input = LoginFormInputs.add_inputs();
-	input->set_input_id("log_in_submit");
+	input->set_inputid("log_in_submit");
 	input->set_type("submit");
 	input->set_label("Log In");
 
@@ -222,13 +222,12 @@ void LoginService::Stop()
 int32 LoginService::SendResponse(soap* soapClient, google::protobuf::Message const& response)
 {
 	std::string JsonResponse;
-	protobuf::MessageToJson(response, JsonResponse);
-	std::string jsonResponse = JSON::Serialize(response);
-
-	int result = JsonResponse.compare(jsonResponse.c_str());
+	Protobuf::MessageToJson(response, JsonResponse);
+	//std::string jsonResponse = JSON::Serialize(response);
+	//int result = JsonResponse.compare(jsonResponse.c_str());
 
 	soap_response(soapClient, SOAP_FILE);
-	soap_send_raw(soapClient, jsonResponse.c_str(), jsonResponse.length());
+	soap_send_raw(soapClient, JsonResponse.c_str(), JsonResponse.length());
 	return soap_end_send(soapClient);
 }
 
@@ -272,7 +271,8 @@ int32 LoginService::HandlePost(soap* soapClient)
 
 	Battlenet::JSON::Login::LoginForm LoginForm;
 	Battlenet::JSON::Login::LoginResult LoginResult;
-	if (!JSON::Deserialize(Buffer, &LoginForm))
+	//if (!JSON::Deserialize(Buffer, &LoginForm))
+	if (Protobuf::Status::OK != Protobuf::JsonToMessage(Buffer, LoginForm))
 	{
 		if (soap_register_plugin_arg(soapClient, &ResponseCodePlugin::Init, nullptr) != SOAP_OK)
 			return 500;
@@ -282,27 +282,44 @@ int32 LoginService::HandlePost(soap* soapClient)
 
 		ResponseCode->ErrorCode = 400;
 
-		LoginResult.set_authentication_state(Battlenet::JSON::Login::LOGIN);
-		LoginResult.set_error_code("UNABLE_TO_DECODE");
-		LoginResult.set_error_message("There was an internal error while connecting to Battle.net. Please try again later.");
+		LoginResult.set_authenticationstate(Battlenet::JSON::Login::LOGIN);
+		LoginResult.set_errorcode("UNABLE_TO_DECODE");
+		LoginResult.set_errormessage("There was an internal error while connecting to Battle.net. Please try again later.");
 		return SendResponse(soapClient, LoginResult);
 	}
 
-	std::string login;
-	std::string password;
+	std::string Login;
+	std::string Password;
 
 	for (int32 i = 0; i < LoginForm.inputs_size(); ++i)
 	{
-		if (LoginForm.inputs(i).input_id() == "account_name")
-			login = LoginForm.inputs(i).value();
-		else if (LoginForm.inputs(i).input_id() == "password")
-			password = LoginForm.inputs(i).value();
+		if (LoginForm.inputs(i).inputid() == "account_name")
+		{
+			Login = LoginForm.inputs(i).value();
+		}
+		else if (LoginForm.inputs(i).inputid() == "password")
+		{
+			Password = LoginForm.inputs(i).value();
+		}
 	}
 
-	Utf8ToUpperOnlyLatin(login);
-	Utf8ToUpperOnlyLatin(password);
 	/*
+	std::wcout << "User-preferred locale setting is " << std::locale("").name().c_str() << '\n';
+	// on startup, the global locale is the "C" locale
+	std::wcout << 1000.01 << '\n';
+	// replace the C++ global locale as well as the C locale with the user-preferred locale
+	std::locale::global(std::locale(""));
+	// use the new global locale for future wide character output
+	std::wcout.imbue(std::locale());
+	// output the same number again
+	std::wcout << 1000.01 << '\n';
+	*/
+	Login = std::toupper(Login.c_str(), std::locale("en_US.utf8"));
+	Password = std::toupper(Password.c_str(), std::locale("en_US.utf8"));
+	//Utf8ToUpperOnlyLatin(Login);
+	//Utf8ToUpperOnlyLatin(Password);
 
+	/*
 	PreparedStatement* stmt = LoginDatabase.GetPreparedStatement(LOGIN_SEL_BNET_ACCOUNT_INFO);
 	stmt->setString(0, login);
 

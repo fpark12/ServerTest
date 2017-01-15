@@ -5,9 +5,12 @@
 #include <rapidjson/reader.h>
 #include <rapidjson/stringbuffer.h>
 
-namespace protobuf
+namespace Protobuf
 {
+	using google::protobuf::util::Status;
+
 	Core_API google::protobuf::util::Status MessageToJson(google::protobuf::Message const& Message, std::string& OutString);
+	Core_API google::protobuf::util::Status JsonToMessage(std::string const& OutString, google::protobuf::Message& Message);
 }
 
 namespace JSON

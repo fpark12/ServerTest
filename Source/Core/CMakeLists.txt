@@ -7,6 +7,7 @@ spdlog
 rapidjson
 libprotobuf
 GUI
+openssl
 )
 SET( LINK
 utf8cpp
@@ -15,6 +16,7 @@ spdlog
 rapidjson
 libprotobuf
 GUI
+openssl
 )
 
 create_project(SHARED "${DEFINE}" "${INCLUDE}" "${LINK}")

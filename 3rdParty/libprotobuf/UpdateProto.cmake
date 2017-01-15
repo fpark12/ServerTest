@@ -35,8 +35,8 @@ if(NOT "${oldProtoStamp}" STREQUAL "${newProtoStamp}")
 			-P "${slnDir}/Purify/Core/RemoveAllBuild.cmake"
 		)
 endif()
-message("Old stamp: ${oldProtoStamp}")
-message("New stamp: ${newProtoStamp}")
+#message("Old stamp: ${oldProtoStamp}")
+#message("New stamp: ${newProtoStamp}")
 
 #[[
 file(READ "${projDir}/CMakeLists.txt" cmakeFile)

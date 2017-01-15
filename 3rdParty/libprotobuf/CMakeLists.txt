@@ -42,10 +42,6 @@ if(TARGET ${PROJECT_NAME})
 	#message("oldProtoStamp: ${oldProtoStamp}")
 	#message("newProtoStamp: ${newProtoStamp}")
 	
-	if ("${oldProtoStamp}" STREQUAL "${newProtoStamp}")
-		message("SAME STAMPS!!!!!!!!!!!!!!")
-	endif()
-
 	if (NOT "${oldProtoStamp}" STREQUAL "${newProtoStamp}")
 
 		message("Recompiling proto files.")
