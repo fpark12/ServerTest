@@ -1,17 +1,6 @@
 #pragma once
-#include "Private/Detail/SQLDatabase/SQLConnectionPool/SQLConnectionPool.h"
-#include "Public/Detail/SQLOperation.h"
-
-
-enum SQLThreadingMode
-{
-	Shared = 0,
-	Dedicated = 1
-};
-struct SQLSchemaInfo : SQLConnectionPoolInfo
-{
-	uint32 ThreadingMode;
-};
+#include "Private\Detail\SQLOperation\SQLTask.h"
+#include "Private\Detail\SQLDatabase\SQLConnectionPool\SQLConnectionPool.h"
 
 class SQLDatabase
 {
@@ -20,69 +9,21 @@ class SQLDatabase
 private:
 	std::vector<SQLConnectionPool> ConnectionPool;
 	std::vector<SQLConnectionPoolInfo> ConnectionPoolInfo;
-	moodycamel::ConcurrentQueue<SQLOperation*> TaskQueue;
+	moodycamel::ConcurrentQueue<SQLTask*> TaskQueue;
 
 public:
 
-	void AddSchema(uint32 index, SQLSchemaInfo& poolInfo)
-	{
-		if (ConnectionPool.size() <= index)
-		{
-			ConnectionPool.resize(index + 1);
-			ConnectionPool[index] = std::move(SQLConnectionPool(poolInfo));
-		}
-	}
+	void AddSchema(uint32 _index, SQLConnectionPoolInfo& _pool_info);
 
-	SQLConnection* GetFreeSQLConnection(uint32 index)
-	{
-		return ConnectionPool[index].GetFreeSQLConnection();
-	}
+	SQLConnection* GetAvaliableSQLConnection(uint32 _schema_idx);
 
-	uint32 SpawnSQLConnections()
-	{
-		for (auto& pool: ConnectionPool)
-		{
-			if (pool.SpawnConnections())
-			{
-				//TODO Error Handling
-			}
-		}
-		return RC_SUCCESS;
-	}
+	uint32 SpawnSQLConnections();
 
-	uint32 AddTask(SQLOperation* operation)
-	{
-		if (!TaskQueue.try_enqueue(operation))
-		{
-			//TODO Error handling
-			return RC_FAILED;
-		}
-		return RC_SUCCESS;
-	}
+	uint32 AddTask(SQLTask* _task);
 
-	uint32 BulkAddTasks(std::vector<SQLOperation*>& operations)
-	{
-		if (!
-			TaskQueue.try_enqueue_bulk(std::make_move_iterator(operations.begin()), 
-				operations.size())
-			)
-		{
-			//TODO Error handling
-			return RC_FAILED;
-		}
-		return RC_SUCCESS;
-	}
+	uint32 BulkAddTasks(std::vector<SQLTask*>& _tasks);
 
-	SQLOperation* NextTask()
-	{
-		SQLOperation* next = nullptr;
-		if (!TaskQueue.try_dequeue(next))
-		{
-			//TODO Error handling
-			return nullptr;
-		}
-		return next;
-	}
+	SQLTask* NextTask();
 };
 
 static SQLDatabase& GDatabase = Singleton<SQLDatabase>().Instance();

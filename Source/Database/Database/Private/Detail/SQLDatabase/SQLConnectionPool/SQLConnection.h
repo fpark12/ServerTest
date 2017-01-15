@@ -20,7 +20,7 @@ private:
 	MYSQL* MySqlHandle;
 	std::vector<MYSQL_STMT*> PreparedStatements;
 	SQLConnectionInfo ConnectionInfo;
-	std::atomic<bool> IsFree;
+	std::atomic<bool> IsAvaliable;
 
 public:
 	
@@ -29,7 +29,7 @@ public:
 		MySqlHandle(std::move(Other.MySqlHandle)),
 		PreparedStatements(std::move(Other.PreparedStatements)),
 		ConnectionInfo(std::move(Other.ConnectionInfo)),
-		IsFree(std::move(Other.IsFree.load()))
+		IsAvaliable(std::move(Other.IsAvaliable.load()))
 	{
 	}
 	SQLConnection& operator=(SQLConnection&& Other)
@@ -40,7 +40,7 @@ public:
 			PreparedStatements = std::move(Other.PreparedStatements);
 		}
 
-		IsFree = std::move(Other.IsFree.load());
+		IsAvaliable = std::move(Other.IsAvaliable.load());
 		ConnectionInfo = std::move(Other.ConnectionInfo);
 		return *this;
 	}

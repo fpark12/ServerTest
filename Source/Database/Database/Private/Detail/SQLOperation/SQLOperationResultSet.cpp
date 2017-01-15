@@ -127,3 +127,53 @@ std::vector<uint8> SQLOperationResultSet::GetResultBinary(uint8 Index, std::size
 	}
 	return bytes;
 }
+
+uint32 SQLOperationResultSet::SizeForType(MYSQL_FIELD* field)
+{
+	switch (field->type)
+	{
+	case MYSQL_TYPE_NULL:
+		return RC_SUCCESS;
+	case MYSQL_TYPE_TINY:
+		return RC_FAILED;
+	case MYSQL_TYPE_YEAR:
+	case MYSQL_TYPE_SHORT:
+		return 2;
+	case MYSQL_TYPE_INT24:
+	case MYSQL_TYPE_LONG:
+	case MYSQL_TYPE_FLOAT:
+		return 4;
+	case MYSQL_TYPE_DOUBLE:
+	case MYSQL_TYPE_LONGLONG:
+	case MYSQL_TYPE_BIT:
+		return 8;
+
+	case MYSQL_TYPE_TIMESTAMP:
+	case MYSQL_TYPE_DATE:
+	case MYSQL_TYPE_TIME:
+	case MYSQL_TYPE_DATETIME:
+		return sizeof(MYSQL_TIME);
+
+	case MYSQL_TYPE_TINY_BLOB:
+	case MYSQL_TYPE_MEDIUM_BLOB:
+	case MYSQL_TYPE_LONG_BLOB:
+	case MYSQL_TYPE_BLOB:
+	case MYSQL_TYPE_STRING:
+	case MYSQL_TYPE_VAR_STRING:
+		return field->max_length + 1;
+
+	case MYSQL_TYPE_DECIMAL:
+	case MYSQL_TYPE_NEWDECIMAL:
+		return 64;
+
+	case MYSQL_TYPE_GEOMETRY:
+		/*
+		Following types are not sent over the wire:
+		MYSQL_TYPE_ENUM:
+		MYSQL_TYPE_SET:
+		*/
+	default:
+		//TODO error log
+		return RC_SUCCESS;
+	}
+}

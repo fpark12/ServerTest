@@ -28,11 +28,13 @@ uint32 SQLConnectionPool::SpawnConnections()
 			if (Connections[i].Connect())
 			{
 				//TODO Error handling
+				return RC_FAILED;
 			}
 		
 			if (Connections[i].InitPreparedStatements(PreparedStatementStrings))
 			{
 				//TODO Error handling
+				return RC_FAILED;
 			}
 		}
 		ActiveConnectionCount = ConnectionPoolInfo.ConnectionCount;
@@ -41,13 +43,13 @@ uint32 SQLConnectionPool::SpawnConnections()
 	return RC_SUCCESS;
 }
 
-SQLConnection* SQLConnectionPool::GetFreeSQLConnection()
+SQLConnection* SQLConnectionPool::GetAvaliableSQLConnection()
 {
 	bool Expected = true;
 	for (auto& conn : Connections)
 	{
 		Expected = true;
-		if (conn.IsFree.compare_exchange_strong(Expected, false))
+		if (conn.IsAvaliable.compare_exchange_strong(Expected, false))
 		{
 			return &conn;
 		}

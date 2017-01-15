@@ -4,12 +4,12 @@ struct SQLOperationResultSet
 {
 
 	// Field: for output
-	MYSQL_BIND* FieldBinds;
-	uint64 RowCount;
-	uint32 FieldCount;
-	uint64 CurrentRowCursor;
-	uint64* RowData;
-	uint64* ResultSetData;
+	MYSQL_BIND* FieldBinds = nullptr;
+	uint64 RowCount = 0;
+	uint32 FieldCount = 0;
+	uint64 CurrentRowCursor = 0;
+	uint64* RowData = nullptr;
+	uint64* ResultSetData = nullptr;
 
 	void ClearResultSet();
 	bool GetNextRowOfResultSet();
@@ -30,5 +30,6 @@ struct SQLOperationResultSet
 	std::string GetResultString(uint8 Index);
 	std::vector<uint8> GetResultBinary(uint8 Index, std::size_t Size);
 
+	uint32 SizeForType(MYSQL_FIELD* field);
 
 };

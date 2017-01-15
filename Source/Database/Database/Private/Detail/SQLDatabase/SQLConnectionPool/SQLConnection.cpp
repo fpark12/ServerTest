@@ -1,13 +1,13 @@
 #include "SQLConnection.h"
 
-SQLConnection::SQLConnection() : IsFree(true)
+SQLConnection::SQLConnection() : IsAvaliable(true)
 {
 
 }
 
 SQLConnection::SQLConnection(SQLConnectionInfo& _info) :
 	MySqlHandle(nullptr),
-	IsFree(true),
+	IsAvaliable(true),
 	ConnectionInfo(_info)
 {
 }

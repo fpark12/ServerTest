@@ -2,6 +2,8 @@
 
 struct SQLOperationParamsArchive
 {
+
+	/*
 	enum class StatementStorage
 	{
 		Login,
@@ -10,18 +12,17 @@ struct SQLOperationParamsArchive
 		Hotfix,
 		None
 	};
+	*/
 
 	// Params: for input
-	uint32 ParamCount;
-	uint32 ParamSetBitMask;	// A max of 32 params are allowed for each query
-	MYSQL_BIND* ParamBinds;
-	uint64* ParamData;
-	StatementStorage Storage; // todo: ?? what is this
-
-	void SetParamBind(MYSQL_BIND* mySqlBind, enum_field_types bufferType, void* bufferLocation,
-		bool isUnsigned, size_t bufferLength = 0, size_t dataSize = 0, bool isNull = 0);
-
+	uint32 ParamCount = 0;
+	uint32 ParamSetBitMask = 0x00000000;	// A max of 32 params are allowed for each query
+	MYSQL_BIND* ParamBinds = nullptr;
+	uint64* ParamData = nullptr;
+	// StatementStorage Storage; // todo: ?? what is this
+	
 	void ClearParams();
+
 	void SetParamBool(uint8 Index, const bool& Value);
 	void SetParamUInt8(uint8 Index, const uint8& Value);
 	void SetParamUInt16(uint8 Index, const uint16& Value);
@@ -43,4 +44,7 @@ struct SQLOperationParamsArchive
 	void MoveParamString(uint8 Index, std::string&& Value);
 	void MoveParamBinary(uint8 Index, void*& Value, uint32 dataSize);
 	void MoveParamBinary(uint8 Index, std::vector<uint8>&& Value);
+
+	void SetParamBind(MYSQL_BIND* mySqlBind, enum_field_types bufferType, void* bufferLocation,
+		bool isUnsigned, size_t bufferLength = 0, size_t dataSize = 0, bool isNull = 0);
 };

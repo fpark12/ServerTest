@@ -1,6 +1,9 @@
 #pragma once
 #include "Private/Detail/SQLDatabase/SQLThreadPool/SQLThread.h"
 
+// Shared Thread: one thread that could serve operations on any schema
+// Dedicated Thread: one thread that could only serve operations on one schema
+
 class SQLThreadPool
 {
 	DECLARE_SINGLETON(SQLThreadPool);

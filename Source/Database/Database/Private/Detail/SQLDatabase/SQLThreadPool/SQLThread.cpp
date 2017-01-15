@@ -1,6 +1,6 @@
 #include "SQLThread.h"
-#include "SQLOperation.h"
-#include "SQLDatabase.h"
+#include "Private\Detail\SQLOperation\SQLOperation.h"
+#include "Public\Detail\SQLDatabase.h"
 
 SQLThread::SQLThread() :
 	CancelationToken(false)
@@ -24,10 +24,11 @@ void SQLThread::Main()
 {
 	while (!CancelationToken)
 	{
-		static SQLOperation* nextTask = nullptr;
+		static SQLTask* nextTask = nullptr;
+		//TODO sleep if no new task, followed by a signal from task queue if new job comes
 		if (nextTask = GDatabase.NextTask())
 		{
-			nextTask->Call();
+			nextTask->Execute();
 		}
 	}
 }

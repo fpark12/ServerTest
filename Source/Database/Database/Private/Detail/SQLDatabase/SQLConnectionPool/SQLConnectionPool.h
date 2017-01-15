@@ -34,5 +34,5 @@ public:
 
 	uint32 SpawnConnections();
 
-	SQLConnection* GetFreeSQLConnection();
+	SQLConnection* GetAvaliableSQLConnection();
 };
