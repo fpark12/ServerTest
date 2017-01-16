@@ -29,6 +29,11 @@ public:
 	
 	uint32 Execute();
 
+	// TODO
+	// if we want to keep using the same prepared stmt for next task
+	// merely clean output buffer
+	// and use set param to change inputs
+
 	// the following functions are used to assign new sql instruction to the same operation object
 	// the input and result buffer is automatically cleared upon reset
 	// reset schema if we want to use the same operation to execute different stmt
@@ -49,5 +54,4 @@ private:
 	// fetching the next row on result set and store it into result buffer
 	bool FetchNextRow();
 
-	void ClearInputOutputBuffer();
 };

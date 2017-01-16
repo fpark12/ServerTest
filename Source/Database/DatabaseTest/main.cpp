@@ -1,102 +1,89 @@
-#include "Public/Detail/SQLDatabase.h"
-#include "Public/Detail/SQLThreadPool.h"
+#include <iostream>
+#include <string>
+#include <thread>
+#include <mutex>
+#include <condition_variable>
 #include "Private/Detail/SQLOperation/SQLStatement.h"
-#include <filesystem>
+#include "Private/Detail/SQLOperation/SQLTransaction.h"
 
-#if PLATFORM_WINDOWS
-#define _CRTDBG_MAP_ALLOC
-#include <crtdbg.h>
-#endif
+std::mutex m;
+std::condition_variable cv;
+std::string data;
+bool ready = false;
+bool processed = false;
+MYSQL* MySqlHandle1;
+MYSQL* MySqlHandle2;
 
-
-BEFORE_MAIN()
+void worker_thread()
 {
-	GCore.Init();
+	// Wait until main() sends data
+	std::unique_lock<std::mutex> lk(m);
+	cv.wait(lk, [] { return ready; });
+
+	// after the wait, we own the lock.
+	std::cout << "Worker thread is processing data\n";
+	data += " after processing";
+
+	// Send data back to main()
+	processed = true;
+	std::cout << "Worker thread signals data processing completed\n";
+
+	// Manual unlocking is done before notifying, to avoid waking up
+	// the waiting thread only to block again (see notify_one for details)
+	lk.unlock();
+	cv.notify_one();
 }
 
 int main()
 {
-	//GConsole.Print("abcd");
-
+	MYSQL* initMysql1 = mysql_init(NULL);
+	MYSQL* initMysql2 = mysql_init(NULL);
+	if (!initMysql1)
 	{
-		GConfig.Load("DatabaseTest.ini");
-		bool Res;
-		SQLConnectionPoolInfo SchemaInfo;
-		Res |= GConfig.GetString("DatabaseTest.LoginDatabase.Hostname", SchemaInfo.Hostname);
-		Res |= GConfig.GetString("DatabaseTest.LoginDatabase.Username", SchemaInfo.Username);
-		Res |= GConfig.GetString("DatabaseTest.LoginDatabase.Password", SchemaInfo.Password);
-		Res |= GConfig.GetString("DatabaseTest.LoginDatabase.Schema", SchemaInfo.Schema);
-		Res |= GConfig.GetUInt("DatabaseTest.LoginDatabase.Port", SchemaInfo.Port);
-		Res |= GConfig.GetUInt("DatabaseTest.LoginDatabase.ConnectionCount", SchemaInfo.ConnectionCount);
-		// Res |= GConfig.GetUInt("DatabaseTest.LoginDatabase.ThreadingMode", SchemaInfo.ThreadingMode);
-
-		enum ESchema
-		{
-			Login = 0
-		};
-
-		enum ELoginPreparedStatement
-		{
-			UsernameQuery = 0,
-			PersonalInfoQuery = 1
-		};
-
-		// added login database (connections)
-		// since its the first schema to be added, it has index 0
-		GDatabase.AddSchema(ESchema::Login, SchemaInfo);
-		ASSERT(GDatabase.SpawnSQLConnections() == RC_SUCCESS);
-
-		// main thread execute
-		SQLStatement example1(ESchema::Login, "DROP TABLE IF EXISTS debug");
-		example1.Execute();
-		example1.ResetStatement("CREATE TABLE debug (id int not null, my_name varchar(50), PRIMARY KEY(id))");
-		example1.Execute();
-
-		example1.ResetStatement("DROP TABLE IF EXISTS debug");
-
-		// set it up for async execute environment
-		GSQLThreadPool.SetDefaultThreadCount();
-		GSQLThreadPool.SpawnThreads();
-
-		GConsole.Message("{}: Time: {}", __FUNCTION__, getMSTime());
-		example1.AsyncExecute();
-		GConsole.Message("{}: Time: {}", __FUNCTION__, getMSTime());
-		//operation.SetStatement("SELECT `sex`, `age`, `name` FROM `user` WHERE `id` = ?");
-		//operation.SetParamInt32(0, 1);
-		
-		/*
-		Database.Schemas[enum::LoginDatabase];
-		SQLOperation op(LoginConnectionPool);
-		op.SetPreparedStatement(enum::GET_CHARACTERS);
-		op.SetParam(0, xxx);
-		GDatabase.AsyncQuery(op);
-		//Database.Connect();
-		SQLConnection dbConn(dbInfo);
-		char* sql = "SELECT `sex`, `age`, `name` FROM `user` WHERE `id` = ?";
-
-		SQLOperation op(&dbConn);
-		std::string test = "abc";// "tempString1tempString2tempString3tempString4tempString5tempString6";
-		op.SetStatement(sql);
-		op.MoveParamString(0, std::move(test));
-		op.SetParamInt32(0, 1);
-		memset(&test, 0, sizeof(std::string));
-
-		//dbConn.AddTask(&op);
-		//SQLThread worker(&dbConn);
-
-		while (!op.IsDone());
-
-		while (op.GetNextRowOfResultSet())
-		{
-			int32 a = op.GetResultInt32(0);
-			int32 b = op.GetResultInt32(1);
-			std::string c = op.GetResultString(2);
-			std::cout << "Sex: " << a << ", Age: " << b << ", Name: " << c << std::endl;
-		}
-		*/
-
+		// TODO Error Log: not enough memory to spawn a new mysql connection handle
+		return RC_FAILED;
 	}
-#if PLATFORM_WINDOWS
-	_CrtDumpMemoryLeaks();
-#endif
+
+	MySqlHandle1 = mysql_real_connect(initMysql1, "127.0.0.1",
+		"root", "password",	"test", 3306, NULL, 0);
+
+	if (!MySqlHandle1)
+	{
+		return 1;
+	}
+
+	MySqlHandle2 = mysql_real_connect(initMysql2, "127.0.0.1",
+		"root", "password", "test", 3306, NULL, 0);
+
+	if (!MySqlHandle2)
+	{
+		return 1;
+	}
+
+	std::thread worker(worker_thread);
+
+	int retValue = 0;
+	retValue = mysql_query(MySqlHandle1, "START TRANSACTION");
+
+	retValue = mysql_query(MySqlHandle1, "CREATE TABLE `test`.`new_table` (`idnew_table` INT NOT NULL,	PRIMARY KEY(`idnew_table`))");
+	retValue = mysql_query(MySqlHandle1, "INSERT INTO `test`.`new_table` (`idnew_table`) VALUES('1')");
+	retValue = mysql_query(MySqlHandle1, "INSERT INTO `test`.`new_table` (`idnew_table`) VALUES('2')");
+
+	data = "Example data";
+	// send data to the worker thread
+	{
+		std::lock_guard<std::mutex> lk(m);
+		ready = true;
+		std::cout << "main() signals data ready for processing\n";
+	}
+	cv.notify_one();
+
+	// wait for the worker
+	{
+		std::unique_lock<std::mutex> lk(m);
+		cv.wait(lk, [] { return processed; });
+	}
+	std::cout << "Back in main(), data = " << data << '\n';
+
+	worker.join();
 }
