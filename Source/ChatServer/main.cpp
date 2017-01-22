@@ -15,7 +15,7 @@ int main(int argc, char* argv[])
 		std::list<ChatServer> Servers;
 		for (int i = 0; i < 1; ++i)
 		{
-			asio::ip::tcp::endpoint Endpoint(asio::ip::tcp::v4(), std::atoi("1723"/*argv[i]*/));
+			asio::ip::tcp::endpoint Endpoint(asio::ip::tcp::v4(), std::atoi("1723 "/*argv[i]*/));
 			Servers.emplace_back(IoService, Endpoint);
 		}
 
