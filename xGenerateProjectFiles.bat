@@ -122,6 +122,9 @@ echo oLink.Save >> %SCRIPT%
 cscript /nologo %SCRIPT%
 del %SCRIPT%
 
+:RemoveAllBuild
+1>NUL 2>NUL "%CMakePath%" -P "%~dp0/Purify/Core/RemoveAllBuild.cmake"
+
 rem ## Finish up
 goto Exit
 
