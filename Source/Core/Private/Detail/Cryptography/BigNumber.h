@@ -1,6 +1,4 @@
-#include <memory>
-#include <string>
-
+#pragma once
 struct bignum_st;
 
 class Core_API BigNumber

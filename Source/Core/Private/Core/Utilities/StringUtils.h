@@ -68,5 +68,7 @@ inline wchar_t wcharToUpperOnlyLatin(wchar_t wchar)
 	return 0;// isBasicLatinCharacter(wchar) ? wcharToUpper(wchar) : wchar;
 }
 
+Core_API std::string ByteArrayToHexStr(uint8 const* bytes, uint32 arrayLen, bool reverse = false);
+
 
 Core_API bool Utf8ToUpperOnlyLatin(std::string& utf8String);

@@ -5,46 +5,69 @@
 
 SHA256Hash::SHA256Hash()
 {
-    SHA256_Init(&mC);
-    memset(mDigest, 0, SHA256_DIGEST_LENGTH * sizeof(uint8));
+	SHA256_Init(&SHA256Context);
+	memset(Digest, 0, SHA256_DIGEST_LENGTH * sizeof(uint8));
 }
 
 SHA256Hash::~SHA256Hash()
 {
-    SHA256_Init(&mC);
+	// Seems unnecessary
+	//SHA256_Init(&SHA256Context);
 }
 
-void SHA256Hash::UpdateData(const uint8 *dta, int len)
+void SHA256Hash::AppendData(const uint8 *Data, int length)
 {
-    SHA256_Update(&mC, dta, len);
+	SHA256_Update(&SHA256Context, Data, length);
 }
 
-void SHA256Hash::UpdateData(const std::string &str)
+void SHA256Hash::AppendData(const std::string& String)
 {
-    UpdateData((uint8 const*)str.c_str(), str.length());
+	AppendData((const uint8*)String.c_str(), String.length());
+}
+
+SHA256Hash & SHA256Hash::operator<<(const std::string & String)
+{
+	AppendData((const uint8*)String.c_str(), String.length());
+	return *this;
 }
 
 void SHA256Hash::UpdateBigNumbers(BigNumber* bn0, ...)
 {
-    va_list v;
-    BigNumber* bn;
+	va_list v;
+	BigNumber* bn;
 
-    va_start(v, bn0);
-    bn = bn0;
-    while (bn)
-    {
-        UpdateData(bn->AsByteArray().get(), bn->GetNumBytes());
-        bn = va_arg(v, BigNumber*);
-    }
-    va_end(v);
+	va_start(v, bn0);
+	bn = bn0;
+	while (bn)
+	{
+		AppendData(bn->AsByteArray().get(), bn->GetNumBytes());
+		bn = va_arg(v, BigNumber*);
+	}
+	va_end(v);
 }
 
 void SHA256Hash::Initialize()
 {
-    SHA256_Init(&mC);
+	SHA256_Init(&SHA256Context);
 }
 
-void SHA256Hash::Finalize(void)
+void SHA256Hash::CalculateHash(void)
 {
-    SHA256_Final(mDigest, &mC);
+	SHA256_Final(Digest, &SHA256Context);
+}
+
+constexpr char HexMap[] = { '0', '1', '2', '3', '4', '5', '6', '7',
+'8', '9', 'A', 'B', 'C', 'D', 'E', 'F' };
+
+std::string SHA256Hash::GetHexString()
+{
+	int Len = this->GetLength();
+	unsigned char* Data = this->GetDigest();
+
+	std::string Result(Len * 2, ' ');
+	for (int i = 0; i < Len; ++i) {
+		Result[2 * i] = HexMap[(Data[i] & 0xF0) >> 4];
+		Result[2 * i + 1] = HexMap[Data[i] & 0x0F];
+	}
+	return Result;
 }

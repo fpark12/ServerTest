@@ -3,9 +3,9 @@
 std::string Utf8ToUpperLatin(const std::string& Input)
 {
 	setlocale(LC_CTYPE, "en_US.UTF8");
-	auto& f = std::use_facet<std::ctype<char>>(std::locale());
+	auto& Facet = std::use_facet<std::ctype<char>>(std::locale());
 	std::string Result = Input;
-	f.toupper(&Result[0], &Result[0] + Result.size());
+	Facet.toupper(&Result[0], &Result[0] + Result.size());
 	return Result;
 }
 
@@ -72,6 +72,31 @@ bool WStrToUtf8(std::wstring const & wstr, std::string & utf8str)
 	}
 
 	return true;
+}
+#include <sstream>
+
+std::string ByteArrayToHexStr(uint8 const* bytes, uint32 arrayLen, bool reverse /* = false */)
+{
+	int32 init = 0;
+	int32 end = arrayLen;
+	int8 op = 1;
+
+	if (reverse)
+	{
+		init = arrayLen - 1;
+		end = -1;
+		op = -1;
+	}
+
+	std::ostringstream ss;
+	for (int32 i = init; i != end; i += op)
+	{
+		char buffer[4];
+		sprintf(buffer, "%02X", bytes[i]);
+		ss << buffer;
+	}
+
+	return ss.str();
 }
 
 bool Utf8ToUpperOnlyLatin(std::string & utf8String)

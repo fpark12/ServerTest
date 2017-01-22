@@ -16,7 +16,8 @@ endforeach()
 
 #write new stamp to file
 file(WRITE ${projBuildDir}/proto.stamp "${newProtoStamp}")
-if(NOT "${oldProtoStamp}" STREQUAL "${newProtoStamp}")
+if(NOT "${oldProtoStamp}" STREQUAL "${newProtoStamp}"
+	AND NOT "${oldProtoStamp}" STREQUAL "")
 	#message("NOT EQUAL!!!!!!!!!!!!!!!!!!!!!!")
 	#file(REMOVE_RECURSE "${buildDir}/x64/Debug/ZERO_CHECK/")
 

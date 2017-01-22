@@ -36,6 +36,9 @@ private:
 		int32(*fresponse)(soap* s, int32 status, size_t length);
 		int32 ErrorCode;
 	};
+
+	std::string CalculateShaPassHash(std::string const& name, std::string const& password);
+
 public:
 	bool Start(asio::io_service& ioService);
 	void Run();

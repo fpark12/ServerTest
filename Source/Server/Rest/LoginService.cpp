@@ -2,6 +2,8 @@
 #include "LoginService.h"
 #include "Server.h"
 
+#include "Public/Detail/Cryptography.h"
+
 int ns1__executeCommand(soap*, char*, char**)
 {
 	return SOAP_OK;
@@ -304,21 +306,8 @@ int32 LoginService::HandlePost(soap* soapClient)
 		}
 	}
 
-	/*
-	std::wcout << "User-preferred locale setting is " << std::locale("").name().c_str() << '\n';
-	// on startup, the global locale is the "C" locale
-	std::wcout << 1000.01 << '\n';
-	// replace the C++ global locale as well as the C locale with the user-preferred locale
-	std::locale::global(std::locale(""));
-	// use the new global locale for future wide character output
-	std::wcout.imbue(std::locale());
-	// output the same number again
-	std::wcout << 1000.01 << '\n';
-	*/
 	Login = Utf8ToUpperLatin(Login);
 	Password = Utf8ToUpperLatin(Password);
-	//Utf8ToUpperOnlyLatin(Login);
-	//Utf8ToUpperOnlyLatin(Password);
 
 	/*
 	PreparedStatement* stmt = LoginDatabase.GetPreparedStatement(LOGIN_SEL_BNET_ACCOUNT_INFO);
@@ -453,4 +442,19 @@ void LoginService::CleanupLoginTickets(const asio::error_code& error)
 	printf("Cleaning up...\n");
 	LoginTicketCleanupTimer->expires_from_now(std::chrono::seconds(10));
 	LoginTicketCleanupTimer->async_wait(std::bind(&LoginService::CleanupLoginTickets, this, std::placeholders::_1));
+}
+
+std::string LoginService::CalculateShaPassHash(std::string const& name, std::string const& password)
+{
+	SHA256Hash email;
+	email.AppendData(name);
+	email.CalculateHash();
+
+	SHA256Hash sha;
+	sha.AppendData(ByteArrayToHexStr(email.GetDigest(), email.GetLength()));
+	sha.AppendData(":");
+	sha.AppendData(password);
+	sha.CalculateHash();
+
+	return ByteArrayToHexStr(sha.GetDigest(), sha.GetLength(), true);
 }
