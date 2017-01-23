@@ -1,6 +1,7 @@
 SET( DEFINE
 )
 SET( INCLUDE
+asio
 utf8cpp
 fmtlib
 spdlog
@@ -10,6 +11,7 @@ GUI
 openssl
 )
 SET( LINK
+asio
 utf8cpp
 fmtlib
 spdlog
