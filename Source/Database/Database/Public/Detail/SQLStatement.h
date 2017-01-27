@@ -1,7 +1,8 @@
-#include "SQLOperation.h"
-#include "Public\Detail\SQLDatabase.h"
-#include "SQLOperationParamsArchive.h"
-#include "SQLOperationResultSet.h"
+#pragma once
+
+#include "Private/Detail/SQLOperation/SQLOperation.h"
+#include "Private/Detail/SQLOperation/SQLOperationParamsArchive.h"
+#include "Private/Detail/SQLOperation/SQLOperationResultSet.h"
 
 class SQLStatement : public SQLOperation, public SQLOperationParamsArchive, public SQLOperationResultSet
 {

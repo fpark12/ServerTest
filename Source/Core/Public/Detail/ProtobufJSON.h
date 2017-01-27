@@ -12,7 +12,8 @@ namespace Protobuf
 	Core_API google::protobuf::util::Status MessageToJson(google::protobuf::Message const& Message, std::string& OutString);
 	Core_API google::protobuf::util::Status JsonToMessage(std::string const& OutString, google::protobuf::Message& Message);
 }
-
+// Currently using google's internal implementation instead
+/*
 namespace JSON
 {
 	Core_API std::string Serialize(google::protobuf::Message const& message);
@@ -76,3 +77,4 @@ namespace JSON
 		std::vector<std::string> _errors;
 	};
 }
+*/
