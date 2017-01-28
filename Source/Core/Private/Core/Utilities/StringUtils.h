@@ -1,16 +1,6 @@
 #pragma once
 #include "utf8.h"
 
-namespace String
-{
-	template <typename... Args>
-	std::string Format(const char* format, const Args & ... args)
-	{
-		return fmt::format(format, args...);
-	}
-
-}
-/*
 class String : public std::string
 {
 public:
@@ -23,7 +13,6 @@ public:
 	std::string(fmt::format(format, args...))
 	{
 	}
-
 	/*
 	FMT_VARIADIC(std::string, format, CStringRef)
 	FMT_VARIADIC_(char, std::string, format, return format, __VA_ARGS__)
@@ -39,9 +28,10 @@ public:
 			call(FMT_FOR_EACH(FMT_GET_ARG_NAME, __VA_ARGS__), \
 				fmt::ArgList(fmt::internal::make_type(args...), array)); \
 	}
-	
+	*/
+	//
 };
-*/
+
 Core_API std::string Utf8ToUpperLatin(const std::string& Input);
 
 bool Utf8toWStr(const std::string& utf8str, std::wstring& wstr);

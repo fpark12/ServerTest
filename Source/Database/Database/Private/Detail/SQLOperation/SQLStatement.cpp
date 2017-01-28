@@ -1,5 +1,4 @@
-#include "Public/Detail/SQLStatement.h"
-#include "Public/Detail/SQLDatabase.h"
+#include "SQLStatement.h"
 
 SQLStatement::SQLStatement()
 {

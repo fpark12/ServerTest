@@ -1,6 +1,5 @@
 #include "Public/Detail/ProtobufJSON.h"
 
-/*
 #include "StringFormat.h"
 //#include "Common.h"
 //#include "Log.h"
@@ -393,4 +392,3 @@ namespace JSON
 	}
 
 }
-*/
