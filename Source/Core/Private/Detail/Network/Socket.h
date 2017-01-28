@@ -60,232 +60,56 @@ private:
 
 	bool IsWritingAsync;
 
-	void ReadHandlerInternal(asio::error_code error, size_t transferredBytes)
-	{
-		if (error)
-		{
-			CloseSocket();
-			return;
-		}
-
-		ReadBuffer.WriteCompleted(transferredBytes);
-		ReadHandler();
-	}
+	void ReadHandlerInternal(asio::error_code error, size_t transferredBytes);
 
 #ifdef SOCKET_HAS_IOCP
 
-	void WriteHandler(asio::error_code error, std::size_t transferedBytes)
-	{
-		if (!error)
-		{
-			IsWritingAsync = false;
-			WriteQueue.front().ReadCompleted(transferedBytes);
-			if (!WriteQueue.front().GetActiveSize())
-			{
-				WriteQueue.pop();
-			}
-
-			if (!WriteQueue.empty())
-			{
-				AsyncProcessQueue();
-			}
-			else if (IsClosing)
-			{
-				CloseSocket();
-			}
-		}
-		else
-			CloseSocket();
-	}
+	void WriteHandler(asio::error_code error, std::size_t transferedBytes);
 
 
 #else
-	void WriteHandlerWrapper(asio::error_code error, std::size_t transferedBytes)
-	{
-		IsWritingAsync = false;
-		HandleQueue();
-	}
+	void WriteHandlerWrapper(asio::error_code error, std::size_t transferedBytes);
 
-	bool HandleQueue()
-	{
-		if (WriteQueue.empty())
-		{
-			return false;
-		}
-
-		MessageBuffer& queuedMessage = WriteQueue.front();
-
-		std::size_t bytesToSend = queuedMessage.GetActiveSize();
-
-		asio::error_code error;
-		std::size_t bytesSent = SocketImpl.write_some(asio::buffer(queuedMessage.GetReadPointer(), bytesToSend), error);
-
-		if (error)
-		{
-			if (error == asio::error::would_block || error == asio::error::try_again)
-			{
-				return AsyncProcessQueue();
-			}
-
-			WriteQueue.pop();
-
-			if (IsClosing && WriteQueue.empty())
-			{
-				CloseSocket();
-			}
-
-			return false;
-		}
-		else if (bytesSent == 0)
-		{
-			WriteQueue.pop();
-			if (IsClosing && WriteQueue.empty())
-			{
-				CloseSocket();
-			}
-			return false;
-		}
-		else if (bytesSent < bytesToSend) // now n > 0
-		{
-			queuedMessage.ReadCompleted(bytesSent);
-			return AsyncProcessQueue();
-		}
-
-		WriteQueue.pop();
-
-		if (IsClosing && WriteQueue.empty())
-		{
-			CloseSocket();
-		}
-
-		return !WriteQueue.empty();
-	}
+	bool HandleQueue();
 
 #endif
 
 protected:
-	virtual void OnClose() { }
+	virtual void OnClose();
 
 	virtual void ReadHandler() = 0;
 
-	bool AsyncProcessQueue()
-	{
-		if (IsWritingAsync)
-			return false;
-
-		IsWritingAsync = true;
-#ifdef SOCKET_HAS_IOCP
-		MessageBuffer& buffer = WriteQueue.front();
-		SocketImpl.async_write_some(asio::buffer(buffer.GetReadPointer(), buffer.GetActiveSize()), std::bind(&Socket::WriteHandler,
-			this->shared_from_this(), std::placeholders::_1, std::placeholders::_2));
-#else
-		SocketImpl.async_write_some(asio::null_buffers(), std::bind(&Socket::WriteHandlerWrapper,
-			this->shared_from_this(), std::placeholders::_1, std::placeholders::_2));
-#endif
-
-		return false;
-	}
+	bool AsyncProcessQueue();
 
 public:
-	Socket(tcp::socket&& SocketImpl) :
-		SocketImpl(std::move(SocketImpl)),
-		RemoteAddress(SocketImpl.remote_endpoint().address()),
-		RemotePort(SocketImpl.remote_endpoint().port()),
-		ReadBuffer(), IsClosed(false), IsClosing(false), IsWritingAsync(false)
-	{
-		ReadBuffer.Resize(READ_BLOCK_SIZE);
-	}
+	Socket(tcp::socket&& SocketImpl);
 
-	virtual ~Socket()
-	{
-		IsClosed = true;
-		SocketImpl.close(asio::error_code());
-	}
+	virtual ~Socket();
 
 	virtual void Start() = 0;
 
-	virtual bool Update()
-	{
-		if (IsClosed)
-			return false;
+	virtual bool Update();
 
-#ifndef SOCKET_HAS_IOCP
-		if (IsWritingAsync || (WriteQueue.empty() && !IsClosing))
-			return true;
+	asio::ip::address GetRemoteIpAddress() const;
 
-		for (; HandleQueue();)
-			;
-#endif
-
-		return true;
-	}
-
-	asio::ip::address GetRemoteIpAddress() const
-	{
-		return RemoteAddress;
-	}
-
-	uint16 GetRemotePort() const
-	{
-		return RemotePort;
-	}
+	uint16 GetRemotePort() const;
 
 
-	void AsyncRead()
-	{
-		if (!IsOpen())
-			return;
+	void AsyncRead();
 
-		ReadBuffer.Normalize();
-		ReadBuffer.EnsureFreeSpace();
-		SocketImpl.async_read_some(asio::buffer(ReadBuffer.GetWritePointer(), ReadBuffer.GetRemainingSpace()),
-			std::bind(&Socket::ReadHandlerInternal, this->shared_from_this(), std::placeholders::_1, std::placeholders::_2));
-	}
-
-	void AsyncReadWithCallback(void (Socket::*callback)(asio::error_code, std::size_t))
-	{
-		if (!IsOpen())
-			return;
-
-		ReadBuffer.Normalize();
-		ReadBuffer.EnsureFreeSpace();
-		SocketImpl.async_read_some(asio::buffer(ReadBuffer.GetWritePointer(), ReadBuffer.GetRemainingSpace()),
-			std::bind(callback, this->shared_from_this(), std::placeholders::_1, std::placeholders::_2));
-	}
+	void AsyncReadWithCallback(void (Socket::*callback)(asio::error_code, std::size_t));
 
 
-	void QueuePacket(MessageBuffer&& buffer)
-	{
-		WriteQueue.push(std::move(buffer));
+	void QueuePacket(MessageBuffer&& buffer);
 
-#ifdef SOCKET_HAS_IOCP
-		AsyncProcessQueue();
-#endif
-	}
+	bool IsOpen() const;
 
-	bool IsOpen() const { return !IsClosed && !IsClosing; }
-
-	void CloseSocket()
-	{
-		if (IsClosed.exchange(true))
-			return;
-
-		asio::error_code shutdownError;
-		SocketImpl.shutdown(asio::socket_base::shutdown_send, shutdownError);
-		if (shutdownError)
-		{
-			//TC_LOG_DEBUG("network", "Socket::CloseSocket: %s errored when shutting down socket: %i (%s)", GetRemoteIpAddress().to_string().c_str(),
-			//	shutdownError.value(), shutdownError.message().c_str());
-
-		}
-
-		OnClose();
-	}
+	void CloseSocket();
 
 	// Marks the socket for closing after write buffer becomes empty
-	void DelayedCloseSocket() { IsClosing = true; }
+	void DelayedCloseSocket();
 
-	MessageBuffer& GetReadBuffer() { return ReadBuffer; }
+	MessageBuffer& GetReadBuffer();
 
 
 
