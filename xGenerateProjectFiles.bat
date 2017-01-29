@@ -57,28 +57,28 @@ pushd %~dp0\Purify\BatchFiles
 call GetVSComnToolsPath 14
 popd
 if "%VsComnToolsPath%" == "" goto FindVS2013
-set CMakeArg="Visual Studio 14 2015"
+set CMakeArg="Visual Studio 14 2015 Win64"
 goto ReadyToBuild
 :FindVS2013
 pushd %~dp0\Purify\BatchFiles
 call GetVSComnToolsPath 12
 popd
 if "%VsComnToolsPath%" == "" goto FindVS2012
-set CMakeArg="Visual Studio 12 2013"
+set CMakeArg="Visual Studio 12 2013 Win64"
 goto ReadyToBuild
 :FindVS2012
 pushd %~dp0\Purify\BatchFiles
 call GetVSComnToolsPath 11
 popd
 if "%VsComnToolsPath%" == "" goto FindVS2010
-set CMakeArg="Visual Studio 11 2012"
+set CMakeArg="Visual Studio 11 2012 Win64"
 goto ReadyToBuild
 :FindVS2010
 pushd %~dp0\Purify\BatchFiles
 call GetVSComnToolsPath 10
 popd
 if "%VsComnToolsPath%" == "" goto Error_MissingVisualStudio
-set CMakeArg="Visual Studio 10 2010"
+set CMakeArg="Visual Studio 10 2010 Win64"
 goto ReadyToBuild
 
 call "%VsComnToolsPath%/../../VC/bin/x86_amd64/vcvarsx86_amd64.bat" >NUL
