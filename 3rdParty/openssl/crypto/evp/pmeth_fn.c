@@ -61,7 +61,7 @@
 #include "cryptlib.h"
 #include <openssl/objects.h>
 #include <openssl/evp.h>
-#include "evp_locl.h"
+#include "crypto/evp/evp_locl.h"
 
 #define M_check_autoarg(ctx, arg, arglen, err) \
 	if (ctx->pmeth->flags & EVP_PKEY_FLAG_AUTOARGLEN) \

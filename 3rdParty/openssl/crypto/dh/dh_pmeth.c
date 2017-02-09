@@ -62,7 +62,7 @@
 #include <openssl/evp.h>
 #include <openssl/dh.h>
 #include <openssl/bn.h>
-#include "evp_locl.h"
+#include "crypto/evp/evp_locl.h"
 
 /* DH pkey context structure */
 

@@ -123,7 +123,7 @@
 #include <openssl/x509.h>
 #include <openssl/objects.h>
 #include <openssl/buffer.h>
-#include "asn1_locl.h"
+#include "crypto/asn1/asn1_locl.h"
 
 #ifndef NO_ASN1_OLD
 

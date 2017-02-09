@@ -59,7 +59,7 @@
 #include <openssl/x509.h>
 #include <openssl/asn1.h>
 #include <openssl/asn1t.h>
-#include "asn1_locl.h"
+#include "crypto/asn1/asn1_locl.h"
 
 /* Generalised MIME like utilities for streaming ASN1. Although many
  * have a PKCS7/CMS like flavour others are more general purpose.

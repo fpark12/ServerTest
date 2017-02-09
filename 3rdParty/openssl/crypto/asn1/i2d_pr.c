@@ -60,7 +60,7 @@
 #include "cryptlib.h"
 #include <openssl/evp.h>
 #include <openssl/x509.h>
-#include "asn1_locl.h"
+#include "crypto/asn1/asn1_locl.h"
 
 int i2d_PrivateKey(EVP_PKEY *a, unsigned char **pp)
 	{

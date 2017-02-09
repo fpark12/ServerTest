@@ -60,7 +60,7 @@
 #include <time.h>
 
 #include "cryptlib.h"
-#include "asn1_locl.h"
+#include "crypto/asn1/asn1_locl.h"
 
 #ifndef NO_SYS_TYPES_H
 # include <sys/types.h>

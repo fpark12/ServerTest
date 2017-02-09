@@ -58,7 +58,7 @@
 
 #include "cryptlib.h"
 #include <openssl/evp.h>
-#include "asn1_locl.h"
+#include "crypto/asn1/asn1_locl.h"
 
 #define HMAC_TEST_PRIVATE_KEY_FORMAT
 

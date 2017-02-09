@@ -60,7 +60,7 @@
 #include <string.h>
 #include <assert.h>
 #include <openssl/seed.h>
-#include "evp_locl.h"
+#include "crypto/evp/evp_locl.h"
 
 static int seed_init_key(EVP_CIPHER_CTX *ctx, const unsigned char *key,	const unsigned char *iv, int enc);
 

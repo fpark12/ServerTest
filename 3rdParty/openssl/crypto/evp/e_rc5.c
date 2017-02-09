@@ -63,7 +63,7 @@
 
 #include <openssl/evp.h>
 #include <openssl/objects.h>
-#include "evp_locl.h"
+#include "crypto/evp/evp_locl.h"
 #include <openssl/rc5.h>
 
 static int r_32_12_16_init_key(EVP_CIPHER_CTX *ctx, const unsigned char *key,

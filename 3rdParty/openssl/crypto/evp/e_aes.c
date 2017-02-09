@@ -55,9 +55,9 @@
 #include <string.h>
 #include <assert.h>
 #include <openssl/aes.h>
-#include "evp_locl.h"
+#include "crypto/evp/evp_locl.h"
 #ifndef OPENSSL_FIPS
-#include "modes_lcl.h"
+#include "crypto/modes/modes_lcl.h"
 #include <openssl/rand.h>
 
 typedef struct

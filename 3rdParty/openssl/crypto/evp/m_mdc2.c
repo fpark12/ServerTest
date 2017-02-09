@@ -69,7 +69,7 @@
 #include <openssl/rsa.h>
 #endif
 
-#include "evp_locl.h"
+#include "crypto/evp/evp_locl.h"
 
 static int init(EVP_MD_CTX *ctx)
 	{ return MDC2_Init(ctx->md_data); }

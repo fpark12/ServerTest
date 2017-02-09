@@ -42,13 +42,19 @@ if(TARGET ${PROJECT_NAME})
 	#message("oldProtoStamp: ${oldProtoStamp}")
 	#message("newProtoStamp: ${newProtoStamp}")
 	
-	if (NOT "${oldProtoStamp}" STREQUAL "${newProtoStamp}")
-
+	#if (NOT "${oldProtoStamp}" STREQUAL "${newProtoStamp}")
+	if (true)
 		message("Recompiling proto files.")
 
 		foreach(PROTO_FILE ${protoFiles})
 			get_filename_component(PROTO_FILE_DIR ${PROTO_FILE} DIRECTORY)
 			get_filename_component(PROTO_FILE_NAME ${PROTO_FILE} NAME_WE)
+
+			string(LENGTH ${PROJECT_NAME}_BINARY_DIR projBinDirStrSize)
+			string(SUBSTRING PROTO_FILE_DIR 0 projBinDirStrSize)
+			message("projBinDirStrSize: ${projBinDirStrSize}")
+			message("${PROJECT_NAME}_BINARY_DIR: ${${PROJECT_NAME}_BINARY_DIR}")
+			message("PROTO_FILE_DIR: ${PROTO_FILE_DIR}")
 
 			execute_process(
 				COMMAND ${ProtoCompiler}

@@ -66,7 +66,7 @@
 #endif
 #include <openssl/x509.h>
 #include <openssl/asn1.h>
-#include "asn1_locl.h"
+#include "crypto/asn1/asn1_locl.h"
 
 EVP_PKEY *d2i_PrivateKey(int type, EVP_PKEY **a, const unsigned char **pp,
 	     long length)

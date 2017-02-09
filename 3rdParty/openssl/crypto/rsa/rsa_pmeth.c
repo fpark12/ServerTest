@@ -69,7 +69,7 @@
 #ifdef OPENSSL_FIPS
 #include <openssl/fips.h>
 #endif
-#include "evp_locl.h"
+#include "crypto/evp/evp_locl.h"
 #include "rsa_locl.h"
 
 /* RSA pkey context structure */

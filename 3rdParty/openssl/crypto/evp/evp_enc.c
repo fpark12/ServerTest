@@ -67,7 +67,7 @@
 #ifdef OPENSSL_FIPS
 #include <openssl/fips.h>
 #endif
-#include "evp_locl.h"
+#include "crypto/evp/evp_locl.h"
 
 #ifdef OPENSSL_FIPS
 #define M_do_cipher(ctx, out, in, inl) FIPS_cipher(ctx, out, in, inl)
