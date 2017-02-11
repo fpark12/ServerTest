@@ -18,74 +18,89 @@ create_project(STATIC "${DEFINE}" "${INCLUDE}" "${LINK}")
 if(TARGET ${PROJECT_NAME})
 	#message("Running ${CMAKE_CURRENT_SOURCE_DIR}/CMakelists.txt")
 	
-	file(GLOB_RECURSE protoFiles ${CMAKE_SOURCE_DIR}/*.proto)
+	# Find the protobuf compiler first
 	if(MSVC)
-		file(GLOB_RECURSE ProtoCompiler ${CMAKE_SOURCE_DIR}/protoc.exe)
+		file(GLOB_RECURSE ProtoCompiler ${CMAKE_CURRENT_SOURCE_DIR}/protoc.exe)
 	else()
-		file(GLOB_RECURSE ProtoCompiler ${CMAKE_SOURCE_DIR}/protoc)
+		file(GLOB_RECURSE ProtoCompiler ${CMAKE_CURRENT_SOURCE_DIR}/protoc)
 	endif()
 
-	file(GLOB_RECURSE existingProtoSourceList ${${PROJECT_NAME}_BINARY_DIR}/*.pb.cc ${${PROJECT_NAME}_BINARY_DIR}/*.pb.h)
-	#build new proto stamp
-	set(newProtoStamp "")
-	foreach(newFile ${protoFiles})
-		file(TIMESTAMP ${newFile} newStamp)
-		list(APPEND newProtoStamp "${newFile}, ${newStamp}")
-		#message("newfile: ${newFile}, ${newStamp}")
-	endforeach()
+	# Loop thru all projects and compile .proto
+	foreach(projBinDir ${CMAKE_ALL_PROJECT_DIRS})
+		file(GLOB_RECURSE protoFiles ${projBinDir}/*.proto)
+		if(protoFiles)
+			#message("${projBinDir} has: ${protoFiles}")
+			get_folder_name(${projBinDir} projName)
 
-	#read old stamp
-	if(EXISTS "${${PROJECT_NAME}_BINARY_DIR}/proto.stamp2")
-		file(READ "${${PROJECT_NAME}_BINARY_DIR}/proto.stamp2" oldProtoStamp)
-	endif()
+			file(GLOB_RECURSE existingProtoSourceList ${${projName}_BINARY_DIR}/*.pb.cc ${${projName}_BINARY_DIR}/*.pb.h)
 
-	#message("oldProtoStamp: ${oldProtoStamp}")
-	#message("newProtoStamp: ${newProtoStamp}")
-	
-	if (NOT "${oldProtoStamp}" STREQUAL "${newProtoStamp}")
+			#build new proto stamp
+			set(newProtoStamp "")
+			foreach(newFile ${protoFiles})
+				file(TIMESTAMP ${newFile} newStamp)
+				list(APPEND newProtoStamp "${newFile}, ${newStamp}")
+				#message("newfile: ${newFile}, ${newStamp}")
+			endforeach()
 
-		message("Recompiling proto files.")
+			#read old stamp
+			if(EXISTS "${${projName}_BINARY_DIR}/proto.stamp2")
+				file(READ "${${projName}_BINARY_DIR}/proto.stamp2" oldProtoStamp)
+			endif()
 
-		foreach(PROTO_FILE ${protoFiles})
-			get_filename_component(PROTO_FILE_DIR ${PROTO_FILE} DIRECTORY)
-			get_filename_component(PROTO_FILE_NAME ${PROTO_FILE} NAME_WE)
+			#if (NOT "${oldProtoStamp}" STREQUAL "${newProtoStamp}")
+			if (true AND ProtoCompiler)
+				message("${PROJECT_NAME}: Detected changes to .proto files in ${projName}. Recompiling...")
 
-			execute_process(
-				COMMAND ${ProtoCompiler}
-				-I=${PROTO_FILE_DIR}
-				--cpp_out=${${PROJECT_NAME}_BINARY_DIR}
-				${PROTO_FILE}
-			)
-		endforeach()
+				foreach(PROTO_FILE ${protoFiles})
+					get_filename_component(PROTO_FILE_DIR ${PROTO_FILE} DIRECTORY)
+					get_filename_component(PROTO_FILE_NAME ${PROTO_FILE} NAME_WE)
+
+					string(LENGTH ${${projName}_SOURCE_DIR} projSrcDirStrSize)
+					#math(EXPR projSrcDirStrSize "${projSrcDirStrSize}")
+					string(SUBSTRING ${PROTO_FILE_DIR} ${projSrcDirStrSize} -1 protoFileDirSubStr)
+					set(protoFileDestDir "${${projName}_BINARY_DIR}${protoFileDirSubStr}")
+					#message("PROTO_FILE_DIR: ${PROTO_FILE_DIR}")
+					#message("${projName}_SOURCE_DIR: ${${projName}_SOURCE_DIR}")
+					#message("projSrcDirStrSize: ${projSrcDirStrSize}")
+					#message("protoFileDirSubStr: ${protoFileDirSubStr}")
+
+					file(REMOVE_RECURSE "${${PROJECT_NAME}_BINARY_DIR}/${PROTO_FILE_NAME}.pb.cc")
+					file(REMOVE_RECURSE "${${PROJECT_NAME}_BINARY_DIR}/${PROTO_FILE_NAME}.pb.h")
+					file(MAKE_DIRECTORY ${protoFileDestDir})
+
+					execute_process(
+						COMMAND ${ProtoCompiler}
+						-I=${PROTO_FILE_DIR}
+						--cpp_out=${protoFileDestDir}
+						${PROTO_FILE}
+					)
+				endforeach()
+				
+				
+				file(WRITE ${${PROJECT_NAME}_BINARY_DIR}/proto.stamp2 "${newProtoStamp}")
+			endif()
+
+			set(newProtoSourceList "")
+			foreach(PROTO_FILE ${protoFiles})
+				#message(status "Add source....;${protoFileDestDir}/${PROTO_FILE_NAME}.pb.cc")
+				get_filename_component(PROTO_FILE_NAME ${PROTO_FILE} NAME_WE)
+				list(APPEND newProtoSourceList "${protoFileDestDir}/${PROTO_FILE_NAME}.pb.cc")
+				list(APPEND newProtoSourceList "${protoFileDestDir}/${PROTO_FILE_NAME}.pb.h")
+			endforeach()
+
+			#delete useless proto source files
+			foreach(newProtoSource ${newProtoSourceList})
+				list(REMOVE_ITEM existingProtoSourceList "${newProtoSource}")
+			endforeach()
+			if(existingProtoSourceList)
+				file(REMOVE ${existingProtoSourceList})
+			endif()
+		endif()
+
+
 		
-		file(WRITE ${${PROJECT_NAME}_BINARY_DIR}/proto.stamp2 "${newProtoStamp}")
-	endif()
-
-	set(newProtoSourceList "")
-	foreach(PROTO_FILE ${protoFiles})
-		get_filename_component(PROTO_FILE_DIR ${PROTO_FILE} DIRECTORY)
-		get_filename_component(PROTO_FILE_NAME ${PROTO_FILE} NAME_WE)
-
-		#message("${PROJECT_NAME}: ${${PROJECT_NAME}_BINARY_DIR}/${PROTO_FILE_NAME}.pb.cc")
-		#message("${PROJECT_NAME}: ${${PROJECT_NAME}_BINARY_DIR}/${PROTO_FILE_NAME}.pb.h")
-		target_sources(${PROJECT_NAME} PRIVATE ${${PROJECT_NAME}_BINARY_DIR}/${PROTO_FILE_NAME}.pb.cc)
-		target_sources(${PROJECT_NAME} PRIVATE ${${PROJECT_NAME}_BINARY_DIR}/${PROTO_FILE_NAME}.pb.h)
-		SOURCE_GROUP("ProtoGenerated" FILES ${${PROJECT_NAME}_BINARY_DIR}/${PROTO_FILE_NAME}.pb.cc)
-		SOURCE_GROUP("ProtoGenerated" FILES ${${PROJECT_NAME}_BINARY_DIR}/${PROTO_FILE_NAME}.pb.h)
-		list(APPEND newProtoSourceList "${${PROJECT_NAME}_BINARY_DIR}/${PROTO_FILE_NAME}.pb.cc")
-		list(APPEND newProtoSourceList "${${PROJECT_NAME}_BINARY_DIR}/${PROTO_FILE_NAME}.pb.h")
 	endforeach()
 
-	#delete useless proto source files
-	#message("existingProtoSourceList: ${existingProtoSourceList}")
-	#message("newProtoSourceList: ${newProtoSourceList}")
-	foreach(newProtoSource ${newProtoSourceList})
-		list(REMOVE_ITEM existingProtoSourceList "${newProtoSource}")
-	endforeach()
-	#message("should delete: ${existingProtoSourceList}")
-	if(existingProtoSourceList)
-		file(REMOVE ${existingProtoSourceList})
-	endif()
 	add_custom_target(
 		${PROJECT_NAME}_UpdateProto
 		DEPENDS always_rebuild
