@@ -1,6 +1,6 @@
-#include "SQLOperationParamsArchive.h"
+#include "Private/Detail/SQLOperations/SQLOperationBase/SQLOperationParams.h"
 
-void SQLOperationParamsArchive::ClearParams()
+void SQLOperationParams::ClearParams()
 {
 	if (ParamCount)
 	{
@@ -26,84 +26,84 @@ void SQLOperationParamsArchive::ClearParams()
 	ParamBinds = nullptr;
 }
 
-void SQLOperationParamsArchive::SetParamBool(uint8 Index, const bool& Value)
+void SQLOperationParams::SetBool(uint8 Index, const bool& Value)
 {
 	ParamSetBitMask |= 1 << Index;
 	ParamData[Index] = reinterpret_cast<const uint64&>(Value);
-	SetParamBind(&ParamBinds[Index], MYSQL_TYPE_TINY, &ParamData[Index], true);
+	SetBind(&ParamBinds[Index], MYSQL_TYPE_TINY, &ParamData[Index], true);
 }
 
-void SQLOperationParamsArchive::SetParamUInt8(uint8 Index, const uint8& Value)
+void SQLOperationParams::SetUInt8(uint8 Index, const uint8& Value)
 {
 	ParamSetBitMask |= 1 << Index;
 	ParamData[Index] = reinterpret_cast<const uint64&>(Value);
-	SetParamBind(&ParamBinds[Index], MYSQL_TYPE_TINY, &ParamData[Index], true);
+	SetBind(&ParamBinds[Index], MYSQL_TYPE_TINY, &ParamData[Index], true);
 }
 
-void SQLOperationParamsArchive::SetParamUInt16(uint8 Index, const uint16& Value)
+void SQLOperationParams::SetUInt16(uint8 Index, const uint16& Value)
 {
 	ParamSetBitMask |= 1 << Index;
 	ParamData[Index] = reinterpret_cast<const uint64&>(Value);
-	SetParamBind(&ParamBinds[Index], MYSQL_TYPE_SHORT, &ParamData[Index], true);
+	SetBind(&ParamBinds[Index], MYSQL_TYPE_SHORT, &ParamData[Index], true);
 }
 
-void SQLOperationParamsArchive::SetParamUInt32(uint8 Index, const uint32& Value)
+void SQLOperationParams::SetUInt32(uint8 Index, const uint32& Value)
 {
 	ParamSetBitMask |= 1 << Index;
 	ParamData[Index] = reinterpret_cast<const uint64&>(Value);
-	SetParamBind(&ParamBinds[Index], MYSQL_TYPE_LONG, &ParamData[Index], true);
+	SetBind(&ParamBinds[Index], MYSQL_TYPE_LONG, &ParamData[Index], true);
 }
 
-void SQLOperationParamsArchive::SetParamUInt64(uint8 Index, const uint64& Value)
+void SQLOperationParams::SetUInt64(uint8 Index, const uint64& Value)
 {
 	ParamSetBitMask |= 1 << Index;
 	ParamData[Index] = reinterpret_cast<const uint64&>(Value);
-	SetParamBind(&ParamBinds[Index], MYSQL_TYPE_LONGLONG, &ParamData[Index], true);
+	SetBind(&ParamBinds[Index], MYSQL_TYPE_LONGLONG, &ParamData[Index], true);
 }
 
-void SQLOperationParamsArchive::SetParamInt8(uint8 Index, const int8& Value)
+void SQLOperationParams::SetInt8(uint8 Index, const int8& Value)
 {
 	ParamSetBitMask |= 1 << Index;
 	ParamData[Index] = reinterpret_cast<const uint64&>(Value);
-	SetParamBind(&ParamBinds[Index], MYSQL_TYPE_TINY, &ParamData[Index], false);
+	SetBind(&ParamBinds[Index], MYSQL_TYPE_TINY, &ParamData[Index], false);
 }
 
-void SQLOperationParamsArchive::SetParamInt16(uint8 Index, const int16& Value)
+void SQLOperationParams::SetInt16(uint8 Index, const int16& Value)
 {
 	ParamSetBitMask |= 1 << Index;
 	ParamData[Index] = reinterpret_cast<const uint64&>(Value);
-	SetParamBind(&ParamBinds[Index], MYSQL_TYPE_SHORT, &ParamData[Index], false);
+	SetBind(&ParamBinds[Index], MYSQL_TYPE_SHORT, &ParamData[Index], false);
 }
 
-void SQLOperationParamsArchive::SetParamInt32(uint8 Index, const int32& Value)
+void SQLOperationParams::SetInt32(uint8 Index, const int32& Value)
 {
 	ParamSetBitMask |= 1 << Index;
 	ParamData[Index] = reinterpret_cast<const uint64&>(Value);
-	SetParamBind(&ParamBinds[Index], MYSQL_TYPE_LONG, &ParamData[Index], false);
+	SetBind(&ParamBinds[Index], MYSQL_TYPE_LONG, &ParamData[Index], false);
 }
 
-void SQLOperationParamsArchive::SetParamInt64(uint8 Index, const int64& Value)
+void SQLOperationParams::SetInt64(uint8 Index, const int64& Value)
 {
 	ParamSetBitMask |= 1 << Index;
 	ParamData[Index] = reinterpret_cast<const uint64&>(Value);
-	SetParamBind(&ParamBinds[Index], MYSQL_TYPE_LONGLONG, &ParamData[Index], false);
+	SetBind(&ParamBinds[Index], MYSQL_TYPE_LONGLONG, &ParamData[Index], false);
 }
 
-void SQLOperationParamsArchive::SetParamFloat(uint8 Index, const float& Value)
+void SQLOperationParams::SetFloat(uint8 Index, const float& Value)
 {
 	ParamSetBitMask |= 1 << Index;
 	ParamData[Index] = reinterpret_cast<const uint64&>(Value);
-	SetParamBind(&ParamBinds[Index], MYSQL_TYPE_FLOAT, &ParamData[Index], (Value > 0.0f));
+	SetBind(&ParamBinds[Index], MYSQL_TYPE_FLOAT, &ParamData[Index], (Value > 0.0f));
 }
 
-void SQLOperationParamsArchive::SetParamDouble(uint8 Index, const double& Value)
+void SQLOperationParams::SetDouble(uint8 Index, const double& Value)
 {
 	ParamSetBitMask |= 1 << Index;
 	ParamData[Index] = reinterpret_cast<const uint64&>(Value);
-	SetParamBind(&ParamBinds[Index], MYSQL_TYPE_DOUBLE, &ParamData[Index], (Value > 0.0f));
+	SetBind(&ParamBinds[Index], MYSQL_TYPE_DOUBLE, &ParamData[Index], (Value > 0.0f));
 }
 
-void SQLOperationParamsArchive::SetParamString(uint8 Index, const char* Value)
+void SQLOperationParams::SetString(uint8 Index, const char* Value)
 {
 	ParamSetBitMask |= 1 << Index;
 
@@ -112,10 +112,10 @@ void SQLOperationParamsArchive::SetParamString(uint8 Index, const char* Value)
 	memcpy(stringLocation, Value, len);
 
 	ParamData[Index] = reinterpret_cast<uint64&>(stringLocation);
-	SetParamBind(&ParamBinds[Index], MYSQL_TYPE_VAR_STRING, stringLocation, false, len, len - 1);
+	SetBind(&ParamBinds[Index], MYSQL_TYPE_VAR_STRING, stringLocation, false, len, len - 1);
 }
 
-void SQLOperationParamsArchive::SetParamString(uint8 Index, const std::string& Value)
+void SQLOperationParams::SetString(uint8 Index, const std::string& Value)
 {
 	ParamSetBitMask |= 1 << Index;
 
@@ -124,10 +124,10 @@ void SQLOperationParamsArchive::SetParamString(uint8 Index, const std::string& V
 	memcpy(stringLocation, Value.c_str(), len);
 
 	ParamData[Index] = reinterpret_cast<uint64&>(stringLocation);
-	SetParamBind(&ParamBinds[Index], MYSQL_TYPE_VAR_STRING, stringLocation, false, len, len - 1);
+	SetBind(&ParamBinds[Index], MYSQL_TYPE_VAR_STRING, stringLocation, false, len, len - 1);
 }
 
-void SQLOperationParamsArchive::SetParamBinary(uint8 Index, const void* Value, uint32 dataSize)
+void SQLOperationParams::SetBinary(uint8 Index, const void* Value, uint32 dataSize)
 {
 	ParamSetBitMask |= 1 << Index;
 
@@ -135,10 +135,10 @@ void SQLOperationParamsArchive::SetParamBinary(uint8 Index, const void* Value, u
 	memcpy(binaryLocation, Value, dataSize);
 
 	ParamData[Index] = reinterpret_cast<uint64&>(binaryLocation);
-	SetParamBind(&ParamBinds[Index], MYSQL_TYPE_BLOB, binaryLocation, false, dataSize, dataSize);
+	SetBind(&ParamBinds[Index], MYSQL_TYPE_BLOB, binaryLocation, false, dataSize, dataSize);
 }
 
-void SQLOperationParamsArchive::SetParamBinary(uint8 Index, const std::vector<uint8>& Value)
+void SQLOperationParams::SetBinary(uint8 Index, const std::vector<uint8>& Value)
 {
 	ParamSetBitMask |= 1 << Index;
 
@@ -147,19 +147,19 @@ void SQLOperationParamsArchive::SetParamBinary(uint8 Index, const std::vector<ui
 	memcpy(binaryLocation, Value.data(), dataSize);
 
 	ParamData[Index] = reinterpret_cast<uint64&>(binaryLocation);
-	SetParamBind(&ParamBinds[Index], MYSQL_TYPE_BLOB, binaryLocation, false, dataSize, dataSize);
+	SetBind(&ParamBinds[Index], MYSQL_TYPE_BLOB, binaryLocation, false, dataSize, dataSize);
 }
 
-void SQLOperationParamsArchive::MoveParamString(uint8 Index, char*& Value)
+void SQLOperationParams::MoveString(uint8 Index, char*& Value)
 {
 	ParamSetBitMask |= 1 << Index;
 	size_t len = strlen(Value) + 1;
 	ParamData[Index] = reinterpret_cast<uint64&>(Value);
-	SetParamBind(&ParamBinds[Index], MYSQL_TYPE_VAR_STRING, Value, false, len, len - 1);
+	SetBind(&ParamBinds[Index], MYSQL_TYPE_VAR_STRING, Value, false, len, len - 1);
 	Value = nullptr;
 }
 
-void SQLOperationParamsArchive::MoveParamString(uint8 Index, std::string&& Value)
+void SQLOperationParams::MoveString(uint8 Index, std::string&& Value)
 {
 	ParamSetBitMask |= 1 << Index;
 	size_t Length = Value.length() + 1; // include null terminator
@@ -189,18 +189,18 @@ void SQLOperationParamsArchive::MoveParamString(uint8 Index, std::string&& Value
 	//Value.shrink_to_fit();
 
 	ParamData[Index] = reinterpret_cast<uint64&>(MemBlock);
-	SetParamBind(&ParamBinds[Index], MYSQL_TYPE_VAR_STRING, const_cast<void*>(reinterpret_cast<const void*>(MemBlock)), false, Length, Length - 1);
+	SetBind(&ParamBinds[Index], MYSQL_TYPE_VAR_STRING, const_cast<void*>(reinterpret_cast<const void*>(MemBlock)), false, Length, Length - 1);
 }
 
-void SQLOperationParamsArchive::MoveParamBinary(uint8 Index, void*& Value, uint32 dataSize)
+void SQLOperationParams::MoveBinary(uint8 Index, void*& Value, uint32 dataSize)
 {
 	ParamSetBitMask |= 1 << Index;
 	ParamData[Index] = reinterpret_cast<uint64&>(Value);
-	SetParamBind(&ParamBinds[Index], MYSQL_TYPE_BLOB, (void*)Value, false, dataSize, dataSize);
+	SetBind(&ParamBinds[Index], MYSQL_TYPE_BLOB, (void*)Value, false, dataSize, dataSize);
 	Value = nullptr;
 }
 
-void SQLOperationParamsArchive::MoveParamBinary(uint8 Index, std::vector<uint8>&& Value)
+void SQLOperationParams::MoveBinary(uint8 Index, std::vector<uint8>&& Value)
 {
 	ParamSetBitMask |= 1 << Index;
 
@@ -208,17 +208,17 @@ void SQLOperationParamsArchive::MoveParamBinary(uint8 Index, std::vector<uint8>&
 	void* binaryLocation = Value.data();
 
 	ParamData[Index] = reinterpret_cast<uint64&>(binaryLocation);
-	SetParamBind(&ParamBinds[Index], MYSQL_TYPE_BLOB, binaryLocation, false, dataSize, dataSize);
+	SetBind(&ParamBinds[Index], MYSQL_TYPE_BLOB, binaryLocation, false, dataSize, dataSize);
 }
 
-void SQLOperationParamsArchive::SetParamNull(uint8 Index)
+void SQLOperationParams::SetNull(uint8 Index)
 {
 	ParamSetBitMask |= 1 << Index;
 
-	SetParamBind(&ParamBinds[Index], MYSQL_TYPE_NULL, NULL, false, 0, 0, true);
+	SetBind(&ParamBinds[Index], MYSQL_TYPE_NULL, NULL, false, 0, 0, true);
 }
 
-void SQLOperationParamsArchive::SetParamBind(MYSQL_BIND* mySqlBind, enum_field_types bufferType, void* bufferLocation, bool isUnsigned, size_t bufferLength /*= 0*/, size_t dataSize /*= 0*/, bool isNull /*= 0*/)
+void SQLOperationParams::SetBind(MYSQL_BIND* mySqlBind, enum_field_types bufferType, void* bufferLocation, bool isUnsigned, size_t bufferLength /*= 0*/, size_t dataSize /*= 0*/, bool isNull /*= 0*/)
 {
 	mySqlBind->buffer_type = bufferType;
 	mySqlBind->buffer = bufferLocation;

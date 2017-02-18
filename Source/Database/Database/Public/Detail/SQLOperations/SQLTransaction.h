@@ -1,8 +1,8 @@
 #pragma once
-#include "SQLOperation.h"
+#include "Private/Detail/SQLOperations/SQLOperationBase/SQLOperationBase.h"
 #include "Public/Detail/SQLDatabase.h"
 
-class SQLTransaction : public SQLOperation
+class SQLTransaction : public SQLOperationBase
 {
 	DISABLE_COPY_AND_ASSIGN(SQLTransaction);
 
@@ -112,14 +112,14 @@ public:
 
 	virtual uint32 Execute()
 	{
-		SQLConnection* conn = GDatabase.GetAvaliableSQLConnection(SQLOperation::SchemaIndex);
-		MYSQL* mySql = SQLOperation::GetMySQLHandle(conn);
+		SQLConnection* conn = GDatabase.GetAvaliableSQLConnection(SQLOperationBase::SchemaIndex);
+		MYSQL* mySql = SQLOperationBase::GetMySQLHandle(conn);
 
 		// test validity of connection
 		if (!conn)
 		{
 			GConsole.Message("{}: Connection to target schema unavailable.", __FUNCTION__);
-			SQLOperation::OperationStatus = SQLOperation::SQLOperationStatus::Failed;
+			SQLOperationBase::OperationStatus = SQLOperationBase::SQLOperationStatus::Failed;
 			return RC_FAILED;
 		}
 
@@ -135,7 +135,7 @@ public:
 			{
 				const char* err = mysql_error(mySql);
 				GConsole.Message("{}: Error executing \"START TRANSACTION\": {}.", __FUNCTION__, err);
-				SQLOperation::OperationStatus = SQLOperation::SQLOperationStatus::Failed;
+				SQLOperationBase::OperationStatus = SQLOperationBase::SQLOperationStatus::Failed;
 				if (RollBack(mySql) != RC_SUCCESS)
 				{
 					GConsole.Message("{}: Rollback for last transaction unsuccessful, database might be tinted.", __FUNCTION__);

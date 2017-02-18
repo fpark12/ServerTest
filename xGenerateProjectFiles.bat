@@ -24,11 +24,18 @@ rem ## Find CMake or clone from Git
 for %%X in (cmake.exe) do (set CMakePath=%%~$PATH:X)
 if not defined CMakePath (
 	IF NOT EXIST %~dp0\CMake\bin\cmake.exe (
-		echo Purify is cloning a portable CMake from GitHub...
+		echo Cloning portable CMake from GitHub...
 		echo.
 		if not exist CMake (mkdir CMake)
 		Attrib +h +s +r CMake
 		"%Git%" clone https://github.com/fpark12/PortableCMake-Win32.git CMake
+		echo.
+	) else (
+		echo Updating portable CMake...
+		echo.
+		pushd %~dp0\CMake\
+		1>NUL "%Git%" pull https://github.com/fpark12/PortableCMake-Win32.git
+		popd
 		echo.
 	)
 	set CMakePath="%~dp0\CMake\bin\cmake.exe"
@@ -38,12 +45,12 @@ rem ## Find Purify or clone from Git
 IF NOT EXIST %~dp0\Purify\Purify.cmake (
 		mkdir Purify
 		Attrib +h +s +r Purify
-		echo Purify is cloning itself from GitHub...
+		echo Cloning Purify from GitHub...
 		echo.
 		"%Git%" clone https://github.com/fpark12/PurifyCore.git Purify
 		echo.
 ) else (
-		echo Purify is updating...
+		echo Updating Purify...
 		echo.
 		pushd %~dp0\Purify\
 		1>NUL "%Git%" pull https://github.com/fpark12/PurifyCore.git
@@ -51,7 +58,14 @@ IF NOT EXIST %~dp0\Purify\Purify.cmake (
 		echo.
 )
 
-rem ## Find Visual Studio 2013 Full & Express
+rem ## Find Visual Studio
+:FindVS2017
+pushd %~dp0\Purify\BatchFiles
+call GetVSComnToolsPath 15
+popd
+if "%VsComnToolsPath%" == "" goto FindVS2015
+set CMakeArg="Visual Studio 15 2017 Win64"
+goto ReadyToBuild
 :FindVS2015
 pushd %~dp0\Purify\BatchFiles
 call GetVSComnToolsPath 14
@@ -82,8 +96,9 @@ set CMakeArg="Visual Studio 10 2010 Win64"
 goto ReadyToBuild
 
 call "%VsComnToolsPath%/../../VC/bin/x86_amd64/vcvarsx86_amd64.bat" >NUL
+
 :ReadyToBuild
-echo Purify is setting up project files...
+echo Setting up project files...
 if NOT EXIST %~dp0\Build\CMakeCache.txt (
 	goto InitialBuild
 ) else (

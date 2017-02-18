@@ -1,4 +1,4 @@
-#include "Public/Detail/SQLStatement.h"
+#include "Public/Detail/SQLOperations/SQLStatement.h"
 #include "Public/Detail/SQLDatabase.h"
 
 SQLStatement::SQLStatement()
@@ -10,27 +10,27 @@ SQLStatement::SQLStatement(uint32 _schema_idx, const char* _stmt_string) :
 	IsStatementRawString(!strchr(_stmt_string, '?')),
 	RawStringStatement(_stmt_string)
 {
-	SQLOperation::SchemaIndex = _schema_idx;
+	SQLOperationBase::SchemaIndex = _schema_idx;
 }
 
 SQLStatement::SQLStatement(uint32 _schema_idx, uint32 _stmt_idx)
 {
 	// TODO get stmt from stmt repo
 
-	SQLOperation::SchemaIndex = _schema_idx;
+	SQLOperationBase::SchemaIndex = _schema_idx;
 }
 
 SQLStatement::~SQLStatement()
 {
-	SQLOperationParamsArchive::ClearParams();
+	SQLOperationParams::ClearParams();
 	SQLOperationResultSet::ClearResultSet();
 }
 
 uint32 SQLStatement::Execute()
 {
 	// get connection from corresponding connection pool
-	SQLConnection* conn = GDatabase.GetAvaliableSQLConnection(SQLOperation::SchemaIndex);
-	MYSQL* mySql = SQLOperation::GetMySQLHandle(conn);
+	SQLConnection* conn = GDatabase.GetAvaliableSQLConnection(SQLOperationBase::SchemaIndex);
+	MYSQL* mySql = SQLOperationBase::GetMySQLHandle(conn);
 	// result storage
 	MYSQL_RES* resultMetaData;
 
@@ -38,7 +38,7 @@ uint32 SQLStatement::Execute()
 	if (!conn)
 	{
 		GConsole.Message("{}: Connection to target schema unavailable.", __FUNCTION__);
-		SQLOperation::OperationStatus = SQLOperation::SQLOperationStatus::Failed;
+		SQLOperationBase::OperationStatus = SQLOperationBase::SQLOperationStatus::Failed;
 		return RC_FAILED;
 	}
 
@@ -49,7 +49,7 @@ uint32 SQLStatement::Execute()
 		{
 			const char* err = mysql_error(mySql);
 			GConsole.Message("{}: Error executing raw string statement: {}", __FUNCTION__, err);
-			SQLOperation::OperationStatus = SQLOperation::SQLOperationStatus::Failed;
+			SQLOperationBase::OperationStatus = SQLOperationBase::SQLOperationStatus::Failed;
 			return RC_FAILED;
 		}
 
@@ -64,7 +64,7 @@ uint32 SQLStatement::Execute()
 		{
 			const char* err = mysql_error(mySql);
 			GConsole.Message("{}: Error executing prepared statement: {}.", __FUNCTION__, err);
-			SQLOperation::OperationStatus = SQLOperation::SQLOperationStatus::Failed;
+			SQLOperationBase::OperationStatus = SQLOperationBase::SQLOperationStatus::Failed;
 			return RC_FAILED;
 		}
 
@@ -73,7 +73,7 @@ uint32 SQLStatement::Execute()
 		{
 			const char* err = mysql_error(mySql);
 			GConsole.Message("{}: Error storing result of prepared statement: {}.", __FUNCTION__, err);
-			SQLOperation::OperationStatus = SQLOperation::SQLOperationStatus::Failed;
+			SQLOperationBase::OperationStatus = SQLOperationBase::SQLOperationStatus::Failed;
 			return RC_FAILED;
 		}
 
@@ -88,12 +88,12 @@ uint32 SQLStatement::Execute()
 		{
 			const char* err = mysql_error(mySql);
 			GConsole.Message("{}: Expected result from prepared statement but got none: {}.", __FUNCTION__, err);
-			SQLOperation::OperationStatus = SQLOperation::SQLOperationStatus::Failed;
+			SQLOperationBase::OperationStatus = SQLOperationBase::SQLOperationStatus::Failed;
 			return RC_FAILED;
 		}
 		else // result is not expected
 		{
-			SQLOperation::OperationStatus = SQLOperation::SQLOperationStatus::Success;
+			SQLOperationBase::OperationStatus = SQLOperationBase::SQLOperationStatus::Success;
 			return RC_SUCCESS;
 		}
 	}
@@ -130,12 +130,12 @@ uint32 SQLStatement::Execute()
 			{
 				char* fieldBuffer = new char[size];
 				SQLOperationResultSet::RowData[i] = reinterpret_cast<uint64&>(fieldBuffer);
-				SetParamBind(&SQLOperationResultSet::FieldBinds[i], resultDataFields[i].type,
+				SetBind(&SQLOperationResultSet::FieldBinds[i], resultDataFields[i].type,
 					fieldBuffer, false, size, size);
 			}
 			else
 			{
-				SetParamBind(&SQLOperationResultSet::FieldBinds[i], resultDataFields[i].type,
+				SetBind(&SQLOperationResultSet::FieldBinds[i], resultDataFields[i].type,
 					&SQLOperationResultSet::RowData[i], !!(resultDataFields[i].flags & UNSIGNED_FLAG));
 			}
 		}
@@ -177,24 +177,24 @@ uint32 SQLStatement::Execute()
 	// release connection
 	if (conn)
 	{
-		SQLOperation::FreeUpConnection(conn);
+		SQLOperationBase::FreeUpConnection(conn);
 		conn = nullptr;
 	}
 
-	SQLOperation::OperationStatus = SQLOperation::SQLOperationStatus::Success;
+	SQLOperationBase::OperationStatus = SQLOperationBase::SQLOperationStatus::Success;
 	return RC_SUCCESS;
 }
 
 void SQLStatement::ResetSchema(uint32 _schema_idx)
 {
-	SQLOperationParamsArchive::ClearParams();
+	SQLOperationParams::ClearParams();
 	SQLOperationResultSet::ClearResultSet();
-	SQLOperation::SchemaIndex = _schema_idx;
+	SQLOperationBase::SchemaIndex = _schema_idx;
 }
 
 void SQLStatement::ResetStatement(const char* _stmt_string)
 {
-	SQLOperationParamsArchive::ClearParams();
+	SQLOperationParams::ClearParams();
 	SQLOperationResultSet::ClearResultSet();
 	IsStatementRawString = !strchr(_stmt_string, '?');
 	RawStringStatement = _stmt_string;
@@ -202,20 +202,20 @@ void SQLStatement::ResetStatement(const char* _stmt_string)
 
 void SQLStatement::ResetStatement(uint32 _stmt_idx)
 {
-	SQLOperationParamsArchive::ClearParams();
+	SQLOperationParams::ClearParams();
 	SQLOperationResultSet::ClearResultSet();
 	// TODO stmt idx api
 }
 
 void SQLStatement::InitializeParamMemory()
 {
-	SQLOperationParamsArchive::ParamCount = mysql_stmt_param_count(PreparedStatement);
-	if (SQLOperationParamsArchive::ParamCount)
+	SQLOperationParams::ParamCount = mysql_stmt_param_count(PreparedStatement);
+	if (SQLOperationParams::ParamCount)
 	{
-		SQLOperationParamsArchive::ParamBinds = new MYSQL_BIND[SQLOperationParamsArchive::ParamCount];
-		memset(ParamBinds, 0, sizeof(MYSQL_BIND) * SQLOperationParamsArchive::ParamCount);
-		SQLOperationParamsArchive::ParamData = new uint64[SQLOperationParamsArchive::ParamCount];
-		memset(ParamData, 0, sizeof(uint64) * SQLOperationParamsArchive::ParamCount);
+		SQLOperationParams::ParamBinds = new MYSQL_BIND[SQLOperationParams::ParamCount];
+		memset(ParamBinds, 0, sizeof(MYSQL_BIND) * SQLOperationParams::ParamCount);
+		SQLOperationParams::ParamData = new uint64[SQLOperationParams::ParamCount];
+		memset(ParamData, 0, sizeof(uint64) * SQLOperationParams::ParamCount);
 	}
 }
 
@@ -227,7 +227,7 @@ uint32 SQLStatement::InitPreparedStatement(MYSQL* _mysql)
 	{
 		const char* err = mysql_stmt_error(tempStmt);
 		GConsole.Message("{}: Error parsing prepared statement: {}.", __FUNCTION__, err);
-		SQLOperation::OperationStatus = SQLOperation::SQLOperationStatus::Failed;
+		SQLOperationBase::OperationStatus = SQLOperationBase::SQLOperationStatus::Failed;
 		return RC_FAILED;
 	}
 
@@ -238,9 +238,9 @@ uint32 SQLStatement::InitPreparedStatement(MYSQL* _mysql)
 	my_bool bool_tmp = 1;
 	mysql_stmt_attr_set(PreparedStatement, STMT_ATTR_UPDATE_MAX_LENGTH, &bool_tmp);
 	// bind param buffer
-	if (SQLOperationParamsArchive::ParamCount)
+	if (SQLOperationParams::ParamCount)
 	{
-		mysql_stmt_bind_param(PreparedStatement, SQLOperationParamsArchive::ParamBinds);
+		mysql_stmt_bind_param(PreparedStatement, SQLOperationParams::ParamBinds);
 	}
 	
 	return RC_SUCCESS;

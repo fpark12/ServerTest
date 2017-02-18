@@ -1,6 +1,6 @@
 #pragma once
-#include "Private\Detail\SQLOperation\SQLTask.h"
-#include "Private\Detail\SQLDatabase\SQLConnectionPool\SQLConnectionPool.h"
+#include "Public/Detail/SQLTask.h"
+#include "Private/Detail/SQLDatabase/SQLConnectionPool/SQLConnectionPool.h"
 
 class SQLDatabase
 {

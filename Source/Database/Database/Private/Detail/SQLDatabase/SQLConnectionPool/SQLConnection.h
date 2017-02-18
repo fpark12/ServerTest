@@ -12,7 +12,7 @@ struct SQLConnectionInfo
 
 class SQLConnection
 {
-	friend class SQLOperation;
+	friend class SQLOperationBase;
 	friend class SQLConnectionPool;
 
 private:

@@ -3,8 +3,8 @@
 #include <thread>
 #include <mutex>
 #include <condition_variable>
-#include "Private/Detail/SQLOperation/SQLStatement.h"
-#include "Private/Detail/SQLOperation/SQLTransaction.h"
+#include "Public/Detail/SQLOperations/SQLStatement.h"
+#include "Public/Detail/SQLOperations/SQLTransaction.h"
 
 std::mutex m;
 std::condition_variable cv;
@@ -36,6 +36,22 @@ void worker_thread()
 
 int main()
 {
+	bool Result = false;
+	// Initialize Database Connection
+	SQLConnectionPoolInfo connPoolInfo;
+	Result = GConfig.Load("DatabaseTest.ini");
+	GConfig.GetString("DatabseTest.LoginDatabase.Hostname", connPoolInfo.Hostname);
+	connPoolInfo.Hostname = "127.0.0.1";
+	connPoolInfo.Port = 3306;
+	connPoolInfo.Username = "root";
+	connPoolInfo.Password = "password";
+	connPoolInfo.Schema = "test";
+	connPoolInfo.ConnectionCount = 1;
+	GDatabase.AddSchema(0, connPoolInfo);
+
+	// Prepared Statement
+
+
 	MYSQL* initMysql1 = mysql_init(NULL);
 	MYSQL* initMysql2 = mysql_init(NULL);
 	if (!initMysql1)

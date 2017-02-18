@@ -3,7 +3,7 @@
 
 struct SQLConnectionInfo;
 class SQLConnection;
-class SQLOperation;
+class SQLOperationBase;
 
 
 struct SQLConnectionPoolInfo : SQLConnectionInfo

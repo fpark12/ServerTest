@@ -1,7 +1,7 @@
 #pragma once
 
 class SQLConnection;
-class SQLOperation;
+class SQLOperationBase;
 
 class SQLThread
 {

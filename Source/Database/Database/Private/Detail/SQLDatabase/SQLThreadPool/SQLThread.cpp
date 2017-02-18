@@ -1,6 +1,6 @@
 #include "SQLThread.h"
-#include "Private\Detail\SQLOperation\SQLOperation.h"
-#include "Public\Detail\SQLDatabase.h"
+#include "Private/Detail/SQLOperations/SQLOperationBase/SQLOperationBase.h"
+#include "Public/Detail/SQLDatabase.h"
 
 SQLThread::SQLThread() :
 	CancelationToken(false)

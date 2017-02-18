@@ -2,9 +2,9 @@
 #include "Private\Detail\SQLDatabase\SQLConnectionPool\SQLConnection.h"
 
 // base class for single statement and multi statements operation
-class SQLOperation
+class SQLOperationBase
 {
-	DISABLE_COPY_AND_ASSIGN(SQLOperation);
+	DISABLE_COPY_AND_ASSIGN(SQLOperationBase);
 
 // accessible by child class
 protected:
@@ -32,7 +32,7 @@ public:
 
 protected:
 
-	SQLOperation();
+	SQLOperationBase();
 
 	// also allows children to access mysql handle in connection, 
 	// but protect connection private data from general public

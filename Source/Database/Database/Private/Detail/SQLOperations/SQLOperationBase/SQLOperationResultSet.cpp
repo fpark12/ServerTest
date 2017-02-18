@@ -1,4 +1,4 @@
-#include "Private//Detail/SQLOperation/SQLOperationResultSet.h"
+#include "Private/Detail/SQLOperations/SQLOperationBase/SQLOperationResultSet.h"
 
 void SQLOperationResultSet::ClearResultSet()
 {

@@ -9,8 +9,8 @@ namespace Protobuf
 {
 	using google::protobuf::util::Status;
 
-	Core_API google::protobuf::util::Status MessageToJson(google::protobuf::Message const& Message, std::string& OutString);
-	Core_API google::protobuf::util::Status JsonToMessage(std::string const& OutString, google::protobuf::Message& Message);
+	Core_API bool MessageToJson(google::protobuf::Message const& Message, std::string& OutString);
+	Core_API bool JsonToMessage(std::string const& OutString, google::protobuf::Message& Message);
 }
 // Currently using google's internal implementation instead
 /*

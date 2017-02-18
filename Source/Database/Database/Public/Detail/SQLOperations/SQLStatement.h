@@ -1,10 +1,10 @@
 #pragma once
 
-#include "Private/Detail/SQLOperation/SQLOperation.h"
-#include "Private/Detail/SQLOperation/SQLOperationParamsArchive.h"
-#include "Private/Detail/SQLOperation/SQLOperationResultSet.h"
+#include "Private/Detail/SQLOperations/SQLOperationBase/SQLOperationBase.h"
+#include "Private/Detail/SQLOperations/SQLOperationBase/SQLOperationParams.h"
+#include "Private/Detail/SQLOperations/SQLOperationBase/SQLOperationResultSet.h"
 
-class SQLStatement : public SQLOperation, public SQLOperationParamsArchive, public SQLOperationResultSet
+class SQLStatement : public SQLOperationBase, public SQLOperationParams, public SQLOperationResultSet
 {
 
 private:

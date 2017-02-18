@@ -275,7 +275,7 @@ int32 LoginService::HandlePost(soap* soapClient)
 	Battlenet::JSON::Login::LoginForm LoginForm;
 	Battlenet::JSON::Login::LoginResult LoginResult;
 	//if (!JSON::Deserialize(Buffer, &LoginForm))
-	if (Protobuf::Status::OK != Protobuf::JsonToMessage(Buffer, LoginForm))
+	if (Protobuf::JsonToMessage(Buffer, LoginForm))
 	{
 		if (soap_register_plugin_arg(soapClient, &ResponseCodePlugin::Init, nullptr) != SOAP_OK)
 			return 500;

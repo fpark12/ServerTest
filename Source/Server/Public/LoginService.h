@@ -9,6 +9,8 @@
 
 #include "Login.pb.h"
 
+#include "Session.h"
+
 int ns1__executeCommand(soap*, char*, char**);
 
 class LoginService
@@ -31,7 +33,7 @@ private:
 		LoginTicket& operator=(LoginTicket&& right);
 
 		std::string Id;
-		//std::unique_ptr<Battlenet::Session::AccountInfo> Account;
+		std::unique_ptr<Login::AccountInfo> AccountInfo;
 		std::time_t ExpiryTime;
 	};
 

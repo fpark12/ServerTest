@@ -5,11 +5,11 @@ class SQLTask
 	DISABLE_COPY_AND_ASSIGN(SQLTask);
 
 	// only SQLOperation can create task
-	friend class SQLOperation;
+	friend class SQLOperationBase;
 
 private:
 
-	SQLOperation* Operation;
+	SQLOperationBase* Operation;
 
 public:
 
@@ -22,5 +22,5 @@ protected:
 	// it will be created when Operation gets executed
 	SQLTask();
 
-	SQLTask(SQLOperation* _operation);
+	SQLTask(SQLOperationBase* _operation);
 };

@@ -1,4 +1,4 @@
-#include "SQLTransaction.h"
+#include "Public/Detail/SQLOperations/SQLTransaction.h"
 
 uint32 SQLTransaction::Begin(MYSQL* mySqlHandle)
 {
@@ -6,7 +6,7 @@ uint32 SQLTransaction::Begin(MYSQL* mySqlHandle)
 	{
 		const char* err = mysql_error(mySqlHandle);
 		GConsole.Message("{}: Error executing \"START TRANSACTION\": {}.", __FUNCTION__, err);
-		SQLOperation::OperationStatus = SQLOperation::SQLOperationStatus::Failed;
+		SQLOperationBase::OperationStatus = SQLOperationBase::SQLOperationStatus::Failed;
 		return RC_FAILED;
 	}
 
@@ -19,7 +19,7 @@ uint32 SQLTransaction::Commit(MYSQL* mySqlHandle)
 	{
 		const char* err = mysql_error(mySqlHandle);
 		GConsole.Message("{}: Error executing \"COMMIT\": {}.", __FUNCTION__, err);
-		SQLOperation::OperationStatus = SQLOperation::SQLOperationStatus::Failed;
+		SQLOperationBase::OperationStatus = SQLOperationBase::SQLOperationStatus::Failed;
 		return RC_FAILED;
 	}
 
@@ -32,7 +32,7 @@ uint32 SQLTransaction::RollBack(MYSQL* mySqlHandle)
 	{
 		const char* err = mysql_error(mySqlHandle);
 		GConsole.Message("{}: Error executing \"ROLLBACK\": {}.", __FUNCTION__, err);
-		SQLOperation::OperationStatus = SQLOperation::SQLOperationStatus::Failed;
+		SQLOperationBase::OperationStatus = SQLOperationBase::SQLOperationStatus::Failed;
 		return RC_FAILED;
 	}
 
