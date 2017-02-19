@@ -32,11 +32,11 @@ public:
 	}
 
 	// allows user to set parameter for the last stmt they appended
-	uint32 SetParamInt(uint32 idx, int32 value)
+	Status SetParamInt(uint32 idx, int32 value)
 	{
 		if (Statements.empty())
 		{
-			return RC_FAILED;
+			return SC::FAILED;
 		}
 
 		std::string stmt = Statements.back();
@@ -50,19 +50,19 @@ public:
 		if (searchCursor != std::string::npos)
 		{
 			stmt.replace(searchCursor, 1, std::to_string(value));
-			return RC_SUCCESS;
+			return SC::OK;
 		}
 		else
 		{
-			return RC_FAILED;
+			return SC::FAILED;
 		}
 	}
 
-	uint32 SetParamFloat(uint32 idx, double value)
+	Status SetParamFloat(uint32 idx, double value)
 	{
 		if (Statements.empty())
 		{
-			return RC_FAILED;
+			return SC::FAILED;
 		}
 
 		std::string stmt = Statements.back();
@@ -76,19 +76,19 @@ public:
 		if (searchCursor != std::string::npos)
 		{
 			stmt.replace(searchCursor, 1, std::to_string(value));
-			return RC_SUCCESS;
+			return SC::OK;
 		}
 		else
 		{
-			return RC_FAILED;
+			return SC::FAILED;
 		}
 	}
 
-	uint32 SetParamString(uint32 idx, std::string value)
+	Status SetParamString(uint32 idx, std::string value)
 	{
 		if (Statements.empty())
 		{
-			return RC_FAILED;
+			return SC::FAILED;
 		}
 
 		std::string stmt = Statements.back();
@@ -102,15 +102,15 @@ public:
 		if (searchCursor != std::string::npos)
 		{
 			stmt.replace(searchCursor, 1, value);
-			return RC_SUCCESS;
+			return SC::OK;
 		}
 		else
 		{
-			return RC_FAILED;
+			return SC::FAILED;
 		}
 	}
 
-	virtual uint32 Execute()
+	virtual Status Execute()
 	{
 		SQLConnection* conn = GDatabase.GetAvaliableSQLConnection(SQLOperationBase::SchemaIndex);
 		MYSQL* mySql = SQLOperationBase::GetMySQLHandle(conn);
@@ -120,13 +120,13 @@ public:
 		{
 			GConsole.Message("{}: Connection to target schema unavailable.", __FUNCTION__);
 			SQLOperationBase::OperationStatus = SQLOperationBase::SQLOperationStatus::Failed;
-			return RC_FAILED;
+			return SC::FAILED;
 		}
 
 		// begin transaction
-		if (Begin(mySql) != RC_SUCCESS)
+		if (Begin(mySql) != SC::OK)
 		{
-			return RC_FAILED;
+			return SC::FAILED;
 		}
 
 		for (auto& stmt: Statements)
@@ -136,26 +136,26 @@ public:
 				const char* err = mysql_error(mySql);
 				GConsole.Message("{}: Error executing \"START TRANSACTION\": {}.", __FUNCTION__, err);
 				SQLOperationBase::OperationStatus = SQLOperationBase::SQLOperationStatus::Failed;
-				if (RollBack(mySql) != RC_SUCCESS)
+				if (RollBack(mySql) != SC::OK)
 				{
 					GConsole.Message("{}: Rollback for last transaction unsuccessful, database might be tinted.", __FUNCTION__);
 				}
-				return RC_FAILED;
+				return SC::FAILED;
 			}
 
-			return RC_SUCCESS;
+			return SC::OK;
 		}
 
 
-		return RC_SUCCESS;
+		return SC::OK;
 	}
 
 private:
 
-	uint32 Begin(MYSQL* mySqlHandle);
+	Status Begin(MYSQL* mySqlHandle);
 
-	uint32 Commit(MYSQL* mySqlHandle);
+	Status Commit(MYSQL* mySqlHandle);
 
-	uint32 RollBack(MYSQL* mySqlHandle);
+	Status RollBack(MYSQL* mySqlHandle);
 
 };

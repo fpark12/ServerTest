@@ -32,7 +32,7 @@ public:
 	SQLConnectionPool(SQLConnectionPoolInfo& info);
 	~SQLConnectionPool() = default;
 
-	uint32 SpawnConnections();
+	Status SpawnConnections();
 
 	SQLConnection* GetAvaliableSQLConnection();
 };

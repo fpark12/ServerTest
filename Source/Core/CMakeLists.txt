@@ -21,4 +21,4 @@ GUI
 openssl
 )
 
-create_project(SHARED "${DEFINE}" "${INCLUDE}" "${LINK}")
+create_project(STATIC "${DEFINE}" "${INCLUDE}" "${LINK}")

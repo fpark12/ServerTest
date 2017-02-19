@@ -14,30 +14,30 @@ SQLConnection* SQLDatabase::GetAvaliableSQLConnection(uint32 _schema_idx)
 	return ConnectionPool[_schema_idx].GetAvaliableSQLConnection();
 }
 
-uint32 SQLDatabase::SpawnSQLConnections()
+Status SQLDatabase::SpawnSQLConnections()
 {
 	for (auto& pool : ConnectionPool)
 	{
-		if (pool.SpawnConnections())
+		if (SC::OK != pool.SpawnConnections())
 		{
 			//TODO Error Handling
-			return RC_FAILED;
+			return SC::FAILED;
 		}
 	}
-	return RC_SUCCESS;
+	return SC::OK;
 }
 
-uint32 SQLDatabase::AddTask(SQLTask* _task)
+Status SQLDatabase::AddTask(SQLTask* _task)
 {
 	if (!TaskQueue.try_enqueue(_task))
 	{
 		//TODO Error handling
-		return RC_FAILED;
+		return SC::FAILED;
 	}
-	return RC_SUCCESS;
+	return SC::OK;
 }
 
-uint32 SQLDatabase::BulkAddTasks(std::vector<SQLTask*>& _tasks)
+Status SQLDatabase::BulkAddTasks(std::vector<SQLTask*>& _tasks)
 {
 	if (!
 		TaskQueue.try_enqueue_bulk(std::make_move_iterator(_tasks.begin()),
@@ -45,9 +45,9 @@ uint32 SQLDatabase::BulkAddTasks(std::vector<SQLTask*>& _tasks)
 		)
 	{
 		//TODO Error handling
-		return RC_FAILED;
+		return SC::FAILED;
 	}
-	return RC_SUCCESS;
+	return SC::OK;
 }
 
 SQLTask* SQLDatabase::NextTask()

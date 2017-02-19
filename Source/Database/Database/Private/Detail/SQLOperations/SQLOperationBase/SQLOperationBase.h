@@ -26,7 +26,7 @@ protected:
 public:
 
 	// Virtual Execute Function
-	virtual uint32 Execute() = 0;
+	virtual Status Execute() = 0;
 
 	virtual void AsyncExecute();
 

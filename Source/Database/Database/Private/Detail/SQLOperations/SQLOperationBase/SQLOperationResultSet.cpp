@@ -128,14 +128,14 @@ std::vector<uint8> SQLOperationResultSet::GetResultBinary(uint8 Index, std::size
 	return bytes;
 }
 
-uint32 SQLOperationResultSet::SizeForType(MYSQL_FIELD* field)
+size_t SQLOperationResultSet::SizeOfField(MYSQL_FIELD* field)
 {
 	switch (field->type)
 	{
 	case MYSQL_TYPE_NULL:
-		return RC_SUCCESS;
+		return 0;
 	case MYSQL_TYPE_TINY:
-		return RC_FAILED;
+		return 1;
 	case MYSQL_TYPE_YEAR:
 	case MYSQL_TYPE_SHORT:
 		return 2;
@@ -174,6 +174,6 @@ uint32 SQLOperationResultSet::SizeForType(MYSQL_FIELD* field)
 		*/
 	default:
 		//TODO error log
-		return RC_SUCCESS;
+		return 0;
 	}
 }

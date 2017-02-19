@@ -54,8 +54,39 @@ template <typename T> inline T* ASSERT_NOTNULL(T* pointer)
 	return pointer;
 }
 
-enum ReturnCode
+class Status
 {
-	RC_SUCCESS,
-	RC_FAILED
+private:
+	enum class EStatusCode {
+		OK = 0,
+		FAILED = 1,
+		UNKNOWN = 2
+	};
+
+	EStatusCode StatusCode;
+	std::string ErrorMessage;
+
+	inline std::string StatusCodeEnumToString(EStatusCode code) const;
+
+public:
+
+
+	Status();
+	Status(EStatusCode statusCode, std::string errorMessage);
+	Status(const Status& other);
+	
+	std::string ToString() const;
+
+	Status& operator=(const Status& other);
+	bool operator==(const Status& x) const;
+	bool operator!=(const Status& x) const {
+		return !operator==(x);
+	}
+
+	static const Status OK;             // Identical to 0-arg constructor
+	static const Status FAILED;
+	static const Status UNKNOWN;
+
+	Status& operator<<(const Status& other);
 };
+typedef Status SC;

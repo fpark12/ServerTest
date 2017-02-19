@@ -26,7 +26,7 @@ SQLStatement::~SQLStatement()
 	SQLOperationResultSet::ClearResultSet();
 }
 
-uint32 SQLStatement::Execute()
+Status SQLStatement::Execute()
 {
 	// get connection from corresponding connection pool
 	SQLConnection* conn = GDatabase.GetAvaliableSQLConnection(SQLOperationBase::SchemaIndex);
@@ -39,7 +39,7 @@ uint32 SQLStatement::Execute()
 	{
 		GConsole.Message("{}: Connection to target schema unavailable.", __FUNCTION__);
 		SQLOperationBase::OperationStatus = SQLOperationBase::SQLOperationStatus::Failed;
-		return RC_FAILED;
+		return SC::FAILED;
 	}
 
 	// deal with raw string statement first
@@ -50,7 +50,7 @@ uint32 SQLStatement::Execute()
 			const char* err = mysql_error(mySql);
 			GConsole.Message("{}: Error executing raw string statement: {}", __FUNCTION__, err);
 			SQLOperationBase::OperationStatus = SQLOperationBase::SQLOperationStatus::Failed;
-			return RC_FAILED;
+			return SC::FAILED;
 		}
 
 		resultMetaData = mysql_store_result(mySql);
@@ -65,7 +65,7 @@ uint32 SQLStatement::Execute()
 			const char* err = mysql_error(mySql);
 			GConsole.Message("{}: Error executing prepared statement: {}.", __FUNCTION__, err);
 			SQLOperationBase::OperationStatus = SQLOperationBase::SQLOperationStatus::Failed;
-			return RC_FAILED;
+			return SC::FAILED;
 		}
 
 		// store the result if any
@@ -74,7 +74,7 @@ uint32 SQLStatement::Execute()
 			const char* err = mysql_error(mySql);
 			GConsole.Message("{}: Error storing result of prepared statement: {}.", __FUNCTION__, err);
 			SQLOperationBase::OperationStatus = SQLOperationBase::SQLOperationStatus::Failed;
-			return RC_FAILED;
+			return SC::FAILED;
 		}
 
 		// get the result, could get NULL
@@ -89,12 +89,12 @@ uint32 SQLStatement::Execute()
 			const char* err = mysql_error(mySql);
 			GConsole.Message("{}: Expected result from prepared statement but got none: {}.", __FUNCTION__, err);
 			SQLOperationBase::OperationStatus = SQLOperationBase::SQLOperationStatus::Failed;
-			return RC_FAILED;
+			return SC::FAILED;
 		}
 		else // result is not expected
 		{
 			SQLOperationBase::OperationStatus = SQLOperationBase::SQLOperationStatus::Success;
-			return RC_SUCCESS;
+			return SC::OK;
 		}
 	}
 
@@ -123,7 +123,7 @@ uint32 SQLStatement::Execute()
 		for (uint32 i = 0; i < FieldCount; ++i)
 		{
 
-			uint32 size = SQLOperationResultSet::SizeForType(&resultDataFields[i]);
+			size_t size = SQLOperationResultSet::SizeOfField(&resultDataFields[i]);
 
 			if (resultDataFields[i].type == MYSQL_TYPE_VAR_STRING ||
 				resultDataFields[i].type == MYSQL_TYPE_BLOB)
@@ -182,7 +182,7 @@ uint32 SQLStatement::Execute()
 	}
 
 	SQLOperationBase::OperationStatus = SQLOperationBase::SQLOperationStatus::Success;
-	return RC_SUCCESS;
+	return SC::OK;
 }
 
 void SQLStatement::ResetSchema(uint32 _schema_idx)
@@ -219,7 +219,7 @@ void SQLStatement::InitializeParamMemory()
 	}
 }
 
-uint32 SQLStatement::InitPreparedStatement(MYSQL* _mysql)
+Status SQLStatement::InitPreparedStatement(MYSQL* _mysql)
 {
 	MYSQL_STMT* tempStmt = mysql_stmt_init(_mysql);
 
@@ -228,7 +228,7 @@ uint32 SQLStatement::InitPreparedStatement(MYSQL* _mysql)
 		const char* err = mysql_stmt_error(tempStmt);
 		GConsole.Message("{}: Error parsing prepared statement: {}.", __FUNCTION__, err);
 		SQLOperationBase::OperationStatus = SQLOperationBase::SQLOperationStatus::Failed;
-		return RC_FAILED;
+		return SC::FAILED;
 	}
 
 	PreparedStatement = tempStmt;
@@ -243,7 +243,7 @@ uint32 SQLStatement::InitPreparedStatement(MYSQL* _mysql)
 		mysql_stmt_bind_param(PreparedStatement, SQLOperationParams::ParamBinds);
 	}
 	
-	return RC_SUCCESS;
+	return SC::OK;
 }
 
 bool SQLStatement::FetchNextRow()

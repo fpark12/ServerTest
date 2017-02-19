@@ -17,11 +17,11 @@ public:
 
 	SQLConnection* GetAvaliableSQLConnection(uint32 _schema_idx);
 
-	uint32 SpawnSQLConnections();
+	Status SpawnSQLConnections();
 
-	uint32 AddTask(SQLTask* _task);
+	Status AddTask(SQLTask* _task);
 
-	uint32 BulkAddTasks(std::vector<SQLTask*>& _tasks);
+	Status BulkAddTasks(std::vector<SQLTask*>& _tasks);
 
 	SQLTask* NextTask();
 };

@@ -28,7 +28,7 @@ public:
 
 	~SQLStatement();
 	
-	uint32 Execute();
+	Status Execute();
 
 	// TODO
 	// if we want to keep using the same prepared stmt for next task
@@ -50,7 +50,7 @@ private:
 	void InitializeParamMemory();
 
 	// init prepared stmt
-	uint32 InitPreparedStatement(MYSQL* _mysql);
+	Status InitPreparedStatement(MYSQL* _mysql);
 
 	// fetching the next row on result set and store it into result buffer
 	bool FetchNextRow();

@@ -50,7 +50,7 @@ int ConfigFile::LoadFile(std::string Filename)
 	return Error;
 }
 
-bool ConfigFile::GetString(std::string Key, std::string& Output) const
+Status ConfigFile::GetString(std::string Key, std::string& Output) const
 {
 	if (Values.count(Key))
 	{
@@ -59,13 +59,13 @@ bool ConfigFile::GetString(std::string Key, std::string& Output) const
 		{
 			Output = (*it).second;
 		}
-		return 0;
+		return Status::OK;
 	}
 
-	return 1;
+	return Status::FAILED;
 }
 
-bool ConfigFile::GetLong(std::string Key, long& Output) const
+Status ConfigFile::GetLong(std::string Key, long& Output) const
 {
 	std::string Value = "";
 	GetString(Key, Value);
@@ -75,12 +75,12 @@ bool ConfigFile::GetLong(std::string Key, long& Output) const
 	if (end > Value.c_str())
 	{
 		Output = Result;
-		return 0;
+		return Status::OK;
 	}
 
-	return 1;
+	return Status::FAILED;
 }
-bool ConfigFile::GetDouble(std::string Key, double& Output) const
+Status ConfigFile::GetDouble(std::string Key, double& Output) const
 {
 	std::string Value = "";
 	GetString(Key, Value);
@@ -89,13 +89,13 @@ bool ConfigFile::GetDouble(std::string Key, double& Output) const
 	if (end > Value.c_str())
 	{
 		Output = Result;
-		return 0;
+		return Status::OK;
 	}
 
-	return 1;
+	return Status::FAILED;
 }
 
-bool ConfigFile::GetBoolean(std::string Key, bool& Output) const
+Status ConfigFile::GetBoolean(std::string Key, bool& Output) const
 {
 	std::string Value = "";
 	GetString(Key, Value);
@@ -103,18 +103,18 @@ bool ConfigFile::GetBoolean(std::string Key, bool& Output) const
 	if (Value == "true" || Value == "yes" || Value == "on" || Value == "1")
 	{
 		Output = true;
-		return 0;
+		return Status::OK;
 	}
 	else if (Value == "false" || Value == "no" || Value == "off" || Value == "0")
 	{
 		Output = false;
-		return 0;
+		return Status::OK;
 	}
 
-	return 1;
+	return Status::FAILED;
 }
 
-bool ConfigFile::GetString(std::string Section, std::string Name, std::string& Output) const
+Status ConfigFile::GetString(std::string Section, std::string Name, std::string& Output) const
 {
 	const std::string key = MakeKey(Section, Name);
 	if (Values.count(key))
@@ -124,13 +124,13 @@ bool ConfigFile::GetString(std::string Section, std::string Name, std::string& O
 		{
 			Output = (*it).second;
 		}
-		return 0;
+		return Status::OK;
 	}
 
-	return 1;
+	return Status::FAILED;
 }
 
-bool ConfigFile::GetLong(std::string section, std::string name, long& Output) const
+Status ConfigFile::GetLong(std::string section, std::string name, long& Output) const
 {
 	std::string Value = "";
 	GetString(section, name, Value);
@@ -140,13 +140,13 @@ bool ConfigFile::GetLong(std::string section, std::string name, long& Output) co
 	if (end > Value.c_str())
 	{
 		Output = Result;
-		return 0;
+		return Status::OK;
 	}
 
-	return 1;
+	return Status::FAILED;
 }
 
-bool ConfigFile::GetDouble(std::string section, std::string name, double& Output) const
+Status ConfigFile::GetDouble(std::string section, std::string name, double& Output) const
 {
 	std::string Value = "";
 	GetString(section, name, Value);
@@ -155,13 +155,13 @@ bool ConfigFile::GetDouble(std::string section, std::string name, double& Output
 	if (end > Value.c_str())
 	{
 		Output = Result;
-		return 0;
+		return Status::OK;
 	}
 
-	return 1;
+	return Status::FAILED;
 }
 
-bool ConfigFile::GetBoolean(std::string Section, std::string Name, bool& Output) const
+Status ConfigFile::GetBoolean(std::string Section, std::string Name, bool& Output) const
 {
 	std::string Value = "";
 	GetString(Section, Name, Value);
@@ -169,15 +169,15 @@ bool ConfigFile::GetBoolean(std::string Section, std::string Name, bool& Output)
 	if (Value == "true" || Value == "yes" || Value == "on" || Value == "1")
 	{
 		Output = true;
-		return 0;
+		return Status::OK;
 	}
 	else if (Value == "false" || Value == "no" || Value == "off" || Value == "0")
 	{
 		Output = false;
-		return 0;
+		return Status::OK;
 	}
 
-	return 1;
+	return Status::FAILED;
 }
 
 std::set<std::string> ConfigFile::GetFields(std::string Section) const
@@ -233,13 +233,13 @@ int ConfigFile::ValueHandler(void* user, const char* section, const char* name, 
 }
 
 
-bool Config::Load(std::string const& Filename)
+Status Config::Load(std::string const& Filename)
 {
 	std::lock_guard<std::mutex> lock(ConfigLock);
 
 	if (Find(Filename))
 	{
-		return true;
+		return SC::OK;
 	}
 
 	ConfigFilesList.emplace_back();
@@ -248,16 +248,16 @@ bool Config::Load(std::string const& Filename)
 	if (res == 0)
 	{
 		ConfigFilesList.back().GetFilename() = Filename;
-		return true;
+		return SC::OK;
 	}
 	else
 	{
 		ConfigFilesList.pop_back();
-		return false;
+		return SC::FAILED;
 	}
 }
 
-bool Config::Unload(std::string const& Filename)
+Status Config::Unload(std::string const& Filename)
 {
 	auto i = std::begin(ConfigFilesList);
 
@@ -273,17 +273,17 @@ bool Config::Unload(std::string const& Filename)
 		}
 	}
 
-	return true;
+	return SC::OK;
 }
 
-bool Config::Reload(std::string const& Filename)
+Status Config::Reload(std::string const& Filename)
 {
-	if (Unload(Filename))
+	if (SC::OK == Unload(Filename))
 	{
 		return Load(Filename);
 	}
 
-	return false;
+	return SC::FAILED;
 }
 
 const ConfigFile* Config::GetFile(std::string const& Filename)
@@ -362,7 +362,7 @@ std::list<std::string> Config::GetKeysByString(std::string const& Key, std::stri
 	return Keys;
 }
 
-bool Config::GetString(const std::string& Key, std::string& Value) const
+Status Config::GetString(const std::string& Key, std::string& Value) const
 {
 	size_t FilenameEnd = Key.find_first_of(".", 0);
 	std::string Filename = Key.substr(0, FilenameEnd);
@@ -372,13 +372,13 @@ bool Config::GetString(const std::string& Key, std::string& Value) const
 	const ConfigFile* ConfigFile = this->Find(Filename);
 	if (!ConfigFile)
 	{
-		return "";
+		return Status::FAILED;
 	}
 
 	return ConfigFile->GetString(Subkey, Value);
 }
 
-bool Config::GetBool(const std::string& Key, bool& Value) const
+Status Config::GetBool(const std::string& Key, bool& Value) const
 {
 	size_t FilenameEnd = Key.find_first_of(".", 0);
 	std::string Filename = Key.substr(0, FilenameEnd);
@@ -388,12 +388,12 @@ bool Config::GetBool(const std::string& Key, bool& Value) const
 	const ConfigFile* ConfigFile = this->Find(Filename);
 	if (!ConfigFile)
 	{
-		return false;
+		return Status::FAILED;
 	}
 	return ConfigFile->GetBoolean(Subkey, Value);
 }
 
-bool Config::GetLong(const std::string& Key, long& Value) const
+Status Config::GetLong(const std::string& Key, long& Value) const
 {
 	size_t FilenameEnd = Key.find_first_of(".", 0);
 	std::string Filename = Key.substr(0, FilenameEnd);
@@ -403,12 +403,12 @@ bool Config::GetLong(const std::string& Key, long& Value) const
 	const ConfigFile* ConfigFile = this->Find(Filename);
 	if (!ConfigFile)
 	{
-		return false;
+		return Status::FAILED;
 	}
 	return ConfigFile->GetLong(Subkey, Value);
 }
 
-bool Config::GetUInt(const std::string& Key, uint32& Value) const
+Status Config::GetUInt(const std::string& Key, uint32& Value) const
 {
 	size_t FilenameEnd = Key.find_first_of(".", 0);
 	std::string Filename = Key.substr(0, FilenameEnd);
@@ -418,11 +418,11 @@ bool Config::GetUInt(const std::string& Key, uint32& Value) const
 	const ConfigFile* ConfigFile = this->Find(Filename);
 	if (!ConfigFile)
 	{
-		return false;
+		return Status::FAILED;
 	}
 	long Long;
-	bool bResult = ConfigFile->GetLong(Subkey, Long);
-	if (bResult == 0)
+	Status bResult = ConfigFile->GetLong(Subkey, Long);
+	if (bResult == Status::OK)
 	{
 		Value = (uint32)Long;
 	}
@@ -430,7 +430,7 @@ bool Config::GetUInt(const std::string& Key, uint32& Value) const
 	return bResult;
 }
 
-bool Config::GetInt(const std::string& Key, int& Value) const
+Status Config::GetInt(const std::string& Key, int& Value) const
 {
 	size_t FilenameEnd = Key.find_first_of(".", 0);
 	std::string Filename = Key.substr(0, FilenameEnd);
@@ -440,11 +440,11 @@ bool Config::GetInt(const std::string& Key, int& Value) const
 	const ConfigFile* ConfigFile = this->Find(Filename);
 	if (!ConfigFile)
 	{
-		return false;
+		return Status::FAILED;
 	}
 	long Long;
-	bool bResult = ConfigFile->GetLong(Subkey, Long);
-	if (bResult == 0)
+	Status bResult = ConfigFile->GetLong(Subkey, Long);
+	if (bResult == Status::OK)
 	{
 		Value = (int)Long;
 	}
@@ -452,7 +452,7 @@ bool Config::GetInt(const std::string& Key, int& Value) const
 	return bResult;
 }
 
-bool Config::GetDouble(const std::string& Key, double& Value) const
+Status Config::GetDouble(const std::string& Key, double& Value) const
 {
 	size_t FilenameEnd = Key.find_first_of(".", 0);
 	std::string Filename = Key.substr(0, FilenameEnd);
@@ -462,12 +462,12 @@ bool Config::GetDouble(const std::string& Key, double& Value) const
 	const ConfigFile* ConfigFile = this->Find(Filename);
 	if (!ConfigFile)
 	{
-		return false;
+		return Status::FAILED;
 	}
 	return ConfigFile->GetDouble(Subkey, Value);
 }
 
-bool Config::GetFloat(const std::string& Key, float& Value) const
+Status Config::GetFloat(const std::string& Key, float& Value) const
 {
 	size_t FilenameEnd = Key.find_first_of(".", 0);
 	std::string Filename = Key.substr(0, FilenameEnd);
@@ -477,11 +477,11 @@ bool Config::GetFloat(const std::string& Key, float& Value) const
 	const ConfigFile* ConfigFile = this->Find(Filename);
 	if (!ConfigFile)
 	{
-		return false;
+		return Status::FAILED;
 	}
 	double Double;
-	bool bResult = ConfigFile->GetDouble(Subkey, Double);
-	if (bResult == 0)
+	Status bResult = ConfigFile->GetDouble(Subkey, Double);
+	if (bResult == Status::OK)
 	{
 		Value = (float)Double;
 	}
@@ -490,52 +490,52 @@ bool Config::GetFloat(const std::string& Key, float& Value) const
 }
 
 // deprecated
-bool Config::GetString(std::string const& Section, std::string const& Key, std::string& Value, std::string const& Filename) const
+Status Config::GetString(std::string const& Section, std::string const& Key, std::string& Value, std::string const& Filename) const
 {
 	const ConfigFile* ConfigFile = this->Find(Filename);
 	if (!ConfigFile)
 	{
-		return "";
+		return Status::FAILED;
 	}
 
 	return ConfigFile->GetString(Section.c_str(), Key.c_str(), Value);
 }
 
-bool Config::GetBool(std::string const& Section, std::string const& Key, bool& Value, const std::string& Filename) const
+Status Config::GetBool(std::string const& Section, std::string const& Key, bool& Value, const std::string& Filename) const
 {
 	const ConfigFile* ConfigFile = this->Find(Filename);
 	if (!ConfigFile)
 	{
-		return false;
+		return Status::FAILED;
 	}
 	return ConfigFile->GetBoolean(Section.c_str(), Key.c_str(), Value);
 }
 
-bool Config::GetLong(std::string const& Section, std::string const& Key, long& Value, const std::string& Filename) const
+Status Config::GetLong(std::string const& Section, std::string const& Key, long& Value, const std::string& Filename) const
 {
 	const ConfigFile* ConfigFile = this->Find(Filename);
 	if (!ConfigFile)
 	{
-		return false;
+		return Status::FAILED;
 	}
 	return ConfigFile->GetLong(Section.c_str(), Key.c_str(), Value);
 }
 
-bool Config::GetUInt(std::string const& section, std::string const& Key, uint32& Value, std::string const& Filename) const
+Status Config::GetUInt(std::string const& section, std::string const& Key, uint32& Value, std::string const& Filename) const
 {
-	return false;
+	return Status::FAILED;
 }
 
-bool Config::GetInt(std::string const& Section, std::string const& Key, int& Value, const std::string& Filename) const
+Status Config::GetInt(std::string const& Section, std::string const& Key, int& Value, const std::string& Filename) const
 {
 	const ConfigFile* ConfigFile = this->Find(Filename);
 	if (!ConfigFile)
 	{
-		return false;
+		return Status::FAILED;
 	}
 	long Long;
-	bool bResult = ConfigFile->GetLong(Section.c_str(), Key.c_str(), Long);
-	if (bResult == 0)
+	Status bResult = ConfigFile->GetLong(Section.c_str(), Key.c_str(), Long);
+	if (bResult == Status::OK)
 	{
 		Value = (int)Long;
 	}
@@ -543,26 +543,26 @@ bool Config::GetInt(std::string const& Section, std::string const& Key, int& Val
 	return bResult;
 }
 
-bool Config::GetDouble(std::string const& Section, std::string const& Key, double& Value, const std::string& Filename) const
+Status Config::GetDouble(std::string const& Section, std::string const& Key, double& Value, const std::string& Filename) const
 {
 	const ConfigFile* ConfigFile = this->Find(Filename);
 	if (!ConfigFile)
 	{
-		return false;
+		return Status::FAILED;
 	}
 	return ConfigFile->GetDouble(Section.c_str(), Key.c_str(), Value);
 }
 
-bool Config::GetFloat(std::string const& Section, std::string const& Key, float& Value, const std::string& Filename) const
+Status Config::GetFloat(std::string const& Section, std::string const& Key, float& Value, const std::string& Filename) const
 {
 	const ConfigFile* ConfigFile = this->Find(Filename);
 	if (!ConfigFile)
 	{
-		return false;
+		return Status::FAILED;
 	}
 	double Double;
-	bool bResult = ConfigFile->GetDouble(Section.c_str(), Key.c_str(), Double);
-	if (bResult == 0)
+	Status bResult = ConfigFile->GetDouble(Section.c_str(), Key.c_str(), Double);
+	if (bResult == Status::OK)
 	{
 		Value = (float)Double;
 	}

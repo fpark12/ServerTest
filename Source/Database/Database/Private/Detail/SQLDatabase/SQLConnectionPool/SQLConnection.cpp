@@ -21,13 +21,13 @@ SQLConnection::~SQLConnection()
 	}
 }
 
-uint32 SQLConnection::Connect()
+Status SQLConnection::Connect()
 {
 	MYSQL* initMysql = mysql_init(NULL);
 	if (!initMysql)
 	{
 		// TODO Error Log: not enough memory to spawn a new mysql connection handle
-		return RC_FAILED;
+		return SC::FAILED;
 	}
 
 	mysql_options(initMysql, MYSQL_SET_CHARSET_NAME, "utf8");
@@ -43,7 +43,7 @@ uint32 SQLConnection::Connect()
 		uint32 error_code = mysql_errno(initMysql);
 		mysql_print_error(initMysql);
 		mysql_close(initMysql);
-		return error_code;
+		return SC::FAILED;
 	}
 
 	// TODO Logger: Get library & server version info
@@ -55,37 +55,37 @@ uint32 SQLConnection::Connect()
 	mysql_autocommit(MySqlHandle, 1); //Turn on auto commit mode
 
 	mysql_set_character_set(MySqlHandle, "utf8");
-	return RC_SUCCESS;
+	return SC::OK;
 }
 
-uint32 SQLConnection::InitPreparedStatements(std::vector<char*>& preparedStmtStrings)
+Status SQLConnection::InitPreparedStatements(std::vector<char*>& preparedStmtStrings)
 {
 	for (auto& stmt : preparedStmtStrings)
 	{
-		if (PrepareStatement(stmt))
+		if (SC::OK != PrepareStatement(stmt))
 		{
 			//TODO Error Handling
 		}
 	}
-	return RC_SUCCESS;
+	return SC::OK;
 }
 
-uint32 SQLConnection::PrepareStatement(char* stmtString)
+Status SQLConnection::PrepareStatement(char* stmtString)
 {
 	MYSQL_STMT* MySQLStatement = mysql_stmt_init(MySqlHandle);
 	if (!MySQLStatement)
 	{
 		//TODO Error handling
-		return RC_FAILED;
+		return SC::FAILED;
 	}
 
 	if (mysql_stmt_prepare(MySQLStatement, stmtString, static_cast<unsigned long>(strlen(stmtString))))
 	{
 		//TODO Error handling
-		return RC_FAILED;
+		return SC::FAILED;
 	}
 
 	PreparedStatements.push_back(MySQLStatement);
-	return RC_SUCCESS;
+	return SC::OK;
 }
 

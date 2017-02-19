@@ -36,19 +36,18 @@ void worker_thread()
 
 int main()
 {
-	bool Result = false;
+	Status Result = Status::OK;
 	// Initialize Database Connection
 	SQLConnectionPoolInfo connPoolInfo;
 	Result = GConfig.Load("DatabaseTest.ini");
-	GConfig.GetString("DatabseTest.LoginDatabase.Hostname", connPoolInfo.Hostname);
-	connPoolInfo.Hostname = "127.0.0.1";
-	connPoolInfo.Port = 3306;
-	connPoolInfo.Username = "root";
-	connPoolInfo.Password = "password";
-	connPoolInfo.Schema = "test";
-	connPoolInfo.ConnectionCount = 1;
+	Result = GConfig.GetString("DatabaseTest.LoginDatabase.Hostname", connPoolInfo.Hostname);
+	Result = GConfig.GetUInt("DatabaseTest.LoginDatabase.Port", connPoolInfo.Port);
+	Result = GConfig.GetString("DatabaseTest.LoginDatabase.Username", connPoolInfo.Username);
+	Result = GConfig.GetString("DatabaseTest.LoginDatabase.Password", connPoolInfo.Password);
+	Result = GConfig.GetString("DatabaseTest.LoginDatabase.Schema", connPoolInfo.Schema);
+	Result = GConfig.GetUInt("DatabaseTest.LoginDatabase.ConnectionCount", connPoolInfo.ConnectionCount);
 	GDatabase.AddSchema(0, connPoolInfo);
-
+	GDatabase.SpawnSQLConnections();
 	// Prepared Statement
 
 
@@ -57,7 +56,7 @@ int main()
 	if (!initMysql1)
 	{
 		// TODO Error Log: not enough memory to spawn a new mysql connection handle
-		return RC_FAILED;
+		return 1;
 	}
 
 	MySqlHandle1 = mysql_real_connect(initMysql1, "127.0.0.1",

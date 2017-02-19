@@ -46,9 +46,9 @@ public:
 	}
 	SQLConnection(SQLConnectionInfo& _info);
 	~SQLConnection();
-	uint32 Connect();
+	Status Connect();
 
-	virtual uint32 InitPreparedStatements(std::vector<char*>& preparedStmtStrings);
+	virtual Status InitPreparedStatements(std::vector<char*>& preparedStmtStrings);
 	
-	uint32 PrepareStatement(char* stmtString);
+	Status PrepareStatement(char* stmtString);
 };

@@ -16,7 +16,7 @@ SQLTask::~SQLTask()
 
 }
 
-uint32 SQLTask::Execute()
+Status SQLTask::Execute()
 {
 	return Operation->Execute();
 }

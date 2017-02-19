@@ -15,7 +15,7 @@ public:
 
 	~SQLTask();
 
-	uint32 Execute();
+	Status Execute();
 
 protected:
 	// disable SQLTask creation, 

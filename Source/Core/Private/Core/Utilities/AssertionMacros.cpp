@@ -92,3 +92,79 @@ void AbortHandler(int /*sigval*/)
 	*((volatile int*)NULL) = 0;
 	exit(1);
 }
+
+const Status Status::OK = Status();
+const Status Status::FAILED = Status(EStatusCode::FAILED, "FAILED");
+const Status Status::UNKNOWN = Status(EStatusCode::UNKNOWN, "UNKNOWN");
+
+
+Status::Status() : StatusCode(EStatusCode::OK)
+{
+}
+
+Status::Status(EStatusCode statusCode, std::string errorMessage)
+	: StatusCode(statusCode)
+{
+	if (StatusCode != EStatusCode::OK) {
+		ErrorMessage = errorMessage;
+	}
+}
+
+Status::Status(const Status& other)
+	: StatusCode(other.StatusCode), ErrorMessage(other.ErrorMessage)
+{
+}
+
+Status& Status::operator=(const Status& other)
+{
+	StatusCode = other.StatusCode;
+	ErrorMessage = other.ErrorMessage;
+	return *this;
+}
+
+bool Status::operator==(const Status& x) const
+{
+	return (StatusCode == x.StatusCode) &&
+		(ErrorMessage == x.ErrorMessage);
+}
+
+Status& Status::operator<<(const Status& other)
+{
+	// TODO: Finish this
+	/*
+	if (other.StatusCode != EStatusCode::OK)
+	{
+	}
+	*/
+	return *this;
+}
+
+
+
+inline std::string Status::StatusCodeEnumToString(EStatusCode code) const
+{
+	switch (code) {
+	case EStatusCode::OK:
+		return "OK";
+	case EStatusCode::FAILED:
+		return "FAILED";
+	case EStatusCode::UNKNOWN:
+		return "UNKNOWN";
+	}
+}
+
+std::string Status::ToString() const
+{
+	if (StatusCode == EStatusCode::OK) {
+		return "OK";
+	}
+	else {
+		if (ErrorMessage.empty()) {
+			return StatusCodeEnumToString(StatusCode);
+		}
+		else {
+			return StatusCodeEnumToString(StatusCode) + ":" +
+				ErrorMessage;
+		}
+	}
+}

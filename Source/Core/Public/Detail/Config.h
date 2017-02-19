@@ -33,27 +33,27 @@ public:
 	// first error on parse error, or -1 on file open error.
 	int LoadFile(std::string Filename);
 
-	bool GetString(std::string Key, std::string& Output) const;
-	bool GetLong(std::string Key, long& Output) const;
-	bool GetDouble(std::string Key, double& Output) const;
-	bool GetBoolean(std::string Key, bool& Output) const;
+	Status GetString(std::string Key, std::string& Output) const;
+	Status GetLong(std::string Key, long& Output) const;
+	Status GetDouble(std::string Key, double& Output) const;
+	Status GetBoolean(std::string Key, bool& Output) const;
 
 	// Get a string value from INI file, returning default_value if not found.
-	bool GetString(std::string section, std::string name, std::string& OutString) const;
+	Status GetString(std::string section, std::string name, std::string& OutString) const;
 
 	// Get an integer (long) value from INI file, returning default_value if
 	// not found or not a valid integer (decimal "1234", "-1234", or hex "0x4d2").
-	bool GetLong(std::string section, std::string name, long& Output) const;
+	Status GetLong(std::string section, std::string name, long& Output) const;
 
 	// Get a real (floating point double) value from INI file, returning
 	// default_value if not found or not a valid floating point value
 	// according to strtod().
-	bool GetDouble(std::string section, std::string name, double& Output) const;
+	Status GetDouble(std::string section, std::string name, double& Output) const;
 
 	// Get a boolean value from INI file, returning default_value if not found or if
 	// not a valid true/false value. Valid true values are "true", "yes", "on", "1",
 	// and valid false values are "false", "no", "off", "0" (not case sensitive).
-	bool GetBoolean(std::string section, std::string name, bool& Output) const;
+	Status GetBoolean(std::string section, std::string name, bool& Output) const;
 
 	// Returns all the section names from the INI file, in alphabetical order, but in the
 	// original casing
@@ -91,28 +91,28 @@ private:
 
 public:
 	// Method used only for loading main configuration files
-	bool Load(std::string const& Filename);
-	bool Unload(std::string const& Filename);
-	bool Reload(std::string const& Filename);
+	Status Load(std::string const& Filename);
+	Status Unload(std::string const& Filename);
+	Status Reload(std::string const& Filename);
 
 	const ConfigFile* GetFile(std::string const& Filename);
 	std::list<std::string> GetFilenames() const;
 	std::list<std::string> GetKeysByString(std::string const& Key, std::string const& Filename) const;
 	std::set<std::string> GetKeys(std::string const& Filename) const;
 
-	bool GetString(const std::string& Key, std::string& Value) const;
-	bool GetBool(const std::string& Key, bool& Value) const;
-	bool GetLong(const std::string& Key, long& Value) const;
-	bool GetUInt(const std::string& Key, uint32& Value) const;
-	bool GetInt(const std::string& Key, int& Value) const;
-	bool GetDouble(const std::string& Key, double& Value) const;
-	bool GetFloat(const std::string& Key, float& Value) const;
+	Status GetString(const std::string& Key, std::string& Value) const;
+	Status GetBool(const std::string& Key, bool& Value) const;
+	Status GetLong(const std::string& Key, long& Value) const;
+	Status GetUInt(const std::string& Key, uint32& Value) const;
+	Status GetInt(const std::string& Key, int& Value) const;
+	Status GetDouble(const std::string& Key, double& Value) const;
+	Status GetFloat(const std::string& Key, float& Value) const;
 
-	bool GetString(std::string const& section, std::string const& Key, std::string& Value, std::string const& Filename) const;
-	bool GetBool(std::string const& section, std::string const& Key, bool& Value, std::string const& Filename) const;
-	bool GetLong(std::string const& section, std::string const& Key, long& Value, std::string const& Filename) const;
-	bool GetUInt(std::string const& section, std::string const& Key, uint32& Value, std::string const& Filename) const;
-	bool GetInt(std::string const& section, std::string const& Key, int& Value, std::string const& Filename) const;
-	bool GetDouble(std::string const& section, std::string const& Key, double& Value, std::string const& Filename) const;
-	bool GetFloat(std::string const& section, std::string const& Key, float& Value, std::string const& Filename) const;
+	Status GetString(std::string const& section, std::string const& Key, std::string& Value, std::string const& Filename) const;
+	Status GetBool(std::string const& section, std::string const& Key, bool& Value, std::string const& Filename) const;
+	Status GetLong(std::string const& section, std::string const& Key, long& Value, std::string const& Filename) const;
+	Status GetUInt(std::string const& section, std::string const& Key, uint32& Value, std::string const& Filename) const;
+	Status GetInt(std::string const& section, std::string const& Key, int& Value, std::string const& Filename) const;
+	Status GetDouble(std::string const& section, std::string const& Key, double& Value, std::string const& Filename) const;
+	Status GetFloat(std::string const& section, std::string const& Key, float& Value, std::string const& Filename) const;
 };

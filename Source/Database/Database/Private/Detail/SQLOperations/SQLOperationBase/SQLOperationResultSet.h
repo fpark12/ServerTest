@@ -30,6 +30,6 @@ struct SQLOperationResultSet
 	std::string GetResultString(uint8 Index);
 	std::vector<uint8> GetResultBinary(uint8 Index, std::size_t Size);
 
-	uint32 SizeForType(MYSQL_FIELD* field);
+	size_t SizeOfField(MYSQL_FIELD* field);
 
 };

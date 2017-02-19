@@ -47,8 +47,10 @@ if(TARGET ${PROJECT_NAME})
 				file(READ "${${projName}_BINARY_DIR}/proto.stamp2" oldProtoStamp)
 			endif()
 
-			#if (NOT "${oldProtoStamp}" STREQUAL "${newProtoStamp}")
-			if (true AND ProtoCompiler)
+			if (NOT "${oldProtoStamp}" STREQUAL "${newProtoStamp}")
+				message("oldProtoStamp: ${oldProtoStamp}")
+				message("newProtoStamp: ${newProtoStamp}")
+			#if (true AND ProtoCompiler)
 				message("${PROJECT_NAME}: Detected changes to .proto files in ${projName}. Recompiling...")
 
 				foreach(PROTO_FILE ${protoFiles})
@@ -77,7 +79,7 @@ if(TARGET ${PROJECT_NAME})
 				endforeach()
 				
 				
-				file(WRITE ${${PROJECT_NAME}_BINARY_DIR}/proto.stamp2 "${newProtoStamp}")
+				file(WRITE ${${projName}_BINARY_DIR}/proto.stamp2 "${newProtoStamp}")
 			endif()
 
 			set(newProtoSourceList "")
