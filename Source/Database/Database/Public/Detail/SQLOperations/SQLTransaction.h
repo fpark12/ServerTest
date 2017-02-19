@@ -36,7 +36,7 @@ public:
 	{
 		if (Statements.empty())
 		{
-			return SC::FAILED;
+			return Status::FAILED;
 		}
 
 		std::string stmt = Statements.back();
@@ -50,11 +50,11 @@ public:
 		if (searchCursor != std::string::npos)
 		{
 			stmt.replace(searchCursor, 1, std::to_string(value));
-			return SC::OK;
+			return Status::OK;
 		}
 		else
 		{
-			return SC::FAILED;
+			return Status::FAILED;
 		}
 	}
 
@@ -62,7 +62,7 @@ public:
 	{
 		if (Statements.empty())
 		{
-			return SC::FAILED;
+			return Status::FAILED;
 		}
 
 		std::string stmt = Statements.back();
@@ -76,11 +76,11 @@ public:
 		if (searchCursor != std::string::npos)
 		{
 			stmt.replace(searchCursor, 1, std::to_string(value));
-			return SC::OK;
+			return Status::OK;
 		}
 		else
 		{
-			return SC::FAILED;
+			return Status::FAILED;
 		}
 	}
 
@@ -88,7 +88,7 @@ public:
 	{
 		if (Statements.empty())
 		{
-			return SC::FAILED;
+			return Status::FAILED;
 		}
 
 		std::string stmt = Statements.back();
@@ -102,11 +102,11 @@ public:
 		if (searchCursor != std::string::npos)
 		{
 			stmt.replace(searchCursor, 1, value);
-			return SC::OK;
+			return Status::OK;
 		}
 		else
 		{
-			return SC::FAILED;
+			return Status::FAILED;
 		}
 	}
 
@@ -120,13 +120,13 @@ public:
 		{
 			GConsole.Message("{}: Connection to target schema unavailable.", __FUNCTION__);
 			SQLOperationBase::OperationStatus = SQLOperationBase::SQLOperationStatus::Failed;
-			return SC::FAILED;
+			return Status::FAILED;
 		}
 
 		// begin transaction
-		if (Begin(mySql) != SC::OK)
+		if (Begin(mySql) != Status::OK)
 		{
-			return SC::FAILED;
+			return Status::FAILED;
 		}
 
 		for (auto& stmt: Statements)
@@ -136,18 +136,18 @@ public:
 				const char* err = mysql_error(mySql);
 				GConsole.Message("{}: Error executing \"START TRANSACTION\": {}.", __FUNCTION__, err);
 				SQLOperationBase::OperationStatus = SQLOperationBase::SQLOperationStatus::Failed;
-				if (RollBack(mySql) != SC::OK)
+				if (RollBack(mySql) != Status::OK)
 				{
 					GConsole.Message("{}: Rollback for last transaction unsuccessful, database might be tinted.", __FUNCTION__);
 				}
-				return SC::FAILED;
+				return Status::FAILED;
 			}
 
-			return SC::OK;
+			return Status::OK;
 		}
 
 
-		return SC::OK;
+		return Status::OK;
 	}
 
 private:

@@ -13,15 +13,16 @@ private:
 
 public:
 
-	void AddSchema(uint32 _index, SQLConnectionPoolInfo& _pool_info);
+	void AddSchema(uint32 schemaIndex, SQLConnectionPoolInfo& poolInfo);
 
-	SQLConnection* GetAvaliableSQLConnection(uint32 _schema_idx);
+	SQLConnection* GetAvaliableSQLConnection(uint32 schemaIndex);
+	SQLConnectionPool* GetSQLConnectionPool(uint32 schemaIndex);
 
 	Status SpawnSQLConnections();
 
-	Status AddTask(SQLTask* _task);
+	Status AddTask(SQLTask* task);
 
-	Status BulkAddTasks(std::vector<SQLTask*>& _tasks);
+	Status BulkAddTasks(std::vector<SQLTask*>& tasks);
 
 	SQLTask* NextTask();
 };

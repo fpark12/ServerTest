@@ -28,10 +28,10 @@ public:
 	SQLConnectionPool();
 	SQLConnectionPool(SQLConnectionPool&&) = default;
 	SQLConnectionPool& operator=(SQLConnectionPool&&) = default;
-
 	SQLConnectionPool(SQLConnectionPoolInfo& info);
 	~SQLConnectionPool() = default;
 
+	Status AddPreparedStatementString(uint32 statementStringIndex, char* statementString);
 	Status SpawnConnections();
 
 	SQLConnection* GetAvaliableSQLConnection();

@@ -1,53 +1,58 @@
 #include "Public\Detail\SQLDatabase.h"
 
-void SQLDatabase::AddSchema(uint32 _index, SQLConnectionPoolInfo& _pool_info)
+void SQLDatabase::AddSchema(uint32 schemaIndex, SQLConnectionPoolInfo& poolInfo)
 {
-	if (ConnectionPool.size() <= _index)
+	if (ConnectionPool.size() <= schemaIndex)
 	{
-		ConnectionPool.resize(_index + 1);
-		ConnectionPool[_index] = std::move(SQLConnectionPool(_pool_info));
+		ConnectionPool.resize(schemaIndex + 1);
+		ConnectionPool[schemaIndex] = std::move(SQLConnectionPool(poolInfo));
 	}
 }
 
-SQLConnection* SQLDatabase::GetAvaliableSQLConnection(uint32 _schema_idx)
+SQLConnection* SQLDatabase::GetAvaliableSQLConnection(uint32 schemaIndex)
 {
-	return ConnectionPool[_schema_idx].GetAvaliableSQLConnection();
+	return ConnectionPool[schemaIndex].GetAvaliableSQLConnection();
+}
+
+SQLConnectionPool * SQLDatabase::GetSQLConnectionPool(uint32 schemaIndex)
+{
+	return &ConnectionPool[schemaIndex];
 }
 
 Status SQLDatabase::SpawnSQLConnections()
 {
 	for (auto& pool : ConnectionPool)
 	{
-		if (SC::OK != pool.SpawnConnections())
+		if (Status::OK != pool.SpawnConnections())
 		{
 			//TODO Error Handling
-			return SC::FAILED;
+			return Status::FAILED;
 		}
 	}
-	return SC::OK;
+	return Status::OK;
 }
 
-Status SQLDatabase::AddTask(SQLTask* _task)
+Status SQLDatabase::AddTask(SQLTask* task)
 {
-	if (!TaskQueue.try_enqueue(_task))
+	if (!TaskQueue.try_enqueue(task))
 	{
 		//TODO Error handling
-		return SC::FAILED;
+		return Status::FAILED;
 	}
-	return SC::OK;
+	return Status::OK;
 }
 
-Status SQLDatabase::BulkAddTasks(std::vector<SQLTask*>& _tasks)
+Status SQLDatabase::BulkAddTasks(std::vector<SQLTask*>& task)
 {
 	if (!
-		TaskQueue.try_enqueue_bulk(std::make_move_iterator(_tasks.begin()),
-			_tasks.size())
+		TaskQueue.try_enqueue_bulk(std::make_move_iterator(task.begin()),
+			task.size())
 		)
 	{
 		//TODO Error handling
-		return SC::FAILED;
+		return Status::FAILED;
 	}
-	return SC::OK;
+	return Status::OK;
 }
 
 SQLTask* SQLDatabase::NextTask()

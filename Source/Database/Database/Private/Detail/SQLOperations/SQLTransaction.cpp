@@ -7,10 +7,10 @@ Status SQLTransaction::Begin(MYSQL* mySqlHandle)
 		const char* err = mysql_error(mySqlHandle);
 		GConsole.Message("{}: Error executing \"START TRANSACTION\": {}.", __FUNCTION__, err);
 		SQLOperationBase::OperationStatus = SQLOperationBase::SQLOperationStatus::Failed;
-		return SC::FAILED;
+		return Status::FAILED;
 	}
 
-	return SC::OK;
+	return Status::OK;
 }
 
 Status SQLTransaction::Commit(MYSQL* mySqlHandle)
@@ -20,10 +20,10 @@ Status SQLTransaction::Commit(MYSQL* mySqlHandle)
 		const char* err = mysql_error(mySqlHandle);
 		GConsole.Message("{}: Error executing \"COMMIT\": {}.", __FUNCTION__, err);
 		SQLOperationBase::OperationStatus = SQLOperationBase::SQLOperationStatus::Failed;
-		return SC::FAILED;
+		return Status::FAILED;
 	}
 
-	return SC::OK;
+	return Status::OK;
 }
 
 Status SQLTransaction::RollBack(MYSQL* mySqlHandle)
@@ -33,8 +33,8 @@ Status SQLTransaction::RollBack(MYSQL* mySqlHandle)
 		const char* err = mysql_error(mySqlHandle);
 		GConsole.Message("{}: Error executing \"ROLLBACK\": {}.", __FUNCTION__, err);
 		SQLOperationBase::OperationStatus = SQLOperationBase::SQLOperationStatus::Failed;
-		return SC::FAILED;
+		return Status::FAILED;
 	}
 
-	return SC::OK;
+	return Status::OK;
 }

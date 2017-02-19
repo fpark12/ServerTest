@@ -48,6 +48,9 @@ int main()
 	Result = GConfig.GetUInt("DatabaseTest.LoginDatabase.ConnectionCount", connPoolInfo.ConnectionCount);
 	GDatabase.AddSchema(0, connPoolInfo);
 	GDatabase.SpawnSQLConnections();
+	SQLConnectionPool* connPool = GDatabase.GetSQLConnectionPool(0);
+
+
 	// Prepared Statement
 
 
