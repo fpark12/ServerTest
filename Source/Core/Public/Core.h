@@ -1,5 +1,11 @@
 #pragma once
-
+#include "Public/Detail/Console.h"
+#include "Public/Detail/GUI.h"
+#include "Public/Detail/Config.h"
+#include "Public/Detail/Logger.h"
+#include "Public/Detail/Timer.h"
+#include "Public/Detail/Network.h"
+//#include "Public/Detail/SQLDatabase.h"
 
 namespace CoreGlobals
 {
@@ -14,6 +20,7 @@ public:
 	Console& ConsoleInstance = Singleton<Console>().Instance();
 	GUI& GUIInstance = Singleton<GUI>().Instance();
 	Logger& LoggerInstance = Singleton<Logger>().Instance();
+	//Database& DatabaseInstance = Singleton<Database>().Instance();
 
 	#define GConfig GCore.ConfigInstance
 	#define GConsole GCore.ConsoleInstance
