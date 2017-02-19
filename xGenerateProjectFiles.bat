@@ -118,6 +118,7 @@ goto GenerateSolutionIcon
 :Rebuild
 pushd %~dp0\Build
 "%CMakePath%" -G %CMakeArg% %~dp0 || goto Error_FailedToGenerateSolution
+"%CMakePath%" -G %CMakeArg% %~dp0 || goto Error_FailedToGenerateSolution
 popd
 goto GenerateSolutionIcon
 
@@ -140,7 +141,7 @@ del %SCRIPT%
 1>NUL 2>NUL "%CMakePath%" -P "%~dp0/Purify/Core/RemoveAllBuild.cmake"
 
 rem ## Finish up
-goto Exit
+goto GenerateSuccess
 
 :Error_MissingGit
 echo.
@@ -160,8 +161,33 @@ goto Exit
 echo.
 echo GenerateProjectFiles ERROR: Error detected while generating.
 echo.
-pause
+set /p "=> Press enter to regenerate or press any other key to exit... " <nul
+PowerShell Exit($host.UI.RawUI.ReadKey('NoEcho,IncludeKeyDown').VirtualKeyCode);
+set KeyCode=%ErrorLevel%
+echo.
+cls
+if %KeyCode%==13 (
+goto Rebuild
+) else (
+echo %KeyCode%
+goto Exit
+)
+
+:GenerateSuccess
+echo.
+set /p "=> Project successfully generated. Press enter to regenerate or press any other key to exit... " <nul
+PowerShell Exit($host.UI.RawUI.ReadKey('NoEcho,IncludeKeyDown').VirtualKeyCode);
+set KeyCode=%ErrorLevel%
+echo.
+cls
+if %KeyCode%==13 (
+goto Rebuild
+) else (
+echo %KeyCode%
+goto Exit
+)
 
 :Exit
 rem ## Restore original CWD in case we change it
 popd
+
