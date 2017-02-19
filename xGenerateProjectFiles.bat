@@ -110,14 +110,14 @@ if NOT EXIST %~dp0\Build\CMakeCache.txt (
 Attrib +h +s +r Build
 pushd %~dp0\Build
 rem ## build twice here because first build generates cache
-1>NUL 2>NUL "%CMakePath%" -G %CMakeArg% %~dp0
-1>NUL 2>NUL "%CMakePath%" -G %CMakeArg% %~dp0
+"%CMakePath%" -G %CMakeArg% %~dp0 || goto Error_FailedToGenerateSolution
+"%CMakePath%" -G %CMakeArg% %~dp0 || goto Error_FailedToGenerateSolution
 popd
 goto GenerateSolutionIcon
 
 :Rebuild
 pushd %~dp0\Build
-1>NUL 2>NUL "%CMakePath%" -G %CMakeArg% %~dp0
+"%CMakePath%" -G %CMakeArg% %~dp0 || goto Error_FailedToGenerateSolution
 popd
 goto GenerateSolutionIcon
 
@@ -156,6 +156,11 @@ echo.
 pause
 goto Exit
 
+:Error_FailedToGenerateSolution:
+echo.
+echo GenerateProjectFiles ERROR: Error detected while generating.
+echo.
+pause
 
 :Exit
 rem ## Restore original CWD in case we change it
