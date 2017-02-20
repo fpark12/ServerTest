@@ -111,6 +111,8 @@ if NOT EXIST %~dp0\Build\CMakeCache.txt (
 )
 
 :InitialBuild
+2>NUL mkdir x64
+Attrib +h +s +r x64
 2>NUL mkdir Build
 Attrib +h +s +r Build
 pushd %~dp0\Build
@@ -120,6 +122,8 @@ popd
 goto GenerateSolutionIcon
 
 :Rebuild
+2>NUL mkdir x64
+Attrib +h +s +r x64
 pushd %~dp0\Build
 "%CMakePath%" -G %CMakeArg% %~dp0 -DCMAKE_BUILD_FLAG=%CMAKE_BUILD_FLAG% || goto Error_FailedToGenerateSolution
 popd
