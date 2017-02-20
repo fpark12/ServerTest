@@ -8,7 +8,7 @@ if(MSVC)
 	add_definitions(/wd4244 /wd4267 /wd4331 /wd4273 /wd4311 /wd4996)
 endif()
 
-file( READ opensslconf.h.in CONF )
+file( READ ${${PROJECT_NAME}_SOURCE_DIR}/opensslconf.h.in CONF )
 string( REPLACE "#undef OPENSSL_EXPORT_VAR_AS_FUNCTION" "#cmakedefine OPENSSL_EXPORT_VAR_AS_FUNCTION" CONF "${CONF}" )
 
 set( CONF "
@@ -23,7 +23,7 @@ set( CONF "
 #define OPENSSL_NO_SCTP
 #define OPENSSL_NO_EC_NISTP_64_GCC_128
 ${CONF}" )
-file( WRITE ${CMAKE_CURRENT_BINARY_DIR}/openssl/opensslconf.h.in "${CONF}" )
+file( WRITE ${${PROJECT_NAME}_BINARY_DIR}/openssl/opensslconf.h.in "${CONF}" )
 
 ## AND MINGW AND NOT CYGWIN? or? at least msvc needs OPENSSL_EXPORT_VAR_AS_FUNCTION
 add_definitions( -DOPENSSL_NO_ASM )
@@ -41,8 +41,8 @@ if( WIN32 )
   set( OPENSSL_EXPORT_VAR_AS_FUNCTION true )
 endif()
 
-configure_file ( buildinf.h.in ${CMAKE_CURRENT_BINARY_DIR}/buildinf.h )
-configure_file( ${CMAKE_CURRENT_BINARY_DIR}/openssl/opensslconf.h.in ${CMAKE_CURRENT_BINARY_DIR}/openssl/opensslconf.h )
+configure_file ( ${${PROJECT_NAME}_SOURCE_DIR}/buildinf.h.in ${${PROJECT_NAME}_BINARY_DIR}/buildinf.h )
+configure_file( ${${PROJECT_NAME}_BINARY_DIR}/openssl/opensslconf.h.in ${${PROJECT_NAME}_BINARY_DIR}/openssl/opensslconf.h )
 
 #~2DO: set BUILDINF_DATE to `date LC_ALL=C LC_TIME=C`
 #configure_file ( buildinf.h.cmake buildinf.h )
