@@ -3,8 +3,7 @@
 rem ## back up CWD
 pushd "%~dp0"
 
-set CMAKE_BUILD_STAGE_FLAG=2
-
+set CMAKE_BUILD_FLAG="LITE"
 CALL xGenerateProjectFiles.bat
 
 :Exit

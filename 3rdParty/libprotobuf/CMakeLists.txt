@@ -20,9 +20,9 @@ if(TARGET ${PROJECT_NAME})
 	
 	# Find the protobuf compiler first
 	if(MSVC)
-		file(GLOB_RECURSE ProtoCompiler ${CMAKE_CURRENT_SOURCE_DIR}/protoc.exe)
+		file(GLOB_RECURSE ProtoCompiler ${${PROJECT_NAME}_SOURCE_DIR}/protoc.exe)
 	else()
-		file(GLOB_RECURSE ProtoCompiler ${CMAKE_CURRENT_SOURCE_DIR}/protoc)
+		file(GLOB_RECURSE ProtoCompiler ${${PROJECT_NAME}_SOURCE_DIR}/protoc)
 	endif()
 
 	# Loop thru all projects and compile .proto
@@ -31,7 +31,6 @@ if(TARGET ${PROJECT_NAME})
 		if(protoFiles)
 			#message("${projBinDir} has: ${protoFiles}")
 			get_folder_name(${projBinDir} projName)
-
 			file(GLOB_RECURSE existingProtoSourceList ${${projName}_BINARY_DIR}/*.pb.cc ${${projName}_BINARY_DIR}/*.pb.h)
 
 			#build new proto stamp
@@ -121,10 +120,10 @@ if(TARGET ${PROJECT_NAME})
 			${CMAKE_COMMAND}
 			-DbuildDir=${CMAKE_BINARY_DIR}
 			-DprojBuildDir=${${PROJECT_NAME}_BINARY_DIR}
-			-DprojDir=${CMAKE_CURRENT_SOURCE_DIR}
+			-DprojDir=${${PROJECT_NAME}_SOURCE_DIR}
 			-DslnDir=${CMAKE_SOURCE_DIR}
 			-Dgenerator=${CMAKE_GENERATOR}
-			-P ${CMAKE_CURRENT_SOURCE_DIR}/UpdateProto.cmake
+			-P ${${PROJECT_NAME}_SOURCE_DIR}/UpdateProto.cmake
 		#COMMAND ${CMAKE_COMMAND} -E touch "D:/Github/ServerTest/Build/3rdParty/libprotobuf/CMakeFiles/generate.stamp"
 		#COMMAND ${CMAKE_COMMAND} -E touch "D:/Github/ServerTest/Build/CMakeFiles/generate.stamp"
 		COMMENT "Checking Proto Files..."

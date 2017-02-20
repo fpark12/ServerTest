@@ -16,7 +16,7 @@ ENDIF()
 
 create_project(STATIC "${DEFINE}" "${INCLUDE}" "${LINK}")
 
-message("${ICONV_LIBRARIES}")
+#message("${ICONV_LIBRARIES}")
 
 IF(WIN32)
   SET(SYSTEM_LIBS ws2_32 advapi32 kernel32)

@@ -3,6 +3,10 @@
 rem ## back up CWD
 pushd "%~dp0"
 
+if not defined CMAKE_BUILD_FLAG (
+	set CMAKE_BUILD_FLAG="FULL"
+)
+
 rem ## Find Git from GitHub
 for /d %%a in ("%LOCALAPPDATA%\GitHub\PortableGit*") do (set Git=%%~fa\cmd\Git.exe)
 if exist "%Git%" ( goto GitFound )
@@ -99,12 +103,7 @@ call "%VsComnToolsPath%/../../VC/bin/x86_amd64/vcvarsx86_amd64.bat" >NUL
 
 :ReadyToBuild
 echo Setting up project files...
-if defined CMAKE_BUILD_STAGE_FLAG (
-	echo already defined in litebat
-) else (
-	echo not already defined in litebat
-	set CMAKE_BUILD_STAGE_FLAG=1
-)
+echo.
 if NOT EXIST %~dp0\Build\CMakeCache.txt (
 	goto InitialBuild
 ) else (
@@ -116,18 +115,13 @@ if NOT EXIST %~dp0\Build\CMakeCache.txt (
 Attrib +h +s +r Build
 pushd %~dp0\Build
 rem ## build twice here because first build generates cache
-"%CMakePath%" -G %CMakeArg% %~dp0 -DCMAKE_BUILD_STAGE_FLAG=1 || goto Error_FailedToGenerateSolution
-"%CMakePath%" -G %CMakeArg% %~dp0 -DCMAKE_BUILD_STAGE_FLAG=2 || goto Error_FailedToGenerateSolution
+"%CMakePath%" -G %CMakeArg% %~dp0 -DCMAKE_BUILD_FLAG=%CMAKE_BUILD_FLAG% || goto Error_FailedToGenerateSolution
 popd
 goto GenerateSolutionIcon
 
 :Rebuild
 pushd %~dp0\Build
-"%CMakePath%" -G %CMakeArg% %~dp0 -DCMAKE_BUILD_STAGE_FLAG=%CMAKE_BUILD_STAGE_FLAG% || goto Error_FailedToGenerateSolution
-rem ## 
-if not %CMAKE_BUILD_STAGE_FLAG%==2 (
-	"%CMakePath%" -G %CMakeArg% %~dp0 -DCMAKE_BUILD_STAGE_FLAG=2 || goto Error_FailedToGenerateSolution
-)
+"%CMakePath%" -G %CMakeArg% %~dp0 -DCMAKE_BUILD_FLAG=%CMAKE_BUILD_FLAG% || goto Error_FailedToGenerateSolution
 popd
 goto GenerateSolutionIcon
 
