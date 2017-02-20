@@ -93,6 +93,7 @@ constexpr auto crc32(const char *in)
 	return ~crc;
 }
 
+/*
 int main()
 {
 	constexpr auto crc_code = crc32("some-id");
@@ -100,7 +101,7 @@ int main()
 
 	std::cout << std::hex << crc_code << std::endl;
 }
-
+*/
 /*
 class String : public std::string
 {
