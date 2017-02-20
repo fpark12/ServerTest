@@ -1,6 +1,7 @@
 #pragma once
 
 #include <mysql.h>
+#include <sqlpp11/sqlpp11.h>
 /*
 #ifdef min
 #undef min
