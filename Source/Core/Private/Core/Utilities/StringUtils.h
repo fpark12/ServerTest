@@ -102,6 +102,7 @@ int main()
 	std::cout << std::hex << crc_code << std::endl;
 }
 */
+
 /*
 class String : public std::string
 {

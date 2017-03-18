@@ -236,10 +236,17 @@ namespace sqlpp
       // workaround for msvc bug https://connect.microsoft.com/VisualStudio/Feedback/Details/2173269
       //	  template <typename... T>
       //	  using _check = logic::all_t<is_expression_t<T>::value...>;
+#if _MSC_VER > 1900
       template <typename... T>
-      struct _check : logic::all_t<is_expression_t<T>::value...>
+      struct _check : logic::all_t<is_expression_t<T>::value...>...
       {
       };
+#else
+	  template <typename... T>
+	  struct _check : logic::all_t<is_expression_t<T>::value...>
+	  {
+	  };
+#endif
 
       template <typename Check, typename T>
       using _new_statement_t = new_statement_t<Check, Policies, no_having_t, T>;
