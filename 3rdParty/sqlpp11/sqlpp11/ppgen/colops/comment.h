@@ -27,7 +27,13 @@
 #ifndef _sqlpp__ppgen__colops__comment_h
 #define _sqlpp__ppgen__colops__comment_h
 
+#define SQLPP_COMMENT SQLPP_COMMENT
 #define SQLPP_DECLARE_COLUMN_GET_TRAITS_LAZY_SQLPP_COMMENT PROC_SQLPP_COMMENT
 #define SQLPP_DECLARE_COLUMN_GEN_TRAITS_PROC_SQLPP_COMMENT(str) [COMMENT is not implemented]
+
+//shortcut
+#define SQLPP_DECLARE_COLUMN_GET_TRAITS_LAZY_COMMENT PROC_COMMENT
+#define SQLPP_DECLARE_COLUMN_GEN_TRAITS_PROC_COMMENT(str) [COMMENT is not implemented]
+
 
 #endif  // _sqlpp__ppgen__colops__comment_h

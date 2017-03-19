@@ -138,8 +138,6 @@
 // main
 
 #define SQLPP_DECLARE_TABLE_IMPL(table, cols)                                                                      \
-  namespace SQLPP_DECLARE_TABLE_GET_TABLE_NAME(table)                                                              \
-  {                                                                                                                \
     namespace BOOST_PP_CAT(SQLPP_DECLARE_TABLE_GET_TABLE_NAME(table), _)                                           \
     {                                                                                                              \
       BOOST_PP_SEQ_FOR_EACH(SQLPP_DECLARE_COLUMN, ~, cols)                                                         \
@@ -150,7 +148,7 @@
               SQLPP_DECLARE_TABLE_ENUM_COLUMNS, BOOST_PP_CAT(SQLPP_DECLARE_TABLE_GET_TABLE_NAME(table), _), cols)> \
     {                                                                                                              \
       BOOST_PP_IF(BOOST_PP_LESS(BOOST_PP_TUPLE_SIZE(table), 2),                                                    \
-                  BOOST_PP_TUPLE_EAT(),                                                                            \
+                  BOOST_PP_TUPLE_EAT(0),                                                                           \
                   SQLPP_DECLARE_TABLE_GEN_PROPS)(BOOST_PP_EXPAND table)                                            \
                                                                                                                    \
           struct _alias_t                                                                                          \
@@ -177,7 +175,6 @@
       }; /* struct _alias_t */                                                                                     \
                                                                                                                    \
     }; /* struct SQLPP_DECLARE_TABLE_GET_TABLE_NAME(table) */                                                      \
-  }
 
 /***************************************************************************/
 

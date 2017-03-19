@@ -1,6 +1,7 @@
 SET( DEFINE
 )
 SET( INCLUDE
+3rdparty/boost/preprocessor
 libmariadb
 hinnantdate
 )

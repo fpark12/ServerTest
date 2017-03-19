@@ -27,7 +27,12 @@
 #ifndef _sqlpp__ppgen__colops__null_h
 #define _sqlpp__ppgen__colops__null_h
 
+#define SQLPP_NULL SQLPP_NULL
 #define SQLPP_DECLARE_COLUMN_GET_TRAITS_LAZY_SQLPP_NULL PROC_SQLPP_NULL
 #define SQLPP_DECLARE_COLUMN_GEN_TRAITS_PROC_SQLPP_NULL(...) ::sqlpp::tag::can_be_null
+
+// shortcut
+#define SQLPP_DECLARE_COLUMN_GET_TRAITS_LAZY_NULL PROC_NULL
+#define SQLPP_DECLARE_COLUMN_GEN_TRAITS_PROC_NULL(...) ::sqlpp::tag::can_be_null
 
 #endif  // _sqlpp__ppgen__colops__null_h

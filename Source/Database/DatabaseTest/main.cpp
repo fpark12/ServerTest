@@ -15,6 +15,7 @@
 #include <sqlpp11/select.h>
 #include <sqlpp11/transaction.h>
 #include <sqlpp11/update.h>
+
 #include "SampleTable.h"
 
 std::mutex m;
@@ -48,7 +49,11 @@ void worker_thread()
 
 namespace sql = sqlpp::mysql;
 const auto tab = SampleTable{};
+const auto t = TabBar{};
+const auto Users = SQLTable::Users{};
+
 SQLPP_ALIAS_PROVIDER(left);
+SQLPP_ALIAS_PROVIDER(cheese);
 
 void testSelectAll(sql::connection& db, int expectedRowCount)
 {
@@ -96,10 +101,10 @@ int main()
 	// sqlpp11 test
 
 	auto config = std::make_shared<sql::connection_config>();
-	config->user = "root";
+	config->user     = "root";
 	config->password = "password";
 	config->database = "sqlpp_mysql";
-	config->debug = true;
+	config->debug    = true;
 	try
 	{
 		sql::connection db(config);
@@ -116,15 +121,68 @@ int main()
 		sql::connection db(config);
 		db.execute(R"(DROP TABLE IF EXISTS tab_sample)");
 		db.execute(R"(CREATE TABLE tab_sample (
-		alpha bigint(20) AUTO_INCREMENT,
+			alpha bigint(20) AUTO_INCREMENT,
 			beta varchar(255) DEFAULT NULL,
 			gamma bool DEFAULT NULL,
 			PRIMARY KEY (alpha)
 			))");
 		db.execute(R"(DROP TABLE IF EXISTS tab_foo)");
 		db.execute(R"(CREATE TABLE tab_foo (
-		omega bigint(20) DEFAULT NULL
+			omega bigint(20) DEFAULT NULL
 			))");
+
+		db.execute(R"(DROP TABLE IF EXISTS Users)");
+		db.execute(R"(CREATE TABLE Users (
+			ID bigint AUTO_INCREMENT,
+			AccountName varchar(255) NOT NULL,
+			Password varchar(255) NOT NULL,
+			EmailAddress varchar(255) NOT NULL,
+			PRIMARY KEY (ID)
+			))");
+		
+		/*
+		auto s = select(all_of(t)).from(t).where((t.beta.like(parameter(t.beta)) and t.alpha == parameter(t.alpha)) or
+			t.gamma != parameter(t.gamma));
+		auto p = db.prepare(s);
+		p.params.alpha = 7;
+		p.params.alpha = sqlpp::tvin(0);
+		*/
+
+		// Unprepared insert
+		auto s1 = insert_into(Users).set(
+			Users.AccountName  = "fpark12",
+			Users.Password     = "password",
+			Users.EmailAddress = "fpark12@icloud.com");
+		db.run(s1);
+
+		// Prepared insert
+		auto p1 = db.prepare(
+			insert_into(Users).set(
+				Users.AccountName  = parameter(Users.AccountName),
+				Users.Password     = parameter(Users.Password),
+				Users.EmailAddress = parameter(Users.EmailAddress)
+			));
+
+		struct UserInfo
+		{
+			std::string AccountName, Password, EmailAddress;
+		};
+
+		UserInfo input_values[] =
+		{
+			{"yellowtail", "loveSush1"  , "jellyfish3311@gmail.com"},
+			{"tuna"      , "loveSash1m1", "paperfish@gmail.com"    },
+			{"salmon"    , "deliciousme", "peppercorn11@gmail.com" },
+		};
+
+		for (const auto& input : input_values)
+		{
+			//prepared_insert.params.alpha = input.first;
+			p1.params.AccountName  = input.AccountName;
+			p1.params.Password     = input.Password;
+			p1.params.EmailAddress = input.EmailAddress;
+			db.run(p1);
+		}
 
 		testSelectAll(db, 0);
 		db(insert_into(tab).default_values());
