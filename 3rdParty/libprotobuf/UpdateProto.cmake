@@ -5,8 +5,8 @@ foreach(projBinDir ${CMAKE_ALL_PROJECT_DIRS})
 	if(protoFiles)
 
 		#read stamp if exists
-		if(EXISTS ${projBinDir}/proto.stamp)
-			file(READ ${projBinDir}/proto.stamp oldProtoStamp)
+		if(EXISTS ${projBinDir}/proto.stamp2)
+			file(READ ${projBinDir}/proto.stamp2 oldProtoStamp)
 		endif()
 
 		#build new proto stamp
@@ -18,7 +18,7 @@ foreach(projBinDir ${CMAKE_ALL_PROJECT_DIRS})
 		endforeach()
 
 		#write new stamp to file
-		file(WRITE ${projBinDir}/proto.stamp "${newProtoStamp}")
+		file(WRITE ${projBinDir}/proto.stamp2 "${newProtoStamp}")
 		if(NOT "${oldProtoStamp}" STREQUAL "${newProtoStamp}"
 			AND NOT "${oldProtoStamp}" STREQUAL "")
 			#message("NOT EQUAL!!!!!!!!!!!!!!!!!!!!!!")

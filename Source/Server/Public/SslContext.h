@@ -9,12 +9,13 @@ public:
 	void Initialize()
 	{
 		asio::error_code err;
-		bool Res = 0;
+		Status Res;
 
 		std::string CertificateChainFile;
 		std::string PrivateKeyFile;
-		Res |= GConfig.GetString("LoginService.Initialization.CertificatesFile", CertificateChainFile);
-		Res |= GConfig.GetString("LoginService.Initialization.PrivateKeyFile", PrivateKeyFile);
+		// Check incrementally
+		Res = GConfig.GetString("LoginService.Initialization.CertificatesFile", CertificateChainFile);
+		Res = GConfig.GetString("LoginService.Initialization.PrivateKeyFile", PrivateKeyFile);
 
 
 		Context.set_options(asio::ssl::context::no_sslv3, err);

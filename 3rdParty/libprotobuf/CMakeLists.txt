@@ -42,8 +42,10 @@ if(TARGET ${PROJECT_NAME})
 			endforeach()
 
 			#read old stamp
-			if(EXISTS "${${projName}_BINARY_DIR}/proto.stamp2")
-				file(READ "${${projName}_BINARY_DIR}/proto.stamp2" oldProtoStamp)
+			if(EXISTS "${${projName}_BINARY_DIR}/proto.stamp")
+				file(READ "${${projName}_BINARY_DIR}/proto.stamp" oldProtoStamp)
+			else()
+				message("Proto stamp not found: ${${projName}_BINARY_DIR}/proto.stamp")
 			endif()
 
 			if (NOT "${oldProtoStamp}" STREQUAL "${newProtoStamp}")
@@ -78,7 +80,7 @@ if(TARGET ${PROJECT_NAME})
 				endforeach()
 				
 				
-				file(WRITE ${${projName}_BINARY_DIR}/proto.stamp2 "${newProtoStamp}")
+				file(WRITE ${${projName}_BINARY_DIR}/proto.stamp "${newProtoStamp}")
 			endif()
 
 			set(newProtoSourceList "")
