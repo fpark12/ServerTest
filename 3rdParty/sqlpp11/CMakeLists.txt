@@ -9,4 +9,4 @@ SET( LINK
 libmariadb
 hinnantdate
 )
-create_project(STATIC "${DEFINE}" "${INCLUDE}" "${LINK}")
+create_project(STATIC DEFINE INCLUDE LINK)

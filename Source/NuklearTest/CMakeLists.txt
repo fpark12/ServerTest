@@ -6,4 +6,4 @@ GUI
 SET( LINK
 GUI
 )
-create_project(CONSOLE "${DEFINE}" "${INCLUDE}" "${LINK}")
+create_project(CONSOLE DEFINE INCLUDE LINK)

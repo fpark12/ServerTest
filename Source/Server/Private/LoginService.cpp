@@ -16,7 +16,7 @@ Namespace namespaces[] =
 
 bool LoginService::Start(asio::io_service& ioService)
 {
-	bool Res = 0;
+	Status Res;
 	asio::error_code ec;
 	std::string TempExternalAddress;
 	std::string TempLocalAddress;
@@ -24,11 +24,12 @@ bool LoginService::Start(asio::io_service& ioService)
 	asio::ip::tcp::resolver resolver(ioService);
 
 	// "LoginService.Init.IPAddress	"
+	// TODO: incremental error checking
 	BindIP = "0.0.0.0";
-	Res |= GConfig.GetString("LoginService.Initialization.IPAddress", IPAddress);
-	Res |= GConfig.GetString("LoginService.Initialization.ExternalIPAddress", TempExternalAddress);
-	Res |= GConfig.GetString("LoginService.Initialization.LocalIPAddress", TempLocalAddress);
-	Res |= GConfig.GetInt("LoginService.Initialization.Port", Port);
+	Res = GConfig.GetString("LoginService.Initialization.IPAddress", IPAddress);
+	Res = GConfig.GetString("LoginService.Initialization.ExternalIPAddress", TempExternalAddress);
+	Res = GConfig.GetString("LoginService.Initialization.LocalIPAddress", TempLocalAddress);
+	Res = GConfig.GetInt("LoginService.Initialization.Port", Port);
 	if (Port < 0 || Port > 0xFFFF)
 	{
 		//TC_LOG_ERROR("server.rest", "Specified login service port (%d) out of allowed range (1-65535), defaulting to 8081", _port);

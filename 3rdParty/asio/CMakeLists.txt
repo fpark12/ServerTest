@@ -7,4 +7,4 @@ openssl
 SET( LINK
 openssl
 )
-create_project(STATIC "${DEFINE}" "${INCLUDE}" "${LINK}")
+create_project(STATIC DEFINE INCLUDE LINK)

@@ -13,7 +13,7 @@ if(XCODE)
 	add_definitions(-DHAVE_PTHREAD)
 endif()
 
-create_project(STATIC "${DEFINE}" "${INCLUDE}" "${LINK}")
+create_project(STATIC DEFINE INCLUDE LINK)
 #[[
 if(TARGET ${PROJECT_NAME})
 	#message("Running ${CMAKE_CURRENT_SOURCE_DIR}/CMakelists.txt")

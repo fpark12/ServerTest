@@ -47,4 +47,4 @@ configure_file( ${${PROJECT_NAME}_BINARY_DIR}/openssl/opensslconf.h.in ${${PROJE
 #~2DO: set BUILDINF_DATE to `date LC_ALL=C LC_TIME=C`
 #configure_file ( buildinf.h.cmake buildinf.h )
 
-create_project(STATIC "${DEFINE}" "${INCLUDE}" "${LINK}")
+create_project(STATIC DEFINE INCLUDE LINK)

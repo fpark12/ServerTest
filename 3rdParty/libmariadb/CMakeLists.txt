@@ -14,7 +14,7 @@ IF(NOT WIN32)
   set( LINK ${LINK} ${ICONV_LIBRARIES})
 ENDIF()
 
-create_project(STATIC "${DEFINE}" "${INCLUDE}" "${LINK}")
+create_project(STATIC DEFINE INCLUDE LINK)
 
 #message("${ICONV_LIBRARIES}")
 

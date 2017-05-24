@@ -28,10 +28,11 @@ int main()
 		// malloc storage
 	}
 
-	bool result = GConfig.Load("config.ini");
+	// todo: incremental error checking
+	Status result = GConfig.Load("config.ini");
 	result = GConfig.Load("LoginService.ini");
 	GLoginService.Start(IoService);
-	if (result)
+	if (Status::OK != result)
 	{
 		auto names = GConfig.GetFilenames();
 		std::string a = "";
